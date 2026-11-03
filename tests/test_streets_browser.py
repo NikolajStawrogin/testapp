@@ -52,7 +52,7 @@ class StreetBrowserTests(unittest.TestCase):
         self.page.evaluate("localStorage.clear()")
         self.page.reload()
         self.assertTrue(self.page.locator("#home-view").is_visible())
-        self.assertEqual(self.page.locator(".home-card").count(), 3)
+        self.assertEqual(self.page.locator("#home-view .home-card").count(), 3)
         self.page.locator('[data-nav="settings"]').click()
         self.assertTrue(self.page.locator("#settings-dialog").is_visible())
         self.page.locator("#show-labels-taipei").uncheck()
@@ -268,7 +268,7 @@ class StreetBrowserTests(unittest.TestCase):
         self.page.on("pageerror", lambda error: self.errors.append(str(error)))
         self.page.on("request", lambda request: self.external_requests.append(request.url)
                      if request.url.startswith(("https://", "http://")) and not request.url.startswith(self.url) else None)
-        self.page.goto(self.url)
+        self.page.goto(self.url + "?region=taipei")
         self.open_practice()
 
     def test_mobile_street_quiz_touch_preview_zoom_pan_and_confirmation(self):

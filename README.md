@@ -1,6 +1,6 @@
-# Taipei kennen
+# Stadt kennen · Taipei und Düsseldorf
 
-Lokale Browser-Lernapp 0.7 für alle 41 Verwaltungsbezirke von Taipei City (12) und New Taipei City (29), vier große Flüsse und 22.240 wählbare Straßeneinheiten.
+Lokale Browser-Lernapp mit Stadtauswahl. Die bisherige Region Taipei enthält alle 41 Verwaltungsbezirke von Taipei City (12) und New Taipei City (29), vier große Flüsse und 22.240 wählbare Straßeneinheiten.
 Die App läuft im Browser auf dem eigenen Rechner. Kein Konto, kein bezahltes Hosting, kein Karten-API-Schlüssel und keine externen Kartenabrufe.
 
 ## Über einen Link mit Freunden teilen
@@ -126,3 +126,11 @@ Die Gebietsauswahl steht groß und mittig über der Karte. Ausgewählte Namen er
 Straßenlösungen liegen mit kräftiger grüner Linie und weißem Rand über den übrigen Kartenebenen. Andere Straßen und Metro-Linien werden während der Auflösung abgeblendet. Beim Kapitelwechsel zeigt die App eine Ladeanzeige, bevor die lokale Geometrieaufbereitung beginnt.
 
 Zoom und Verschieben verändern sofort den bestehenden Kartenausschnitt. Eine räumliche Indizierung begrenzt die anschließende Straßensuche auf relevante Zellen; der Aufbau von Straßen und Beschriftungen erfolgt erst 120 ms nach der letzten Bewegung. Straßenbeschriftungen werden während der Bewegung kurz verborgen. Es werden beim Zoomen keine externen Kartendaten nachgeladen. Finger dürfen bis zu 30 CSS-Pixel vom Straßenverlauf entfernt sein; die Touch-Auswahl mit Bestätigung und dem Wechsel zu benachbarten Straßen bleibt erhalten. Während einer laufenden Runde ist das Gebiet gegen versehentliches Wechseln gesperrt.
+
+## Stadtauswahl und Düsseldorf · Zwischenstand 0.9
+
+Nach dem Öffnen wählst du zuerst Taipei/New Taipei oder Düsseldorf und danach das Thema. Düsseldorf enthält 50 Stadtteile, zehn Stadtbezirke und 2.891 benannte Straßen- und Wegeeinheiten. Beide Gebietsebenen, Suche, Auswahl, Lernkarten, Quiz, Touch-Auswahl, Fehlerwiederholung und lokale Lernstände nutzen dieselbe App. Einstellungen und Fortschritt sind pro Region getrennt; alte Taipei-Lernstände bleiben erhalten. Ein Import in die falsche Stadt wird abgewiesen.
+
+**Noch offen:** Die Originaldaten für Düsseldorfer Flüsse und Stadtbahn sind wegen der Cloud-Netzwerkfreigabe noch nicht abrufbar. Diese Themen sind als ausstehend markiert und deaktiviert. Das ist ein geprüfter Zwischenstand, noch keine vollständige Düsseldorf-Erweiterung. Quellen, Datenlücken und der genaue Fortsetzungsweg stehen in [REGIONEN.md](REGIONEN.md). Die historischen OSM-Auszüge sind kein aktuell amtlich geprüftes Straßenverzeichnis. Straßenklassen fehlen im bisherigen Auszug und werden ausdrücklich als unbekannt dargestellt.
+
+Nur das Datenpaket der gewählten Stadt wird geladen. Die Einzeldatei enthält beide Pakete für eine Nutzung ohne Server und ohne Netzwerkabrufe. `python tools/export_standalone.py` erzeugt diese Datei; `python tools/package_app.py` erstellt das vollständige ZIP mit Quellen, Herkunftsnachweisen und Tests.

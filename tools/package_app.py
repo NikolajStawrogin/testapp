@@ -13,11 +13,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=ROOT / "artifacts/taipei-kennen-v0.8.zip")
+    parser.add_argument("--output", type=Path, default=ROOT / "artifacts/stadt-kennen-v0.9.zip")
     parser.add_argument("--html", type=Path, help="Optional additional path for the standalone browser file")
     args = parser.parse_args()
     subprocess.run([sys.executable, str(ROOT / "tools/export_standalone.py")], check=True)
-    names = [".gitignore", ".nojekyll", "GITHUB_PAGES.md", "index.html", "styles.css", "app.js", "street-map.js", "server.py", "Start.bat",
+    names = [".gitignore", ".nojekyll", "GITHUB_PAGES.md", "index.html", "styles.css", "app.js", "street-map.js", "bootstrap.js", "region-ui.js", "REGIONEN.md", "server.py", "Start.bat",
              "README.md", "ANFORDERUNGEN.md", "KARTENQUELLE.md", "OFFIZIELLE_NAMEN.md", "THIRD_PARTY_NOTICES.md",
              "UMSETZUNGSPLAN.md", "PRUEFBERICHT.md", "Taipei-kennen.html"]
     paths = [ROOT / name for name in names]

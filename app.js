@@ -1,6 +1,8 @@
 (() => {
   "use strict";
 
+  const REGION = window.APP_REGION || { id: "taipei", name: "Taipei & New Taipei", storagePrefix: "taipei-kennen", language: "zh-Hant" };
+  const german = REGION.language === "de";
   const DATA = window.TAIPEI_DATA;
   const METRO = window.TAIPEI_METRO;
   const features = DATA.features;
@@ -21,12 +23,12 @@
   const cityById = new Map(cities.map(city => [city.id, city]));
   const $ = id => document.getElementById(id);
   const SVG_NS = "http://www.w3.org/2000/svg";
-  const PROGRESS_KEY = "taipei-kennen.progress.v1";
-  const SETTINGS_KEY = "taipei-kennen.settings.v1";
+  const PROGRESS_KEY = `${REGION.storagePrefix}.progress.v1`;
+  const SETTINGS_KEY = `${REGION.storagePrefix}.settings.v1`;
   const MIN_MAP_ZOOM = 0.5;
   const MAX_MAP_ZOOM = 12;
   const modes = ["explore", "cards", "quiz"];
-  const languages = ["both", "zh", "en"];
+  const languages = german ? ["de"] : ["both", "zh", "en"];
   let toastTimer;
 
   function toast(message) {
@@ -71,14 +73,16 @@
   const storedIds = Array.isArray(savedSettings?.selected) ? savedSettings.selected.filter(id => byId.has(id) && !byId.get(id).kind) : null;
   const expandLegacyAll = savedSettings?.datasetVersion !== DATA.version && storedIds?.length === legacyTaipei.length
     && legacyTaipei.every(feature => storedIds.includes(feature.id));
-  const initialIds = !storedIds || expandLegacyAll ? features.map(feature => feature.id) : storedIds;
+  const initialLevel = german && savedSettings?.areaLevel === "borough" ? "borough" : "neighborhood";
+  const initialIds = !storedIds || expandLegacyAll ? features.filter(feature => !german || feature.level === initialLevel).map(feature => feature.id) : storedIds;
   const storedScope = ["all", ...cities.map(city => city.id)].includes(savedSettings?.scope) ? savedSettings.scope : null;
   const initialScope = expandLegacyAll ? "all" : storedScope || (initialIds.length && initialIds.every(id => byId.get(id).cityId === "taipei") ? "taipei" : "all");
   const state = {
+    areaLevel: initialLevel,
     stage: "setup",
-    view: savedSettings && savedSettings.view !== "home" ? "practice" : "home",
+    view: !window.APP_OPEN_TOPICS && savedSettings && savedSettings.view !== "home" ? "practice" : "home",
     subject: savedSettings?.subject === "streets" ? "streets" : "districts",
-    streetCategories: new Set(Array.isArray(savedSettings?.streetCategories) ? savedSettings.streetCategories.filter(value => ["major", "secondary", "local"].includes(value)) : ["major", "secondary"]),
+    streetCategories: new Set(Array.isArray(savedSettings?.streetCategories) ? savedSettings.streetCategories.filter(value => ["major", "secondary", "local", "unclassified"].includes(value)) : german ? ["major", "secondary", "local", "unclassified"] : ["major", "secondary"]),
     streetUnits: new Set(Array.isArray(savedSettings?.streetUnits) ? savedSettings.streetUnits.filter(value => ["street", "section", "lane", "alley"].includes(value)) : ["street", "section"]),
     excludedStreets: new Set(Array.isArray(savedSettings?.excludedStreets) ? savedSettings.excludedStreets.map(id => streetParents.aliases[id] || id).filter(id => byId.get(id)?.kind === "street") : []),
     onlyBilingual: savedSettings?.onlyBilingual !== false,
@@ -89,14 +93,14 @@
     pendingStreet: null,
     streetAlternatives: [],
     mode: modes.includes(savedSettings?.mode) ? savedSettings.mode : "explore",
-    language: languages.includes(savedSettings?.language) ? savedSettings.language : "both",
+    language: languages.includes(savedSettings?.language) ? savedSettings.language : german ? "de" : "both",
     labelsByCity: Object.fromEntries(cities.map(city => [city.id,
       typeof savedSettings?.labelsByCity?.[city.id] === "boolean"
         ? savedSettings.labelsByCity[city.id] : savedSettings?.labels !== false])),
-    metro: savedSettings?.metro !== false,
-    rivers: savedSettings?.rivers !== false,
+    metro: Boolean(METRO.lines.length) && savedSettings?.metro !== false,
+    rivers: Boolean(rivers.length) && savedSettings?.rivers !== false,
     riverLabels: savedSettings?.riverLabels !== false,
-    includeRivers: savedSettings?.includeRivers === true,
+    includeRivers: Boolean(rivers.length) && savedSettings?.includeRivers === true,
     selectedRivers: new Set(Array.isArray(savedSettings?.selectedRivers)
       ? savedSettings.selectedRivers.filter(id => rivers.some(river => river.id === id)) : rivers.map(river => river.id)),
     scope: initialScope,
@@ -116,12 +120,12 @@
   }
 
   function streetCandidates() {
-    const key = [state.scope, [...state.selected].sort().join(), [...state.streetCategories].sort().join(), [...state.streetUnits].sort().join(), state.onlyBilingual || state.language === "en", state.streetSearch].join("|");
+    const key = [state.scope, [...state.selected].sort().join(), [...state.streetCategories].sort().join(), [...state.streetUnits].sort().join(), !german && (state.onlyBilingual || state.language === "en"), state.streetSearch].join("|");
     if (streetCandidateCache?.key !== key) {
       const query = searchText(state.streetSearch.trim());
-      streetCandidateCache = { key, features: streets.filter(feature => (state.scope === "all" || feature.cityId === state.scope)
+      streetCandidateCache = { key, features: streets.filter(feature => (state.scope === "all" || feature.cityId === state.scope || feature.cityIds?.includes(state.scope))
         && feature.districtIds.some(id => state.selected.has(id)) && state.streetCategories.has(feature.category)
-        && state.streetUnits.has(feature.unit) && (!(state.onlyBilingual || state.language === "en") || feature.nameEn)
+        && state.streetUnits.has(feature.unit) && (german || !(state.onlyBilingual || state.language === "en") || feature.nameEn)
         && (!query || searchText(`${feature.nameZh} ${feature.nameEn}`).includes(query))) };
     }
     return streetCandidateCache;
@@ -141,7 +145,7 @@
 
   function saveSettings() {
     save(SETTINGS_KEY, {
-      view: state.view, subject: state.subject, streetCategories: [...state.streetCategories], streetUnits: [...state.streetUnits],
+      areaLevel: state.areaLevel, view: state.view, subject: state.subject, streetCategories: [...state.streetCategories], streetUnits: [...state.streetUnits],
       excludedStreets: [...state.excludedStreets], onlyBilingual: state.onlyBilingual,
       streetLabels: state.streetLabels, streetSearch: state.streetSearch,
       mode: state.mode, language: state.language, labelsByCity: state.labelsByCity, metro: state.metro,
@@ -153,7 +157,7 @@
   }
 
   function scopeFeatures() {
-    return state.scope === "all" ? features : features.filter(feature => feature.cityId === state.scope);
+    return features.filter(feature => (!german || feature.level === state.areaLevel) && (state.scope === "all" || feature.cityId === state.scope));
   }
 
   function scopeRivers() {
@@ -167,6 +171,7 @@
   }
 
   function isPlayable(feature) {
+    if (german && feature.level && feature.level !== state.areaLevel) return false;
     if (feature.kind === "street" && currentTarget()?.kind === "street" && feature.unit !== currentTarget().unit) return false;
     if (feature.kind === "street") return state.subject === "streets" && (streetPool().ids.has(feature.id)
       || (state.stage === "session" && state.round.ids.includes(feature.id)));
@@ -190,11 +195,14 @@
       : cityName(cityById.get(feature.cityId));
   }
 
+  function areaWord(plural = false) { return german ? state.areaLevel === "borough" ? plural ? "Stadtbezirke" : "Stadtbezirk" : plural ? "Stadtteile" : "Stadtteil" : plural ? "Bezirke" : "Bezirk"; }
+
   function roundLength(size) {
     return state.roundSize === "all" ? size : Math.min(state.roundSize, size);
   }
 
   function cityName(city) {
+    if (german) return city.nameZh;
     if (state.language === "zh") return city.nameZh;
     if (state.language === "en") return city.nameEn;
     return `${city.nameZh} · ${city.nameEn}`;
@@ -218,6 +226,7 @@
   }
 
   function nameParts(feature) {
+    if (german) return { main: feature.nameZh, secondary: "", lang: "de" };
     if (state.language === "en") return { main: feature.nameEn || feature.nameZh, secondary: "", lang: feature.nameEn ? "en" : "zh-Hant" };
     return {
       main: feature.nameZh,
@@ -271,7 +280,7 @@
         clipShape.setAttribute("d", d);
         clipShape.setAttribute("clip-rule", "evenodd");
         $("metro-city-clip").append(clipShape);
-        path.setAttribute("fill", feature.cityId === "taipei" ? colors[index % colors.length] : newTaipeiColors[index % newTaipeiColors.length]);
+        path.setAttribute("fill", (feature.cityId === "taipei" || german) ? colors[index % colors.length] : newTaipeiColors[index % newTaipeiColors.length]);
         path.setAttribute("fill-rule", "evenodd");
         path.setAttribute("class", "district-shape");
         path.setAttribute("data-id", feature.id);
@@ -294,7 +303,7 @@
         label.setAttribute("transform", `translate(${anchor[0]},${anchor[1]})`);
         const zh = document.createElementNS(SVG_NS, "text");
         zh.setAttribute("class", "zh");
-        zh.setAttribute("lang", "zh-Hant");
+        zh.setAttribute("lang", REGION.language);
         zh.textContent = feature.nameZh;
         const en = document.createElementNS(SVG_NS, "text");
         en.setAttribute("class", "en");
@@ -448,7 +457,7 @@
         label.setAttribute("transform", `translate(${anchor[0]},${anchor[1]})`);
         const zh = document.createElementNS(SVG_NS, "text");
         zh.setAttribute("class", "zh");
-        zh.setAttribute("lang", "zh-Hant");
+        zh.setAttribute("lang", REGION.language);
         zh.textContent = feature.nameZh;
         const en = document.createElementNS(SVG_NS, "text");
         en.setAttribute("class", "en");
@@ -654,9 +663,9 @@
         const label = this.labels.get(feature.id);
         label.group.style.display = "none";
         const enabled = feature.kind === "river" ? riversVisible() && state.riverLabels : state.labelsByCity[feature.cityId];
-        if (!enabled || (inSession && !revealed && feature.id === target)) continue;
+        if ((german && feature.level && feature.level !== state.areaLevel) || !enabled || (inSession && !revealed && feature.id === target)) continue;
         label.zh.style.display = state.language === "en" ? "none" : "";
-        label.en.style.display = state.language === "zh" ? "none" : "";
+        label.en.style.display = german || state.language === "zh" ? "none" : "";
         label.zh.style.fontSize = `${12 / scale}px`;
         label.en.style.fontSize = `${9 / scale}px`;
         label.group.style.strokeWidth = `${2.5 / scale}px`;
@@ -696,6 +705,7 @@
         const isRiver = feature.kind === "river";
         const active = isPlayable(feature) && (!inSession || isRiver === (byId.get(target).kind === "river"));
         const path = this.paths.get(feature.id);
+        path.parentElement === $("district-shapes") && (path.style.display = german && feature.level !== state.areaLevel ? "none" : "");
         path.classList.toggle("is-muted", !active && !isRiver);
         path.classList.toggle("is-selected", !inSession && feature.id === state.inspected);
         path.classList.toggle("is-correct", revealed && target === feature.id);
@@ -751,14 +761,14 @@
       });
       const names = document.createElement("span");
       const main = document.createElement("strong");
-      main.lang = "zh-Hant";
+      main.lang = REGION.language;
       main.textContent = feature.nameZh;
       const english = document.createElement("small");
       english.lang = "en";
       english.textContent = feature.nameEn || "Englischer Name nicht belegt";
       const context = document.createElement("small");
       context.className = "street-choice-context";
-      context.textContent = feature.districtIds.map(id => byId.get(id).nameZh).join(" · ");
+      context.textContent = feature.districtIds.filter(id => !german || byId.get(id).level === state.areaLevel).map(id => byId.get(id).nameZh).join(" · ");
       names.append(main, english, context);
       label.append(input, names);
       picker.append(label);
@@ -772,7 +782,7 @@
     $("street-more").textContent = `Weitere Straßen anzeigen (${Math.min(state.streetLimit, available.length)} von ${available.length})`;
     $("street-empty").hidden = available.length > 0;
     const missing = streets.filter(feature => feature.districtIds.some(id => state.selected.has(id)) && !feature.nameEn).length;
-    $("street-data-note").textContent = `Daten außerhalb des Zentrums: 2021; Innenstadt-Auszug: 2026. ${missing.toLocaleString("de-DE")} Einheiten im gewählten Gebiet ohne belegten englischen Namen. Details unter Hilfe → Datenquellen.`;
+    $("street-data-note").textContent = german ? window.DUESSELDORF_DATA.note : `Daten außerhalb des Zentrums: 2021; Innenstadt-Auszug: 2026. ${missing.toLocaleString("de-DE")} Einheiten im gewählten Gebiet ohne belegten englischen Namen. Details unter Hilfe → Datenquellen.`;
   }
 
   function buildPicker() {
@@ -812,7 +822,7 @@
         render();
       });
       const zh = document.createElement("strong");
-      zh.lang = "zh-Hant";
+      zh.lang = REGION.language;
       zh.textContent = feature.nameZh;
       const en = document.createElement("small");
       en.lang = "en";
@@ -826,7 +836,7 @@
     const content = $("map-detail").lastElementChild;
     const strong = document.createElement("strong");
     const paragraph = document.createElement("p");
-    strong.textContent = title || (feature ? readableName(feature) : "Ein Gefühl für Taipei bekommen");
+    strong.textContent = title || (feature ? readableName(feature) : `Ein Gefühl für ${REGION.name} bekommen`);
     paragraph.textContent = description || (feature ? feature.description : state.stage === "session"
       ? "Die gesuchte Fläche wird nach deiner Antwort aufgelöst."
       : "Klicke auf einen Bezirk oder einen zum Mitüben gewählten Fluss, um Namen und Lage kennenzulernen.");
@@ -840,9 +850,9 @@
 
   function renderSetup() {
     const descriptions = {
-      explore: "Erkunde die Karte und klicke auf einen Bezirk.",
+      explore: `Erkunde die Karte und klicke auf einen ${areaWord()}.`,
       cards: "Präge dir Namen und Lage ein. Lass dir die richtige Fläche zeigen.",
-      quiz: "Ein Name, eine Fläche. Teste, wie gut du Taipei schon kennst."
+      quiz: `Ein Name, eine Fläche. Teste, wie gut du ${REGION.name} schon kennst.`
     };
     if (state.subject === "streets") {
       descriptions.explore = "Erkunde Straßennamen und ihre Verläufe. Zoome für kleine Straßen und Gassen hinein.";
@@ -864,20 +874,20 @@
     const available = scopeFeatures();
     for (const heading of document.querySelectorAll(".district-group-title")) {
       const city = cityById.get(heading.dataset.city);
-      heading.textContent = `${cityName(city)} (${features.filter(feature => feature.cityId === city.id).length})`;
+      heading.textContent = `${cityName(city)} (${scopeFeatures().filter(feature => feature.cityId === city.id).length})`;
     }
     $("city-scope").value = state.scope;
     $("mode-description").textContent = descriptions[state.mode];
     $("select-all").textContent = available.every(feature => state.selected.has(feature.id)) ? "Auswahl aufheben" : "Alle auswählen";
-    $("selection-note").textContent = state.selected.size === 0 ? state.subject !== "streets" && state.includeRivers && selectedRiverCount ? "Keine Bezirke · nur Flüsse üben" : "Wähle mindestens einen Bezirk oder Fluss."
-      : state.selected.size === available.length ? `Alle ${available.length} Bezirke ausgewählt`
-      : `${state.selected.size} von ${available.length} Bezirken ausgewählt`;
+    $("selection-note").textContent = state.selected.size === 0 ? state.subject !== "streets" && state.includeRivers && selectedRiverCount ? `Keine ${areaWord(true)} · nur Flüsse üben` : `Wähle mindestens einen ${areaWord()} oder Fluss.`
+      : state.selected.size === available.length ? `Alle ${available.length} ${areaWord(true)} ausgewählt`
+      : `${state.selected.size} / ${available.length} ${areaWord(true)} ausgewählt`;
     $("selection-note").classList.toggle("error", taskCount === 0);
     $("start-button").disabled = taskCount === 0;
     $("focus-selected").disabled = taskCount === 0;
     $("round-size-field").hidden = state.mode !== "quiz";
     $("round-size").value = String(state.roundSize);
-    $("round-size").querySelector('[value="all"]').textContent = state.subject === "streets" ? "Alle gewählten Straßen" : state.includeRivers ? "Alle gewählten Bezirke und Flüsse" : "Alle gewählten Bezirke";
+    $("round-size").querySelector('[value="all"]').textContent = state.subject === "streets" ? "Alle gewählten Straßen" : state.includeRivers ? `Alle gewählten ${areaWord(true)} und Flüsse` : `Alle gewählten ${areaWord(true)}`;
     $("start-button").firstElementChild.textContent = state.mode === "quiz"
       ? `Quiz starten · ${roundLength(taskCount)} Aufgaben`
       : state.mode === "cards" ? "Lernkarten starten" : "Karte erkunden";
@@ -886,7 +896,7 @@
     for (const button of document.querySelectorAll("[data-subject]")) button.setAttribute("aria-pressed", String(button.dataset.subject === state.subject));
     for (const input of document.querySelectorAll('[name="street-category"]')) input.checked = state.streetCategories.has(input.value);
     for (const input of document.querySelectorAll('[name="street-unit"]')) input.checked = state.streetUnits.has(input.value);
-    $("only-bilingual").checked = state.onlyBilingual || state.language === "en";
+    $("only-bilingual").checked = !german && (state.onlyBilingual || state.language === "en");
     $("only-bilingual").disabled = state.language === "en";
     if (document.activeElement !== $("street-search")) $("street-search").value = state.streetSearch;
     renderStreetPicker();
@@ -903,7 +913,7 @@
     $("session-count").textContent = `${round.kind === "quiz" ? "Aufgabe" : "Karte"} ${round.position + 1} / ${round.ids.length}`;
     $("session-score").textContent = round.kind === "quiz" ? `${round.answers.filter(answer => answer.correct).length} richtig` : "Ohne Bewertung";
     $("session-progress-bar").style.width = `${100 * (round.position + Number(round.revealed)) / round.ids.length}%`;
-    $("question-instruction").textContent = round.kind === "quiz" ? isStreet ? "Finde diese Straße auf der Karte:" : isRiver ? "Finde diesen Fluss auf der Karte:" : "Finde diesen Bezirk auf der Karte:" : isStreet ? "Wo verläuft diese Straße?" : isRiver ? "Wo verläuft dieser Fluss?" : "Wo liegt dieser Bezirk?";
+    $("question-instruction").textContent = round.kind === "quiz" ? isStreet ? "Finde diese Straße auf der Karte:" : isRiver ? "Finde diesen Fluss auf der Karte:" : `Finde diesen ${areaWord()} auf der Karte:` : isStreet ? "Wo verläuft diese Straße?" : isRiver ? "Wo verläuft dieser Fluss?" : `Wo liegt dieser ${areaWord()}?`;
     $("question-name").textContent = parts.main;
     $("question-name").lang = parts.lang;
     $("question-name").classList.toggle("english", parts.lang === "en");
@@ -930,7 +940,7 @@
       renderDetail(target, round.kind === "quiz" ? `Lösung: ${readableName(target)}` : null,
         answer.chosenId && !answer.correct ? `Deine Auswahl: ${readableName(byId.get(answer.chosenId))}` : null);
     } else {
-      renderDetail(null, isStreet ? "Welche Straße ist gesucht?" : isRiver ? "Welcher Fluss ist gesucht?" : "Welcher Bezirk ist gesucht?");
+      renderDetail(null, isStreet ? "Welche Straße ist gesucht?" : isRiver ? "Welcher Fluss ist gesucht?" : `Welcher ${areaWord()} ist gesucht?`);
     }
     $("mobile-question-count").textContent = $("session-count").textContent;
     $("mobile-question-city").textContent = $("question-city").textContent;
@@ -955,7 +965,7 @@
     total.textContent = round.kind === "cards" ? " Karten" : ` / ${round.ids.length}`;
     $("result-score").replaceChildren(scoreText, total);
     $("results-title").textContent = round.kind === "cards" ? "Ein Stück vertrauter."
-      : correct === round.ids.length ? "Taipei wird vertrauter!" : "Jede Runde bringt dich weiter.";
+      : correct === round.ids.length ? `${REGION.name} wird vertrauter!` : "Jede Runde bringt dich weiter.";
     $("result-summary").textContent = round.kind === "cards" ? "Du hast dir alle gewählten Orte angesehen. Im Quiz kannst du dein Wissen testen."
       : `${correct} von ${round.ids.length} richtig.${errors.length ? ` ${errors.length} ${errors.length === 1 ? "Aufgabe wartet" : "Aufgaben warten"} noch auf eine Wiederholung.` : " Alle Orte dieser Runde gefunden."}`;
     $("result-list").replaceChildren();
@@ -980,8 +990,8 @@
     $("home-view").hidden = state.view !== "home";
     $("practice-view").hidden = state.view !== "practice";
     document.body.dataset.subject = state.subject;
-    $("home-street-count").textContent = `${streets.length.toLocaleString("de-DE")} Straßeneinheiten · 41 Bezirke`;
-    $("home-data-note").textContent = "Lokale Karte mit Metro und Flüssen. Datenstand und Namensherkunft sind unter Hilfe → Datenquellen dokumentiert.";
+    $("home-street-count").textContent = `${streets.length.toLocaleString("de-DE")} Straßeneinheiten · ${german ? "50 Stadtteile" : "41 Bezirke"}`;
+    $("home-data-note").textContent = german && !window.DUESSELDORF_DATA.complete ? "Düsseldorf im Aufbau: Stadtteile, Stadtbezirke und Straßen sind verfügbar. Flüsse und Stadtbahn sind noch nicht verfügbar." : "Lokale Karte mit Metro und Flüssen. Datenstand und Namensherkunft sind unter Hilfe → Datenquellen dokumentiert.";
     for (const button of document.querySelectorAll("[data-nav]")) {
       if ((state.view === "home" && button.dataset.nav === "home") || (state.view === "practice" && button.dataset.nav === state.mode)) button.setAttribute("aria-current", "page");
       else button.removeAttribute("aria-current");
@@ -994,7 +1004,7 @@
     for (const city of cities) $("show-labels-" + city.id).checked = state.labelsByCity[city.id];
     $("show-metro").checked = state.metro;
     $("show-rivers").checked = riversVisible();
-    $("show-rivers").disabled = currentTarget()?.kind === "river";
+    $("show-rivers").disabled = !rivers.length || currentTarget()?.kind === "river";
     $("show-river-labels").checked = state.riverLabels;
     $("show-river-labels").disabled = !riversVisible();
     $("show-street-labels").checked = state.streetLabels;
@@ -1014,16 +1024,18 @@
       code.textContent = line.code;
       const name = document.createElement("span");
       name.className = "metro-name";
-      name.textContent = state.language === "zh" ? line.nameZh : state.language === "en" ? line.nameEn : `${line.nameZh} · ${line.nameEn}`;
+      name.textContent = german ? line.nameZh : state.language === "zh" ? line.nameZh : state.language === "en" ? line.nameEn : `${line.nameZh} · ${line.nameEn}`;
       chip.append(swatch, code, name);
       $("metro-legend-items").append(chip);
     }
     $("city-scope").disabled = state.stage === "session";
     $("city-scope").title = state.stage === "session" ? "Beende die Runde, um das Gebiet zu wechseln." : "Lerngebiet auswählen";
     $("map-state").textContent = state.stage === "setup" ? "Entdecken" : state.stage === "results" ? "Rundenauswertung" : state.round.kind === "quiz" ? "Quiz" : "Lernkarten";
-    $("map-title").textContent = state.scope === "all" ? "Taipei & New Taipei" : cityById.get(state.scope).nameEn;
-    $("map-city-zh").textContent = state.scope === "all" ? "臺北市 · 新北市" : cityById.get(state.scope).nameZh;
-    $("map-scope-note").textContent = state.scope === "all" ? "12 + 29 Bezirke · beide Städte" : `${scopeFeatures().length} Bezirke`;
+    $("map-title").textContent = state.scope === "all" ? REGION.name : german ? cityName(cityById.get(state.scope)) : cityById.get(state.scope).nameEn;
+    $("map-city-zh").textContent = german ? "" : state.scope === "all" ? "臺北市 · 新北市" : cityById.get(state.scope).nameZh;
+    $("map-scope-note").textContent = german ? `${scopeFeatures().length} ${state.areaLevel === "borough" ? "Stadtbezirke" : "Stadtteile"}` : state.scope === "all" ? "12 + 29 Bezirke · beide Städte" : `${scopeFeatures().length} Bezirke`;
+    $("area-level").value = state.areaLevel;
+    $("area-level").disabled = state.stage === "session";
     renderSetup();
     if (state.stage === "session") renderSession();
     else if (state.stage === "results") { renderResults(); renderDetail(null, "Deine nächste Runde wartet."); }
@@ -1208,6 +1220,13 @@
     map.reset();
   }
 
+  $("area-level").addEventListener("change", event => {
+    state.areaLevel = event.target.value;
+    state.selected = new Set(scopeFeatures().map(feature => feature.id));
+    state.inspected = null;
+    clearStreetPreview();
+    buildPicker(); saveSettings(); map.reset(); render();
+  });
   buildPicker();
   for (const button of document.querySelectorAll("[data-nav]")) button.addEventListener("click", () => ["explore", "cards", "quiz"].includes(button.dataset.nav) ? withLoading(() => navigate(button.dataset.nav)) : navigate(button.dataset.nav));
   for (const button of document.querySelectorAll("[data-subject]")) button.addEventListener("click", () => withLoading(() => chooseSubject(button.dataset.subject)));
@@ -1265,11 +1284,11 @@
     render();
   });
   $("export-progress").addEventListener("click", () => {
-    const payload = { app: "taipei-kennen", formatVersion: 1, exportedAt: new Date().toISOString(), progress: state.progress };
+    const payload = { app: "taipei-kennen", region: REGION.id, formatVersion: 1, exportedAt: new Date().toISOString(), progress: state.progress };
     const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }));
     const link = document.createElement("a");
     link.href = url;
-    link.download = `taipei-kennen-lernstand-${new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(new Date())}.json`;
+    link.download = `${REGION.storagePrefix}-lernstand-${new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(new Date())}.json`;
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
@@ -1281,6 +1300,7 @@
       if (file.size > 5 * 1024 * 1024) throw new Error("Die Sicherung ist zu groß.");
       const payload = JSON.parse(await file.text());
       if (payload?.app !== "taipei-kennen" || payload.formatVersion !== 1 || !payload.progress || !payload.progress.districts || typeof payload.progress.districts !== "object" || Array.isArray(payload.progress.districts)) throw new Error("Keine gültige Taipei-kennen-Sicherung.");
+      if ((payload.region || "taipei") !== REGION.id) throw new Error("Diese Sicherung gehört zu einer anderen Stadt. Bitte wechsle zuerst die Stadt.");
       importedProgress = cleanProgress(payload.progress);
       const attempts = Object.values(importedProgress.districts).reduce((total, row) => total + row.attempts, 0);
       $("import-summary").textContent = `${attempts} gespeicherte Antworten und ${importedProgress.rounds} Quizrunden übernehmen?`;

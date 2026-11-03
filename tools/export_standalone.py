@@ -1,6 +1,7 @@
 """Export the learning app as one self-contained HTML file."""
 
 import argparse
+import json
 from pathlib import Path
 import re
 from urllib.parse import quote, urlsplit
@@ -40,8 +41,12 @@ def main():
 
     html, style_count = re.subn(r'<link rel="stylesheet" href="([^"]+)">', inline_styles, html)
     html, script_count = re.subn(r'<script src="([^"]+)" defer></script>', collect_script, html)
-    if style_count != 1 or script_count != 7:
+    if style_count != 1 or script_count != 1:
         raise ValueError("Unerwartete Ressourcenliste; Export muss überprüft werden")
+    paths = ["data/districts.js", "data/metro.js", "data/rivers.js", "data/streets.js", "data/street-parents.js", "data/duesseldorf.js", "region-ui.js", "street-map.js", "app.js"]
+    embedded = json.dumps({path:local_resource(path) for path in paths}, ensure_ascii=False, separators=(",", ":"))
+    embedded = embedded.replace("<", "\\u003c")
+    scripts.insert(0, "window.APP_EMBEDDED = " + embedded + ";")
     # Inline scripts run after the complete UI has been parsed; inline defer would not delay them.
     html = html.replace("</body>", "\n" + "\n".join("<script>\n" + text + "\n</script>" for text in scripts) + "\n</body>")
     html = html.replace('class="brand" href="index.html"', 'class="brand" href=""')

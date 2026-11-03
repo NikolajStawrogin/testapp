@@ -6,14 +6,8 @@
   <meta name="color-scheme" content="light">
   <meta name="description" content="Lerne Straßen, Bezirke und Flüsse in Taipei und New Taipei. Ohne Konto, mit Kartenquiz und lokal gespeichertem Lernfortschritt.">
   <title>Taipei kennen · Straßen, Bezirke und Flüsse lernen</title>
-  <link rel="stylesheet" href="styles.css?v=0.8">
-  <script src="data/districts.js?v=0.8" defer></script>
-  <script src="data/metro.js?v=0.8" defer></script>
-  <script src="data/rivers.js?v=0.8" defer></script>
-  <script src="data/streets.js?v=0.8" defer></script>
-  <script src="data/street-parents.js?v=0.8" defer></script>
-  <script src="street-map.js?v=0.8" defer></script>
-  <script src="app.js?v=0.8" defer></script>
+  <link rel="stylesheet" href="styles.css?v=0.9">
+  <script src="bootstrap.js?v=0.9" defer></script>
 </head>
 <body>
   <svg class="icon-library" aria-hidden="true"><defs>
@@ -37,19 +31,27 @@
     </div>
   </header>
   <nav id="main-menu" class="main-menu" aria-label="Hauptmenü">
-    <button data-nav="home">Start</button><button data-nav="explore">Entdecken</button><button data-nav="cards">Lernen</button><button data-nav="quiz">Quiz</button><button data-nav="progress">Fortschritt</button><button data-nav="settings">Einstellungen</button><button data-nav="help">Hilfe</button>
+    <a class="region-change" href="?" aria-label="Andere Stadt auswählen">Stadt wechseln</a><button data-nav="home">Themen</button><button data-nav="explore">Entdecken</button><button data-nav="cards">Lernen</button><button data-nav="quiz">Quiz</button><button data-nav="progress">Fortschritt</button><button data-nav="settings">Einstellungen</button><button data-nav="help">Hilfe</button>
   </nav>
 
   <main class="page">
+    <section id="region-view" class="home-view" aria-label="Stadt auswählen">
+      <div class="home-cards region-cards">
+        <a class="home-card" href="?region=taipei#topics" data-region="taipei"><span class="home-card-icon" aria-hidden="true">北</span><strong>Taipei & New Taipei</strong><span>41 Bezirke · Straßen · Flüsse</span><small>Traditionelles Chinesisch und Englisch →</small></a>
+        <a class="home-card" href="?region=duesseldorf#topics" data-region="duesseldorf"><span class="home-card-icon" aria-hidden="true">D</span><strong>Düsseldorf</strong><span>10 Stadtbezirke · 50 Stadtteile · Straßen</span><small>Deutsche Originalnamen · erste Themen öffnen →</small></a>
+      </div>
+      <p class="home-data-note">Ohne Anmeldung, ohne laufende Kosten. Einstellungen und Lernstände bleiben je Stadt getrennt in deinem Browser.</p>
+    </section>
+    <section id="region-error" class="panel" role="alert" hidden><h2>Die Stadt konnte nicht geöffnet werden.</h2><p id="region-error-message"></p><a href="?">Zur Stadtauswahl</a></section>
     <section class="intro" aria-labelledby="page-heading">
       <div><p class="eyebrow"><span lang="zh-Hant">臺北市 · 新北市</span> · DEINE REGION BESSER KENNEN</p>
         <h1 id="page-heading">Taipei wird vertrauter.</h1>
         <p class="intro-copy">Straßen, Bezirke und Flüsse in Taipei und New Taipei kennenlernen.</p>
       </div>
-      <span class="version-badge">Lernapp · 0.8</span>
+      <span class="version-badge">Lernapp · 0.9</span>
     </section>
 
-    <section id="home-view" class="home-view" aria-label="Startseite">
+    <section id="home-view" hidden class="home-view" aria-label="Startseite">
       <div class="home-welcome"><p class="eyebrow">DEIN ORTSSINN WÄCHST MIT JEDER RUNDE</p><h2>Was möchtest du heute kennenlernen?</h2><p>Beginne mit einem Bezirk oder erkunde die Straßen deiner Umgebung. Du bestimmst Gebiet, Umfang und Tempo.</p></div>
       <div class="home-cards">
         <button class="home-card" data-start="districts"><span class="home-card-icon" aria-hidden="true">區</span><strong>Bezirke kennenlernen</strong><span>41 Bezirke · beide Städte im Überblick</span><small>Entdecken, lernen und auf der Karte finden →</small></button>
@@ -69,6 +71,7 @@
             <label class="subject river-subject"><input type="checkbox" id="include-rivers"><div><strong>Flüsse mitüben</strong><small>Optional · mit Bezirken oder nur Flüsse</small></div></label>
             <p id="street-subject-hint" class="mode-description" hidden>Starte am besten mit einem Bezirk. Straßenklassen und Namensabschnitte lassen sich getrennt wählen.</p>
           </div>
+          <label id="area-level-field" class="field" hidden>Gebietsebene<select id="area-level"><option value="neighborhood">50 Stadtteile</option><option value="borough">10 Stadtbezirke</option></select></label>
           <p class="section-label mode-label">02 / SO MÖCHTEST DU LERNEN</p>
           <div class="mode-picker" role="group" aria-label="Lernmodus">
             <button class="mode-button active" data-mode="explore" aria-pressed="true">Entdecken</button>

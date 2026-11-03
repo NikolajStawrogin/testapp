@@ -58,10 +58,11 @@ class PagesTests(unittest.TestCase):
             page.on("pageerror", lambda error: errors.append(str(error)))
             page.on("response", lambda response: responses.update({response.url: response.status}))
             page.on("request", lambda request: external.append(request.url) if request.url.startswith(("http:", "https:")) and not request.url.startswith(self.url) and not request.url.endswith("/favicon.ico") else None)
-            self.assertEqual(page.goto(self.url).status, 200)
+            self.assertEqual(page.goto(self.url + "?region=taipei").status, 200)
+            page.wait_for_selector('body[data-ready="true"]', state="attached")
             self.assertTrue(page.locator("#home-view").is_visible())
-            assets = re.findall(r'(?:src|href)="((?:data/|app\.js|street-map\.js|styles\.css)[^"]*)"', (ROOT / "index.html").read_text())
-            self.assertEqual(len(assets), 8)
+            assets = ["styles.css", "bootstrap.js", "region-ui.js", "street-map.js", "app.js", "data/districts.js", "data/metro.js", "data/rivers.js", "data/streets.js", "data/street-parents.js"]
+            assets = [asset + "?v=0.9" for asset in assets]
             for asset in assets:
                 self.assertEqual(responses.get(self.url + asset), 200, asset)
             page.locator('[data-start="streets"]').click()
@@ -85,7 +86,8 @@ class PagesTests(unittest.TestCase):
         with self.browser.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True) as context:
             page = context.new_page()
             page.on("pageerror", lambda error: errors.append(str(error)))
-            self.assertEqual(page.goto(self.url).status, 200)
+            self.assertEqual(page.goto(self.url + "?region=taipei").status, 200)
+            page.wait_for_selector('body[data-ready="true"]', state="attached")
             page.locator("#menu-toggle").tap()
             page.locator('[data-nav="help"]').tap()
             self.assertTrue(page.locator("#help-dialog").is_visible())

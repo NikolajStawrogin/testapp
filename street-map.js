@@ -88,7 +88,7 @@
       const detail = options.zoom >= 5;
       const visible = this.itemIndex.query(view).filter(item => detail || item.feature.category !== "local" || item.feature.id === options.correctId);
       visible.sort((a, b) => Number(options.pool.has(b.feature.id)) - Number(options.pool.has(a.feature.id))
-        || ({ major: 0, secondary: 1, local: 2 }[a.feature.category] - { major: 0, secondary: 1, local: 2 }[b.feature.category]));
+        || ({ major: 0, secondary: 1, local: 2, unclassified: 3 }[a.feature.category] - { major: 0, secondary: 1, local: 2, unclassified: 3 }[b.feature.category]));
       this.visible = visible.slice(0, 1600);
       const ids = new Set(this.visible.map(item => item.feature.id));
       for (const id of [options.correctId, options.wrongId]) {

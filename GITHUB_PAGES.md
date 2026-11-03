@@ -27,3 +27,5 @@ Die Website verwendet dieselben dokumentierten Kartendaten wie die lokale App. Q
 ## Technische Prüfung
 
 `python -m unittest discover -s tests -p test_pages.py -v` prüft die Website unter dem Projekt-Unterpfad `/testapp/`, sämtliche verlinkten App-Dateien sowie eine Quizrunde und die mobile Navigation. Zur Aktivierung selbst ist ein GitHub-Zugriff mit Repository-Einstellungsrechten erforderlich.
+
+Seit dem regionalen Einstieg öffnet die Website zuerst die Stadtauswahl. Danach werden nur die lokalen Daten der ausgewählten Region geladen. Die Unterpfadprüfung berücksichtigt den Starter und die bedarfsgeladenen Skripte. Der Düsseldorfer Zwischenstand enthält Stadtteile, Stadtbezirke und Straßen; Flüsse und Stadtbahn bleiben bis zur Originaldatenfreigabe als ausstehend markiert. Details und Datenrechte: REGIONEN.md.
