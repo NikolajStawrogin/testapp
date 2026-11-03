@@ -43,6 +43,42 @@ def canonical_geometry(geometry):
     return {"type": "MultiLineString", "coordinates": [[[round(x, 6), round(y, 6)] for x, y in line.simplify(0.000004).coords] for line in lines(geometry)]}
 
 
+def merge_local_namesakes(features):
+    """One postal street identity per name and district, even with mapped gaps."""
+    parent = list(range(len(features)))
+
+    def root(index):
+        while parent[index] != index:
+            parent[index] = parent[parent[index]]
+            index = parent[index]
+        return index
+
+    seen = {}
+    for index, feature in enumerate(features):
+        for district in feature["districtIds"]:
+            key = feature["cityId"], normalize(feature["nameZh"]), district
+            if key in seen:
+                parent[root(index)] = root(seen[key])
+            else:
+                seen[key] = index
+    groups = defaultdict(list)
+    for index, feature in enumerate(features):
+        groups[root(index)].append(feature)
+    result = []
+    priority = {"postal-exact": 0, "postal-numbered": 1, "osm-name-en": 2, "missing": 3}
+    for members in groups.values():
+        if len(members) == 1:
+            result.append(members[0])
+            continue
+        feature = min(members, key=lambda row: priority[row["nameSource"]]).copy()
+        geometry = unary_union([shape(row["geometry"]) for row in members])
+        anchor = max(lines(geometry), key=lambda line: line.length).interpolate(0.5, normalized=True)
+        feature.update({"id": min(row["id"] for row in members), "districtIds": sorted({id for row in members for id in row["districtIds"]}),
+                        "geometry": canonical_geometry(geometry), "anchor": [round(anchor.x, 6), round(anchor.y, 6)]})
+        result.append(feature)
+    return result
+
+
 def main():
     districts = json.loads((ROOT / "data/districts.js").read_text().split("=", 1)[1].strip().removesuffix(";"))
     district_features = districts["features"]
@@ -87,8 +123,11 @@ def main():
         newer = json.loads(archive.read("centre-osm.json"))
         centre_box = box(121.475, 25.005, 121.615, 25.105)
         new_ways = {"way/" + str(row["id"]): row for row in newer["elements"] if row.get("t", {}).get("highway") in ROAD_TYPES and len(row.get("p", [])) >= 2}
+        newer_classes = {row["t"]["highway"] for row in new_ways.values()}
         for id, record in ways.items():
-            if id not in new_ways:
+            # The newer extract omits service roads and several other classes.
+            # Missing ways may only be retired for classes actually covered there.
+            if id not in new_ways and record["tags"]["highway"] in newer_classes:
                 record["parts"] = [line for part in record["parts"] for line in lines(part.difference(centre_box))]
         for id, row in new_ways.items():
             ways[id] = {"tags": row["t"], "parts": [LineString(row["p"])], "newer": True}
@@ -168,6 +207,7 @@ def main():
                              "anchor": [round(anchor.x, 6), round(anchor.y, 6)], "geometry": canonical_geometry(actual),
                              "description": "Straßenverlauf in " + ", ".join(next(f["nameEn"] for f in district_features if f["id"] == id) for id in ids) + ".",
                              "sourceDate": "2026-09-28 / 2021-12-17" if any(row[3] for row in components_records) else "2021-12-17"})
+    features = merge_local_namesakes(features)
     by_district = []
     for district in district_features:
         local = [f for f in features if district["id"] in f["districtIds"]]
@@ -181,7 +221,8 @@ def main():
                 "currentOfficialCompletenessVerified": False}
     output = {"version": 1, "features": features, "background": background, "coverage": coverage,
               "source": {"copyright": "© OpenStreetMap contributors", "license": "ODbL-1.0", "tileCommit": manifest["tileCommit"],
-                         "baseDate": "2021-12-17", "centreDate": "2026-09-28", "postalCommit": manifest["postalCommit"]}}
+                         "baseDate": "2021-12-17", "centreDate": "2026-09-28", "newerHighwayClasses": sorted(newer_classes),
+                         "olderClassesPreserved": sorted(ROAD_TYPES - newer_classes), "postalCommit": manifest["postalCommit"]}}
     (ROOT / "data/streets.js").write_text("window.TAIPEI_STREETS = " + json.dumps(output, ensure_ascii=False, separators=(",", ":")) + ";\n", encoding="utf-8")
     (ROOT / "data/street-coverage.json").write_text(json.dumps(coverage, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps({key: value for key, value in coverage.items() if key not in ["districts", "missingTiles"]}, ensure_ascii=False), flush=True)

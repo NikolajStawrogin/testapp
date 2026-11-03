@@ -50,6 +50,7 @@ class BrowserTests(unittest.TestCase):
         self.page.on("request", lambda request: self.external_requests.append(request.url)
                      if request.url.startswith(("https://", "http://")) and not request.url.startswith(self.url) else None)
         self.page.goto(self.url)
+        self.open_practice()
         self.page.wait_for_selector(".district-shape")
         self.features = self.page.evaluate("window.TAIPEI_DATA.features.map(({id,nameZh,nameEn,cityId}) => ({id,nameZh,nameEn,cityId}))")
         self.rivers = self.page.evaluate("window.TAIPEI_RIVERS.features.map(({id,nameZh,nameEn,kind,cityIds}) => ({id,nameZh,nameEn,kind,cityIds}))")
@@ -58,6 +59,12 @@ class BrowserTests(unittest.TestCase):
         self.assertEqual(self.errors, [], "JavaScript errors")
         self.assertEqual(self.external_requests, [], "Unexpected external network requests")
         self.context.close()
+
+    def open_practice(self):
+        if self.page.locator("#home-view").is_visible():
+            if self.page.locator("#menu-toggle").is_visible():
+                self.page.locator("#menu-toggle").click()
+            self.page.locator('[data-nav="explore"]').click()
 
     def choose(self, ids):
         for item in self.page.locator("#district-picker input").all():
@@ -178,6 +185,7 @@ class BrowserTests(unittest.TestCase):
         self.page.on("request", lambda request: self.external_requests.append(request.url)
                      if request.url.startswith(("https://", "http://")) and not request.url.startswith(self.url) else None)
         self.page.goto(self.url)
+        self.open_practice()
         self.page.locator("#include-rivers").check()
         self.page.locator("#select-all").click()
         for item in self.page.locator("#river-picker input").all():
@@ -422,6 +430,7 @@ class BrowserTests(unittest.TestCase):
         self.page.on("request", lambda request: self.external_requests.append(request.url)
                      if request.url.startswith(("https://", "http://")) and not request.url.startswith(self.url) else None)
         self.page.goto(self.url)
+        self.open_practice()
         self.page.locator('[data-mode="quiz"]').tap()
         self.page.locator("#start-button").tap()
         self.page.locator("#taipei-map").scroll_into_view_if_needed()

@@ -1,6 +1,6 @@
 # Anforderungen: Taipei City und New Taipei City lernen
 
-Stand: 3. November 2026. Status: abgestimmte Grundlage; Entwicklung des ersten lokalen Bezirksprototyps begonnen. Noch keine vollständige Umsetzung der ersten Version.
+Stand: 3. November 2026. Status: lokale Lernapp 0.7 mit Bezirken, Flüssen, Straßen und vollständiger Navigation umgesetzt. Die dokumentierten Grenzen von Quellenaktualität, amtlicher Namensverifikation und Vollständigkeit bleiben bestehen.
 Nach dem Umgebungswechsel aus den im Gespräch bestätigten Anforderungen wiederhergestellt.
 
 ## Ziel und Umfang
@@ -101,16 +101,13 @@ Die Browser-App hilft dem Nutzer, erwähnte Straßennamen in Taipei City und New
 17. Kartenansicht und „Auswahl zeigen“ lassen sich auf das gewählte Gebiet ausrichten. Beschriftungen kleiner Bezirke werden beim Hineinzoomen lesbar, ohne dass der gesuchte Name vor einer Quizantwort eingeblendet wird.
 18. Die beiden Stadtschalter für Bezirksnamen funktionieren unabhängig von Gebietsauswahl, Lernmodus und voneinander. Änderungen geben keine Quizantwort ab und setzen den Kartenausschnitt nicht zurück. Nicht ausgewählte Bezirke bleiben trotz sichtbarer Namen von der Antwortauswahl ausgeschlossen. Bestehende globale Einstellungen zur Namenssichtbarkeit werden für beide Städte übernommen.
 
-## Offene fachliche Entscheidungen
+## Festgelegte Bedienungsregeln und verbleibende Datenprüfung
 
-- Straßenkategorien: Benennung und Einteilung großer Straßen, kleiner Straßen, Lanes und Alleys anhand der Daten prüfen. Straßenhierarchie und Adressbestandteile nicht ungeprüft gleichsetzen.
-- Straßen entlang von Bezirksgrenzen und über mehrere Bezirke: Aufgaben- und Darstellungsregel festlegen.
-- Mehrdeutige Auswahl an Kreuzungen und übereinanderliegenden Straßen bei der Mausbedienung. Die Touch-Auswahl im künftigen Straßenmodus ist noch zu konkretisieren.
-- Bezirksklicks direkt auf Grenzen und genaue Bewertung.
-- Lernkarteninhalt, Bewertungsverfahren, Rundenauswertung und konkret gespeicherte Fortschrittsdaten.
-- Weniger als zehn verfügbare Aufgaben und Anpassbarkeit der Rundenlänge.
-- Verbleibende Datenschutzvorschläge und Hilfen.
-- Konkreter lokaler Start, Datenumfang und Ladeverhalten auf dem vorhandenen Rechner nachweisen. Vollständige Offline-Nutzung ist noch keine bestätigte Anforderung. Kostenpflichtige Karten-APIs sind für die vorgeschlagene lokale Variante nicht vorgesehen.
+Die Bedienungsregeln für Version 0.7 sind festgelegt: Drei Straßenklassen folgen der OSM-Straßenfunktion, unabhängig von der Unterteilung in Straßen, Sections, Lanes und Alleys. Verläufe werden nach Stadt, Namen und örtlichem Zusammenhang unterschieden. Berührte Bezirke sind auswählbar; gleichnamige kartierte Teilstücke innerhalb eines Bezirks bilden eine Aufgabe. Maus-Hover hebt den vollständigen Verlauf hervor, der Klick wählt ihn. Touch zeigt zunächst eine Vorschau mit Bestätigung und erlaubt an Kreuzungen den Wechsel zu anderen nahen Straßen. Die Standardrunde hat zehn Aufgaben oder weniger bei kleinerem Angebot. Lernkarten zählen nicht als Quizantworten. Konkrete Quellaktualität und amtliche Primärnamen bleiben Prüfaufgaben.
+
+- Die heutigen amtlichen Namensverzeichnisse müssen noch direkt mit den verwendeten Postreferenz-Kopien abgeglichen werden; insbesondere ist keine pauschale aktuelle amtliche Bestätigung aller zusammengesetzten Gassennamen erbracht.
+- Die aktuelle amtliche Straßen- und Bezirksvollständigkeit muss unabhängig vom nachgewiesenen enthaltenen Bestand geprüft werden. Bauänderungen und OSM-Lücken können im älteren flächendeckenden Bestand fehlen.
+- Vor einer öffentlichen Bereitstellung sind die aktuellen Weiterverwendungsbedingungen der Namens- und Flussreferenzen abschließend zu klären. Der lokale persönliche Betrieb benötigt keine kostenpflichtigen Karten-APIs.
 
 ## Datenprüfung und Kartenwahl
 
@@ -128,4 +125,4 @@ Die 41 Bezirke beider Städte sind als lokale Karte mit freier Erkundung, Lernka
 
 Version 0.6 ergänzt die vier großen Flüsse als Orientierung und optionale Lernaufgaben. Im Bezirksquiz lassen Flüsse Kartenklicks durch; während einer Flussfrage sind nur die gewählten Flüsse antwortbar und ihre Flächen immer sichtbar. Fluss-Namensanzeige und Teilnahme werden unabhängig gespeichert. Quellen- und Namensnachweisgrenzen stehen in `data/RIVERS-SOURCE.md`.
 
-Der Straßenmodus ist noch nicht umgesetzt. Er bleibt Teil des beabsichtigten Funktionsumfangs. Geometrien und Namensbelege für Straßen einschließlich Sections, Lanes und Alleys müssen für beide Städte weiter geprüft werden. Auch die verwendeten vereinfachten Bezirksgrenzen müssen noch mit einem aktuellen amtlichen Bestand abgeglichen werden. Aus dem Bezirksprototyp folgt keine Vollständigkeits- oder Datenfreigabe für den Straßenmodus.
+Version 0.7 setzt Straßen-Erkundung, Lernkarten und Quiz für 22.039 Einheiten in allen 41 Bezirken um. Gebiet, Straßenklassen, Namenseinheiten, Suchbegriff und Einzelaufgaben sind wählbar. Das Hauptmenü bietet Start, Entdecken, Lernen, Quiz, Fortschritt, Einstellungen und Hilfe, einschließlich mobilem Menü und Lernstand-Sicherung. `data/STREETS-SOURCE.md` und der Abdeckungsbericht belegen den verwendeten Bestand und benennen Lücken. Der flächendeckende Geometriestand ist älter (2021), der Innenstadt-Auszug neuer (2026). Ein heutiger amtlicher Vollständigkeitsnachweis, der aktuelle Originalabgleich aller englischen Namen und der abschließende Rechteabgleich für eine öffentliche Veröffentlichung sind damit weiterhin nicht erbracht.

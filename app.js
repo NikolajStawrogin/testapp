@@ -5,7 +5,9 @@
   const METRO = window.TAIPEI_METRO;
   const features = DATA.features;
   const rivers = window.TAIPEI_RIVERS.features;
-  const learningFeatures = [...features, ...rivers];
+  const streets = window.TAIPEI_STREETS.features;
+  const mapFeatures = [...features, ...rivers];
+  const learningFeatures = [...mapFeatures, ...streets];
   const cities = DATA.cities;
   const byId = new Map(learningFeatures.map(feature => [feature.id, feature]));
   const cityById = new Map(cities.map(city => [city.id, city]));
@@ -58,7 +60,7 @@
 
   const savedSettings = load(SETTINGS_KEY);
   const legacyTaipei = features.filter(feature => feature.cityId === "taipei");
-  const storedIds = Array.isArray(savedSettings?.selected) ? savedSettings.selected.filter(id => byId.has(id) && byId.get(id).kind !== "river") : null;
+  const storedIds = Array.isArray(savedSettings?.selected) ? savedSettings.selected.filter(id => byId.has(id) && !byId.get(id).kind) : null;
   const expandLegacyAll = savedSettings?.datasetVersion !== DATA.version && storedIds?.length === legacyTaipei.length
     && legacyTaipei.every(feature => storedIds.includes(feature.id));
   const initialIds = !storedIds || expandLegacyAll ? features.map(feature => feature.id) : storedIds;
@@ -66,6 +68,18 @@
   const initialScope = expandLegacyAll ? "all" : storedScope || (initialIds.length && initialIds.every(id => byId.get(id).cityId === "taipei") ? "taipei" : "all");
   const state = {
     stage: "setup",
+    view: savedSettings && savedSettings.view !== "home" ? "practice" : "home",
+    subject: savedSettings?.subject === "streets" ? "streets" : "districts",
+    streetCategories: new Set(Array.isArray(savedSettings?.streetCategories) ? savedSettings.streetCategories.filter(value => ["major", "secondary", "local"].includes(value)) : ["major", "secondary"]),
+    streetUnits: new Set(Array.isArray(savedSettings?.streetUnits) ? savedSettings.streetUnits.filter(value => ["street", "section", "lane", "alley"].includes(value)) : ["street", "section"]),
+    excludedStreets: new Set(Array.isArray(savedSettings?.excludedStreets) ? savedSettings.excludedStreets.filter(id => byId.get(id)?.kind === "street") : []),
+    onlyBilingual: savedSettings?.onlyBilingual !== false,
+    streetLabels: savedSettings?.streetLabels !== false,
+    streetSearch: typeof savedSettings?.streetSearch === "string" ? savedSettings.streetSearch.slice(0, 120) : "",
+    streetLimit: 40,
+    hoveredStreet: null,
+    pendingStreet: null,
+    streetAlternatives: [],
     mode: modes.includes(savedSettings?.mode) ? savedSettings.mode : "explore",
     language: languages.includes(savedSettings?.language) ? savedSettings.language : "both",
     labelsByCity: Object.fromEntries(cities.map(city => [city.id,
@@ -85,9 +99,43 @@
     round: null,
     progress: cleanProgress(load(PROGRESS_KEY))
   };
+  let streetRevision = 0;
+  let streetCandidateCache = null;
+  let streetSelectionCache = null;
+
+  function searchText(value) {
+    return value.normalize("NFKC").toLowerCase().replaceAll("臺", "台").replace(/[\s.,’']/g, "");
+  }
+
+  function streetCandidates() {
+    const key = [state.scope, [...state.selected].sort().join(), [...state.streetCategories].sort().join(), [...state.streetUnits].sort().join(), state.onlyBilingual || state.language === "en", state.streetSearch].join("|");
+    if (streetCandidateCache?.key !== key) {
+      const query = searchText(state.streetSearch.trim());
+      streetCandidateCache = { key, features: streets.filter(feature => (state.scope === "all" || feature.cityId === state.scope)
+        && feature.districtIds.some(id => state.selected.has(id)) && state.streetCategories.has(feature.category)
+        && state.streetUnits.has(feature.unit) && (!(state.onlyBilingual || state.language === "en") || feature.nameEn)
+        && (!query || searchText(`${feature.nameZh} ${feature.nameEn}`).includes(query))) };
+    }
+    return streetCandidateCache;
+  }
+
+  function streetPool() {
+    const candidates = streetCandidates();
+    const key = candidates.key + "|" + streetRevision;
+    if (streetSelectionCache?.key !== key) {
+      const features = candidates.features.filter(feature => !state.excludedStreets.has(feature.id));
+      streetSelectionCache = { key, features, ids: new Set(features.map(feature => feature.id)) };
+    }
+    return streetSelectionCache;
+  }
+
+  function maxMapZoom() { return state.subject === "streets" ? 96 : MAX_MAP_ZOOM; }
 
   function saveSettings() {
     save(SETTINGS_KEY, {
+      view: state.view, subject: state.subject, streetCategories: [...state.streetCategories], streetUnits: [...state.streetUnits],
+      excludedStreets: [...state.excludedStreets], onlyBilingual: state.onlyBilingual,
+      streetLabels: state.streetLabels, streetSearch: state.streetSearch,
       mode: state.mode, language: state.language, labelsByCity: state.labelsByCity, metro: state.metro,
       rivers: state.rivers, riverLabels: state.riverLabels, includeRivers: state.includeRivers,
       selectedRivers: [...state.selectedRivers],
@@ -105,11 +153,15 @@
   }
 
   function selectedFeatures() {
+    if (state.subject === "streets") return streetPool().features;
     return [...state.selected].map(id => byId.get(id)).concat(state.includeRivers
       ? scopeRivers().filter(river => state.selectedRivers.has(river.id)) : []);
   }
 
   function isPlayable(feature) {
+    if (feature.kind === "street") return state.subject === "streets" && (streetPool().ids.has(feature.id)
+      || (state.stage === "session" && state.round.ids.includes(feature.id)));
+    if (state.subject === "streets") return false;
     return feature.kind === "river" ? state.includeRivers && state.selectedRivers.has(feature.id)
       && (state.scope === "all" || feature.cityIds.includes(state.scope)) : state.selected.has(feature.id);
   }
@@ -123,6 +175,8 @@
   }
 
   function featureContext(feature) {
+    if (feature.kind === "street") return cityName(cityById.get(feature.cityId)) + " · "
+      + feature.districtIds.map(id => state.language === "en" ? byId.get(id).nameEn : byId.get(id).nameZh).join(" / ");
     return feature.kind === "river" ? "Fluss · " + feature.cityIds.map(id => cityName(cityById.get(id))).join(" / ")
       : cityName(cityById.get(feature.cityId));
   }
@@ -155,7 +209,7 @@
   }
 
   function nameParts(feature) {
-    if (state.language === "en") return { main: feature.nameEn, secondary: "", lang: "en" };
+    if (state.language === "en") return { main: feature.nameEn || feature.nameZh, secondary: "", lang: feature.nameEn ? "en" : "zh-Hant" };
     return {
       main: feature.nameZh,
       secondary: state.language === "both" ? feature.nameEn : "",
@@ -271,9 +325,13 @@
           return;
         }
         const pointer = this.pointer;
+        if (!pointer && event.pointerType !== "touch" && state.subject === "streets") {
+          hoverStreet(this.streets?.pick(event.clientX, event.clientY, false, state.hoveredStreet) || null);
+        }
         if (!pointer || pointer.id !== event.pointerId) return;
         if (!pointer.dragged && Math.hypot(event.clientX - pointer.clientX, event.clientY - pointer.clientY) < 5) return;
         if (!pointer.dragged) {
+          clearStreetPreview();
           pointer.dragged = true;
           this.svg.setPointerCapture(event.pointerId);
           this.svg.classList.add("dragging");
@@ -283,6 +341,7 @@
         this.y = pointer.y + point.y - pointer.point.y;
         this.applyTransform();
       });
+      this.svg.addEventListener("pointerleave", () => { if (!this.pointer && !state.pendingStreet) hoverStreet(null); });
       const release = event => {
         if (this.touches.has(event.pointerId)) {
           this.touchEnd(event, event.type === "pointerup");
@@ -392,6 +451,34 @@
       }
     }
 
+    ensureStreetLayer() {
+      if (this.streets) return;
+      this.streets = new window.TaipeiStreetLayer({ features: streets, background: window.TAIPEI_STREETS.background,
+        project: this.project, root: $("street-layer"), labels: $("street-labels"), highlight: $("street-highlight-layer"),
+        onSelect: this.onSelect, onHover: hoverStreet });
+      for (const [id, item] of this.streets.items) { this.extents.set(id, item.bounds); this.anchors.set(id, item.anchor); }
+    }
+
+    renderStreets() {
+      const visible = state.subject === "streets" && state.view === "practice";
+      $("street-map-hint").hidden = !visible;
+      if (!visible && !this.streets) return;
+      if (visible) this.ensureStreetLayer();
+      const matrix = this.content.getScreenCTM();
+      if (!matrix) return;
+      const target = currentTarget();
+      const revealed = state.stage === "session" && state.round.revealed;
+      const answer = revealed ? state.round.answers.at(-1) : null;
+      const pool = new Set(streetPool().ids);
+      if (state.stage === "session") for (const id of state.round.ids) if (byId.get(id).kind === "street") pool.add(id);
+      this.streets.render({ visible, pool, zoom: this.zoom, matrix, viewport: this.svg.getBoundingClientRect(),
+        language: state.language, names: state.streetLabels, hiddenId: revealed ? null : target?.id,
+        inSession: state.stage === "session", revealed,
+        correctId: revealed && target?.kind === "street" ? target.id : null,
+        wrongId: answer && !answer.correct ? answer.chosenId : null,
+        highlightId: state.pendingStreet || state.hoveredStreet || (state.stage === "setup" && byId.get(state.inspected)?.kind === "street" ? state.inspected : null) });
+    }
+
     touchStart(event) {
       event.preventDefault();
       this.touches.set(event.pointerId, { clientX: event.clientX, clientY: event.clientY });
@@ -411,6 +498,7 @@
     }
 
     beginPinch() {
+      clearStreetPreview();
       const [first, second] = [...this.touches.values()];
       const center = this.svgPoint((first.clientX + second.clientX) / 2, (first.clientY + second.clientY) / 2);
       this.pinch = {
@@ -427,7 +515,7 @@
         const [first, second] = [...this.touches.values()];
         const center = this.svgPoint((first.clientX + second.clientX) / 2, (first.clientY + second.clientY) / 2);
         const distance = Math.hypot(second.clientX - first.clientX, second.clientY - first.clientY);
-        this.zoom = Math.max(MIN_MAP_ZOOM, Math.min(MAX_MAP_ZOOM, this.pinch.zoom * distance / this.pinch.distance));
+        this.zoom = Math.max(MIN_MAP_ZOOM, Math.min(maxMapZoom(), this.pinch.zoom * distance / this.pinch.distance));
         this.x = center.x - this.pinch.point.x * this.zoom;
         this.y = center.y - this.pinch.point.y * this.zoom;
         this.svg.classList.add("dragging");
@@ -435,6 +523,7 @@
       } else if (this.pointer?.id === event.pointerId) {
         const pointer = this.pointer;
         if (!pointer.dragged && Math.hypot(event.clientX - pointer.clientX, event.clientY - pointer.clientY) < 5) return;
+      if (!pointer.dragged) clearStreetPreview();
         pointer.dragged = true;
         const point = this.svgPoint(event.clientX, event.clientY);
         this.x = pointer.x + point.x - pointer.point.x;
@@ -467,7 +556,7 @@
         this.hadPinch = false;
         this.svg.classList.remove("dragging");
       }
-      if (tapId) this.onSelect(tapId);
+      if (tapId) this.onSelect(tapId, { touch: true, alternatives: this.streets?.lastCandidates || [] });
     }
 
     svgPoint(clientX, clientY) {
@@ -478,6 +567,7 @@
     }
 
     selectionAt(event) {
+      if (state.subject === "streets") return this.streets?.pick(event.clientX, event.clientY, event.pointerType === "touch", event.pointerType === "touch" ? null : state.hoveredStreet) || null;
       if (riversVisible() && ((state.stage === "setup" && state.includeRivers) || currentTarget()?.kind === "river")) {
         const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(this.content.getScreenCTM().inverse());
         const containing = rivers.filter(river => this.paths.get(river.id).isPointInFill(point));
@@ -488,7 +578,7 @@
     }
 
     zoomBy(factor, point = { x: 500, y: 390 }) {
-      const newZoom = Math.max(MIN_MAP_ZOOM, Math.min(MAX_MAP_ZOOM, this.zoom * factor));
+      const newZoom = Math.max(MIN_MAP_ZOOM, Math.min(maxMapZoom(), this.zoom * factor));
       const ratio = newZoom / this.zoom;
       this.x = point.x - (point.x - this.x) * ratio;
       this.y = point.y - (point.y - this.y) * ratio;
@@ -505,25 +595,28 @@
       this.x = clampOffset(this.x, 1000, 180);
       this.y = clampOffset(this.y, 780, 140);
       this.content.setAttribute("transform", `translate(${this.x},${this.y}) scale(${this.zoom})`);
-      $("zoom-in").disabled = this.zoom >= MAX_MAP_ZOOM;
+      $("zoom-in").disabled = this.zoom >= maxMapZoom();
+      $("zoom-range").max = String(maxMapZoom() * 100);
       $("zoom-out").disabled = this.zoom <= MIN_MAP_ZOOM;
       $("zoom-range").value = String(Math.round(this.zoom * 100));
       $("zoom-level").textContent = `${Math.round(this.zoom * 100)} %`;
       this.updateLabels();
+      this.renderStreets();
     }
 
     reset() {
-      this.fit(scopeFeatures());
+      this.fit(state.subject === "streets" && state.selected.size ? [...state.selected].map(id => byId.get(id)) : scopeFeatures());
     }
 
     fit(selected) {
       if (!selected.length) return;
+      if (selected.some(feature => feature.kind === "street")) this.ensureStreetLayer();
       const [minX, minY, maxX, maxY] = extent(selected.flatMap(feature => {
         const box = this.extents.get(feature.id);
         return [[box[0], box[1]], [box[2], box[3]]];
       }));
       const desired = Math.min(870 / (maxX - minX), 680 / (maxY - minY));
-      this.zoom = Math.max(MIN_MAP_ZOOM, Math.min(MAX_MAP_ZOOM, Math.abs(desired - 1) < 1e-8 ? 1 : desired));
+      this.zoom = Math.max(MIN_MAP_ZOOM, Math.min(maxMapZoom(), Math.abs(desired - 1) < 1e-8 ? 1 : desired));
       this.x = 500 - (minX + maxX) / 2 * this.zoom;
       this.y = 390 - (minY + maxY) / 2 * this.zoom;
       if (Math.abs(this.x) < 1e-8) this.x = 0;
@@ -540,7 +633,7 @@
       const target = inSession ? state.round.ids[state.round.position] : null;
       const revealed = inSession && state.round.revealed;
       const candidates = [];
-      for (const feature of learningFeatures) {
+      for (const feature of mapFeatures) {
         const label = this.labels.get(feature.id);
         label.group.style.display = "none";
         const enabled = feature.kind === "river" ? riversVisible() && state.riverLabels : state.labelsByCity[feature.cityId];
@@ -582,7 +675,7 @@
       const target = inSession ? state.round.ids[state.round.position] : null;
       const revealed = inSession && state.round.revealed;
       const answer = revealed ? state.round.answers.at(-1) : null;
-      for (const feature of learningFeatures) {
+      for (const feature of mapFeatures) {
         const isRiver = feature.kind === "river";
         const active = isPlayable(feature) && (!inSession || isRiver === (byId.get(target).kind === "river"));
         const path = this.paths.get(feature.id);
@@ -597,10 +690,73 @@
         control.setAttribute("aria-label", inSession && !revealed ? isRiver ? "Fluss auf der Karte auswählen" : "Bezirk auf der Karte auswählen" : readableName(feature));
       }
       this.updateLabels();
+      this.renderStreets();
     }
   }
 
   const map = new DistrictMap(selectDistrict);
+
+  function clearStreetPreview() {
+    state.pendingStreet = null;
+    state.streetAlternatives = [];
+    state.hoveredStreet = null;
+    $("street-confirmation").hidden = true;
+    map.streets?.setHighlight(null);
+  }
+
+  function hoverStreet(id) {
+    if (state.subject !== "streets" || state.pendingStreet || (state.stage === "session" && state.round.revealed)) return;
+    state.hoveredStreet = id;
+    map.streets?.setHighlight(id);
+  }
+
+  function renderStreetPicker() {
+    if (state.subject !== "streets") return;
+    const available = streetCandidates().features;
+    const selectedCount = streetPool().features.length;
+    const picker = $("street-picker");
+    const scroll = picker.scrollTop;
+    const focused = picker.contains(document.activeElement) ? document.activeElement.value : null;
+    picker.replaceChildren();
+    for (const feature of available.slice(0, state.streetLimit)) {
+      const label = document.createElement("label");
+      label.className = "street-choice";
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.value = feature.id;
+      input.checked = !state.excludedStreets.has(feature.id);
+      input.setAttribute("aria-label", readableName(feature));
+      input.addEventListener("change", () => {
+        input.checked ? state.excludedStreets.delete(feature.id) : state.excludedStreets.add(feature.id);
+        streetRevision++;
+        saveSettings();
+        render();
+      });
+      const names = document.createElement("span");
+      const main = document.createElement("strong");
+      main.lang = "zh-Hant";
+      main.textContent = feature.nameZh;
+      const english = document.createElement("small");
+      english.lang = "en";
+      english.textContent = feature.nameEn || "Englischer Name nicht belegt";
+      const context = document.createElement("small");
+      context.className = "street-choice-context";
+      context.textContent = feature.districtIds.map(id => byId.get(id).nameZh).join(" · ");
+      names.append(main, english, context);
+      label.append(input, names);
+      picker.append(label);
+    }
+    picker.scrollTop = scroll;
+    if (focused) picker.querySelector(`input[value="${focused}"]`)?.focus({ preventScroll: true });
+    $("street-selection-count").textContent = `${selectedCount.toLocaleString("de-DE")} / ${available.length.toLocaleString("de-DE")} ausgewählt`;
+    $("street-select-all").textContent = selectedCount === available.length && available.length ? "Auswahl aufheben" : "Alle auswählen";
+    $("street-select-all").disabled = !available.length;
+    $("street-more").hidden = available.length <= state.streetLimit;
+    $("street-more").textContent = `Weitere Straßen anzeigen (${Math.min(state.streetLimit, available.length)} von ${available.length})`;
+    $("street-empty").hidden = available.length > 0;
+    const missing = streets.filter(feature => feature.districtIds.some(id => state.selected.has(id)) && !feature.nameEn).length;
+    $("street-data-note").textContent = `Daten außerhalb des Zentrums: 2021; Innenstadt-Auszug: 2026. ${missing.toLocaleString("de-DE")} Einheiten im gewählten Gebiet ohne belegten englischen Namen. Details unter Hilfe → Datenquellen.`;
+  }
 
   function buildPicker() {
     const root = $("district-picker");
@@ -670,6 +826,11 @@
       cards: "Präge dir Namen und Lage ein. Lass dir die richtige Fläche zeigen.",
       quiz: "Ein Name, eine Fläche. Teste, wie gut du Taipei schon kennst."
     };
+    if (state.subject === "streets") {
+      descriptions.explore = "Erkunde Straßennamen und ihre Verläufe. Zoome für kleine Straßen und Gassen hinein.";
+      descriptions.cards = "Präge dir Namen und Verlauf ein. Lass dir anschließend die Straße auf der Karte zeigen.";
+      descriptions.quiz = "Ein Straßenname, ein Verlauf. Wähle die gesuchte Straße auf der Karte.";
+    }
     for (const button of document.querySelectorAll("[data-mode]")) {
       const active = button.dataset.mode === state.mode;
       button.classList.toggle("active", active);
@@ -678,7 +839,7 @@
     for (const input of $("district-picker").querySelectorAll("input")) input.checked = state.selected.has(input.value);
     for (const input of $("river-picker").querySelectorAll("input")) input.checked = state.selectedRivers.has(input.value);
     $("include-rivers").checked = state.includeRivers;
-    $("river-selection").hidden = !state.includeRivers;
+    $("river-selection").hidden = !state.includeRivers || state.subject === "streets";
     const selectedRiverCount = scopeRivers().filter(river => state.selectedRivers.has(river.id)).length;
     $("river-selection-note").textContent = `${selectedRiverCount} von ${scopeRivers().length} Flüssen ausgewählt. Für eine reine Flussrunde die Bezirksauswahl aufheben.`;
     const taskCount = selectedFeatures().length;
@@ -690,7 +851,7 @@
     $("city-scope").value = state.scope;
     $("mode-description").textContent = descriptions[state.mode];
     $("select-all").textContent = available.every(feature => state.selected.has(feature.id)) ? "Auswahl aufheben" : "Alle auswählen";
-    $("selection-note").textContent = state.selected.size === 0 ? state.includeRivers && selectedRiverCount ? "Keine Bezirke · nur Flüsse üben" : "Wähle mindestens einen Bezirk oder Fluss."
+    $("selection-note").textContent = state.selected.size === 0 ? state.subject !== "streets" && state.includeRivers && selectedRiverCount ? "Keine Bezirke · nur Flüsse üben" : "Wähle mindestens einen Bezirk oder Fluss."
       : state.selected.size === available.length ? `Alle ${available.length} Bezirke ausgewählt`
       : `${state.selected.size} von ${available.length} Bezirken ausgewählt`;
     $("selection-note").classList.toggle("error", taskCount === 0);
@@ -698,10 +859,19 @@
     $("focus-selected").disabled = taskCount === 0;
     $("round-size-field").hidden = state.mode !== "quiz";
     $("round-size").value = String(state.roundSize);
-    $("round-size").querySelector('[value="all"]').textContent = state.includeRivers ? "Alle gewählten Bezirke und Flüsse" : "Alle gewählten Bezirke";
+    $("round-size").querySelector('[value="all"]').textContent = state.subject === "streets" ? "Alle gewählten Straßen" : state.includeRivers ? "Alle gewählten Bezirke und Flüsse" : "Alle gewählten Bezirke";
     $("start-button").firstElementChild.textContent = state.mode === "quiz"
       ? `Quiz starten · ${roundLength(taskCount)} Aufgaben`
       : state.mode === "cards" ? "Lernkarten starten" : "Karte erkunden";
+    $("street-selection").hidden = state.subject !== "streets";
+    $("street-subject-hint").hidden = state.subject !== "streets";
+    for (const button of document.querySelectorAll("[data-subject]")) button.setAttribute("aria-pressed", String(button.dataset.subject === state.subject));
+    for (const input of document.querySelectorAll('[name="street-category"]')) input.checked = state.streetCategories.has(input.value);
+    for (const input of document.querySelectorAll('[name="street-unit"]')) input.checked = state.streetUnits.has(input.value);
+    $("only-bilingual").checked = state.onlyBilingual || state.language === "en";
+    $("only-bilingual").disabled = state.language === "en";
+    if (document.activeElement !== $("street-search")) $("street-search").value = state.streetSearch;
+    renderStreetPicker();
   }
 
   function renderSession() {
@@ -709,19 +879,20 @@
     const target = byId.get(round.ids[round.position]);
     const parts = nameParts(target);
     const isRiver = target.kind === "river";
+    const isStreet = target.kind === "street";
     $("question-city").textContent = featureContext(target);
-    $("session-kind").textContent = round.kind === "quiz" ? round.ids.some(id => byId.get(id).kind === "river") ? "DEIN KARTENQUIZ" : "DEIN BEZIRKSQUIZ" : "DEINE LERNKARTEN";
+    $("session-kind").textContent = round.kind === "quiz" ? isStreet ? "DEIN STRASSENQUIZ" : round.ids.some(id => byId.get(id).kind === "river") ? "DEIN KARTENQUIZ" : "DEIN BEZIRKSQUIZ" : "DEINE LERNKARTEN";
     $("session-count").textContent = `${round.kind === "quiz" ? "Aufgabe" : "Karte"} ${round.position + 1} / ${round.ids.length}`;
     $("session-score").textContent = round.kind === "quiz" ? `${round.answers.filter(answer => answer.correct).length} richtig` : "Ohne Bewertung";
     $("session-progress-bar").style.width = `${100 * (round.position + Number(round.revealed)) / round.ids.length}%`;
-    $("question-instruction").textContent = round.kind === "quiz" ? isRiver ? "Finde diesen Fluss auf der Karte:" : "Finde diesen Bezirk auf der Karte:" : isRiver ? "Wo verläuft dieser Fluss?" : "Wo liegt dieser Bezirk?";
+    $("question-instruction").textContent = round.kind === "quiz" ? isStreet ? "Finde diese Straße auf der Karte:" : isRiver ? "Finde diesen Fluss auf der Karte:" : "Finde diesen Bezirk auf der Karte:" : isStreet ? "Wo verläuft diese Straße?" : isRiver ? "Wo verläuft dieser Fluss?" : "Wo liegt dieser Bezirk?";
     $("question-name").textContent = parts.main;
     $("question-name").lang = parts.lang;
     $("question-name").classList.toggle("english", parts.lang === "en");
     $("question-secondary").textContent = parts.secondary;
     $("question-secondary").hidden = !parts.secondary;
     $("question-hint").hidden = round.revealed;
-    $("question-hint").textContent = round.kind === "quiz" ? isRiver ? "Klicke auf den passenden blauen Flusslauf. Du kannst vorher zoomen." : "Klicke auf die passende Fläche. Du kannst vorher zoomen." : "Versuche ihn zu finden oder lass dir seine Lage zeigen.";
+    $("question-hint").textContent = round.kind === "quiz" ? isStreet ? window.matchMedia("(pointer: coarse)").matches ? "Zoome hinein, tippe eine Straße an und bestätige deine hervorgehobene Auswahl." : "Zoome hinein. Die Maus hebt den Verlauf hervor; ein Klick wählt diese Straße." : isRiver ? "Klicke auf den passenden blauen Flusslauf. Du kannst vorher zoomen." : "Klicke auf die passende Fläche. Du kannst vorher zoomen." : "Versuche die Lage zu finden oder lass dir den Verlauf zeigen.";
     $("reveal-button").textContent = round.kind === "quiz" ? "Ich weiß es noch nicht" : "Lage auf der Karte zeigen";
     $("reveal-button").hidden = round.revealed;
     $("next-button").hidden = !round.revealed;
@@ -740,7 +911,7 @@
       $("feedback").classList.toggle("wrong", round.kind === "quiz" && !answer.correct);
       renderDetail(target);
     } else {
-      renderDetail(null, isRiver ? "Welcher Fluss ist gesucht?" : "Welcher Bezirk ist gesucht?");
+      renderDetail(null, isStreet ? "Welche Straße ist gesucht?" : isRiver ? "Welcher Fluss ist gesucht?" : "Welcher Bezirk ist gesucht?");
     }
   }
 
@@ -775,6 +946,15 @@
   }
 
   function render() {
+    $("home-view").hidden = state.view !== "home";
+    $("practice-view").hidden = state.view !== "practice";
+    document.body.dataset.subject = state.subject;
+    $("home-street-count").textContent = `${streets.length.toLocaleString("de-DE")} Straßeneinheiten · 41 Bezirke`;
+    $("home-data-note").textContent = "Lokale Karte mit Metro und Flüssen. Datenstand und Namensherkunft sind unter Hilfe → Datenquellen dokumentiert.";
+    for (const button of document.querySelectorAll("[data-nav]")) {
+      if ((state.view === "home" && button.dataset.nav === "home") || (state.view === "practice" && button.dataset.nav === state.mode)) button.setAttribute("aria-current", "page");
+      else button.removeAttribute("aria-current");
+    }
     $("setup-panel").hidden = state.stage !== "setup";
     $("session-panel").hidden = state.stage !== "session";
     $("results-panel").hidden = state.stage !== "results";
@@ -785,6 +965,8 @@
     $("show-rivers").disabled = currentTarget()?.kind === "river";
     $("show-river-labels").checked = state.riverLabels;
     $("show-river-labels").disabled = !riversVisible();
+    $("show-street-labels").checked = state.streetLabels;
+    $("street-credit").hidden = state.subject !== "streets";
     $("river-credit").hidden = !riversVisible();
     $("metro-legend").hidden = !state.metro;
     $("metro-credit").hidden = !state.metro;
@@ -812,6 +994,8 @@
     if (state.stage === "session") renderSession();
     else if (state.stage === "results") { renderResults(); renderDetail(null, "Deine nächste Runde wartet."); }
     else renderDetail(byId.get(state.inspected));
+    $("street-confirmation").hidden = !state.pendingStreet;
+    $("street-alternative").hidden = state.streetAlternatives.length < 2;
     map.render();
   }
 
@@ -825,13 +1009,14 @@
     };
     state.stage = "session";
     state.inspected = null;
+    clearStreetPreview();
     map.reset();
     render();
     $("question-name").setAttribute("tabindex", "-1");
     $("question-name").focus({ preventScroll: true });
   }
 
-  function selectDistrict(id) {
+  function selectDistrict(id, options = {}) {
     const feature = byId.get(id);
     if (!feature || !isPlayable(feature)) return;
     if (state.stage === "session" && (feature.kind === "river") !== (currentTarget().kind === "river")) return;
@@ -839,6 +1024,12 @@
       state.inspected = id;
       render();
     } else if (state.stage === "session" && !state.round.revealed) {
+      if (feature.kind === "street" && options.touch && state.round.kind === "quiz") {
+        state.pendingStreet = id;
+        state.streetAlternatives = [...new Set([id, ...(options.alternatives || [])])].filter(candidate => isPlayable(byId.get(candidate)));
+        render();
+        return;
+      }
       answerQuestion(id);
     }
   }
@@ -846,6 +1037,7 @@
   function answerQuestion(chosenId) {
     const round = state.round;
     if (state.stage !== "session" || round.revealed) return;
+    clearStreetPreview();
     const id = round.ids[round.position];
     const answer = { id, chosenId, correct: id === chosenId };
     round.answers.push(answer);
@@ -873,6 +1065,7 @@
       round.completed = true;
       render();
     } else {
+      clearStreetPreview();
       round.position += 1;
       round.revealed = false;
       render();
@@ -881,6 +1074,7 @@
   }
 
   function endRound() {
+    clearStreetPreview();
     state.stage = "setup";
     state.round = null;
     state.inspected = null;
@@ -897,12 +1091,13 @@
     $("progress-list").replaceChildren();
     let previousCity = null;
     for (const feature of learningFeatures) {
+      if (feature.kind === "street" && !state.progress.districts[feature.id]) continue;
       if (feature.kind === "river" && !state.includeRivers && !rivers.some(river => state.progress.districts[river.id])) continue;
-      const group = feature.kind === "river" ? "rivers" : feature.cityId;
+      const group = feature.kind === "river" ? "rivers" : feature.kind === "street" ? "streets" : feature.cityId;
       if (group !== previousCity) {
         const heading = document.createElement("h3");
         heading.className = "progress-city";
-        heading.textContent = group === "rivers" ? "Flüsse" : cityName(cityById.get(group));
+        heading.textContent = group === "rivers" ? "Flüsse" : group === "streets" ? "Geübte Straßen" : cityName(cityById.get(group));
         $("progress-list").append(heading);
         previousCity = group;
       }
@@ -924,7 +1119,137 @@
     $("delete-progress").disabled = !attempts;
   }
 
+  function closeMenu() {
+    $("main-menu").classList.remove("is-open");
+    $("menu-toggle").setAttribute("aria-expanded", "false");
+  }
+
+  function navigate(destination) {
+    closeMenu();
+    if (["progress", "settings", "help"].includes(destination)) {
+      if (destination === "progress") { renderProgress(); $("delete-confirmation").hidden = true; }
+      if (destination === "settings") $("settings-dialog-content").append($("display-settings"));
+      $(destination + "-dialog").showModal();
+      return;
+    }
+    if (destination === "home") state.view = "home";
+    else {
+      state.view = "practice";
+      if (modes.includes(destination) && destination !== state.mode) {
+        state.stage = "setup";
+        state.round = null;
+        clearStreetPreview();
+        state.mode = destination;
+      }
+    }
+    saveSettings();
+    render();
+    if (state.view === "practice") map.reset();
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+
+  function chooseSubject(subject) {
+    state.subject = subject;
+    state.stage = "setup";
+    state.round = null;
+    state.inspected = null;
+    clearStreetPreview();
+    saveSettings();
+    render();
+    map.reset();
+  }
+
   buildPicker();
+  for (const button of document.querySelectorAll("[data-nav]")) button.addEventListener("click", () => navigate(button.dataset.nav));
+  for (const button of document.querySelectorAll("[data-subject]")) button.addEventListener("click", () => chooseSubject(button.dataset.subject));
+  for (const button of document.querySelectorAll("[data-start]")) button.addEventListener("click", () => {
+    const subject = button.dataset.start;
+    state.view = "practice";
+    state.mode = "explore";
+    if (subject === "rivers") { state.includeRivers = true; state.rivers = true; state.selected.clear(); }
+    else if (subject === "districts") {
+      state.includeRivers = false;
+      if (!state.selected.size) state.selected = new Set(scopeFeatures().map(feature => feature.id));
+    } else if (!state.selected.size) state.selected = new Set(scopeFeatures().map(feature => feature.id));
+    chooseSubject(subject === "streets" ? "streets" : "districts");
+    window.scrollTo({ top: 0, behavior: "instant" });
+  });
+  document.querySelector(".brand").addEventListener("click", event => { event.preventDefault(); navigate("home"); });
+  $("menu-toggle").addEventListener("click", () => {
+    const open = $("main-menu").classList.toggle("is-open");
+    $("menu-toggle").setAttribute("aria-expanded", String(open));
+  });
+  document.addEventListener("keydown", event => { if (event.key === "Escape") closeMenu(); });
+  $("settings-dialog").addEventListener("close", () => $("inline-settings-slot").append($("display-settings")));
+  $("help-sources").addEventListener("click", () => { $("help-dialog").close(); $("sources-dialog").showModal(); });
+  for (const [name, key] of [["street-category", "streetCategories"], ["street-unit", "streetUnits"]]) {
+    for (const input of document.querySelectorAll(`[name="${name}"]`)) input.addEventListener("change", () => {
+      input.checked ? state[key].add(input.value) : state[key].delete(input.value);
+      state.streetLimit = 40;
+      clearStreetPreview();
+      saveSettings();
+      render();
+    });
+  }
+  $("only-bilingual").addEventListener("change", event => { state.onlyBilingual = event.target.checked; saveSettings(); render(); });
+  let streetSearchTimer;
+  $("street-search").addEventListener("input", event => {
+    state.streetSearch = event.target.value.slice(0, 120);
+    state.streetLimit = 40;
+    clearTimeout(streetSearchTimer);
+    streetSearchTimer = setTimeout(() => { saveSettings(); render(); }, 120);
+  });
+  $("street-select-all").addEventListener("click", () => {
+    const candidates = streetCandidates().features;
+    const allSelected = candidates.every(feature => !state.excludedStreets.has(feature.id));
+    for (const feature of candidates) allSelected ? state.excludedStreets.add(feature.id) : state.excludedStreets.delete(feature.id);
+    streetRevision++;
+    saveSettings();
+    render();
+  });
+  $("street-more").addEventListener("click", () => { state.streetLimit += 60; renderStreetPicker(); });
+  $("show-street-labels").addEventListener("change", event => { state.streetLabels = event.target.checked; saveSettings(); render(); });
+  $("street-confirm").addEventListener("click", () => { if (state.pendingStreet) answerQuestion(state.pendingStreet); });
+  $("street-alternative").addEventListener("click", () => {
+    const index = state.streetAlternatives.indexOf(state.pendingStreet);
+    state.pendingStreet = state.streetAlternatives[(index + 1) % state.streetAlternatives.length];
+    render();
+  });
+  $("export-progress").addEventListener("click", () => {
+    const payload = { app: "taipei-kennen", formatVersion: 1, exportedAt: new Date().toISOString(), progress: state.progress };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `taipei-kennen-lernstand-${new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(new Date())}.json`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+  let importedProgress = null;
+  $("import-progress").addEventListener("change", async event => {
+    const file = event.target.files[0];
+    if (!file) return;
+    try {
+      if (file.size > 5 * 1024 * 1024) throw new Error("Die Sicherung ist zu groß.");
+      const payload = JSON.parse(await file.text());
+      if (payload?.app !== "taipei-kennen" || payload.formatVersion !== 1 || !payload.progress || !payload.progress.districts || typeof payload.progress.districts !== "object" || Array.isArray(payload.progress.districts)) throw new Error("Keine gültige Taipei-kennen-Sicherung.");
+      importedProgress = cleanProgress(payload.progress);
+      const attempts = Object.values(importedProgress.districts).reduce((total, row) => total + row.attempts, 0);
+      $("import-summary").textContent = `${attempts} gespeicherte Antworten und ${importedProgress.rounds} Quizrunden übernehmen?`;
+      $("import-confirmation").hidden = false;
+      $("confirm-import").focus();
+    } catch (error) { toast(error.message || "Die Sicherung konnte nicht gelesen werden."); }
+    event.target.value = "";
+  });
+  $("confirm-import").addEventListener("click", () => {
+    if (!importedProgress || !save(PROGRESS_KEY, importedProgress)) return;
+    state.progress = importedProgress;
+    importedProgress = null;
+    $("import-confirmation").hidden = true;
+    if (state.stage !== "setup") endRound();
+    renderProgress();
+    toast("Dein Lernstand wurde übernommen.");
+  });
+  $("cancel-import").addEventListener("click", () => { importedProgress = null; $("import-confirmation").hidden = true; });
   for (const button of document.querySelectorAll("[data-mode]")) button.addEventListener("click", () => {
     state.mode = button.dataset.mode;
     saveSettings();
@@ -946,7 +1271,8 @@
     map.reset();
     render();
   });
-  $("focus-selected").addEventListener("click", () => map.fit(selectedFeatures()));
+  $("focus-selected").addEventListener("click", () => map.fit(state.subject === "streets"
+    ? [...state.selected].map(id => byId.get(id)) : selectedFeatures()));
   $("include-rivers").addEventListener("change", event => {
     state.includeRivers = event.target.checked;
     if (state.includeRivers) state.rivers = true;

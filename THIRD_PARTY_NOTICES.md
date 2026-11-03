@@ -40,6 +40,12 @@ Die Quellenangabe ist bei aktivierter Ebene im Kartenfuß sichtbar, auch im mobi
 
 Die vier Flüsse stammen aus dem `RIVERPOLY`-Datensatz der Taiwan Water Resources Agency (WRA), übernommen aus einem fest versionierten, veröffentlichten GIS-Auszug. Namen wurden anhand von `RIVER_NAME` ausgewählt; 329 ursprüngliche GeoJSON-Features sind in `data/river-areas-source.geojson` enthalten. `data/rivers.js` enthält den vereinigten, auf die beiden Städte begrenzten Auszug. Es wurde kein Anwendungscode des Quellprojekts übernommen. Die Flussdaten sind separat von den CC0-Bezirksflächen und den ODbL-Metro-Daten dokumentiert. Quellenlinks, Prüfsummen, Bearbeitungsschritte und der noch ausstehende Abgleich der aktuellen Nutzungsbedingungen beim Primäranbieter stehen in [data/RIVERS-SOURCE.md](data/RIVERS-SOURCE.md).
 
+## Straßen-Geometrien und Namen
+
+© OpenStreetMap contributors, [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/). `data/streets.js` und die in `data/street-sources.zip` archivierten OSM-Auszüge enthalten eine aus OSM abgeleitete Straßendatenbank, die einschließlich der Auswahl und Bearbeitung unter ODbL 1.0 angeboten wird. Quellen sind die festen Versionen `c3d387948e48adc38440062b33a19e1aca1b8b36` von `typebrook/mapstew` (565 Kacheln, Version Dezember 2021) und `96af2cbce0b40dd6120d2719ec7ee3b6027d94f3` von `jpchen/taipei-3d-render` (Innenstadt-Auszug, September 2026). Es wurde kein Anwendungscode dieser Projekte übernommen.
+
+Englische Namensmetadaten verwenden die separat dokumentierten Postreferenz-Kopien der festen Version `2a5923e5de751e24586901082a7df80653e7a96e` von `sean1093/menpai`. Ihre Primärquellen-, Aktualitäts- und Rechteprüfung bleibt entsprechend `OFFIZIELLE_NAMEN.md` offen; eine OSM- oder Softwarelizenz wird nicht pauschal auf amtliche Namensreferenzen übertragen. Datenbearbeitung, Quellenhashes, Namensherkunft, fehlende englische Namen und die Namens-/Geometrie-Abdeckung je Bezirk sind in [data/STREETS-SOURCE.md](data/STREETS-SOURCE.md), `data/street-source-manifest.json` und `data/street-coverage.json` dokumentiert. Die Kartenquellenangabe ist im Straßenmodus sichtbar.
+
 ## Weitere Bestandteile
 
 Die App lädt keine externen Schriftdateien, Kartenkacheln oder JavaScript-Bibliotheken. Die Icons bestehen aus im Projekt enthaltenen SVG-Linienzeichnungen. Python stellt nur den lokalen Dateiserver über seine Standardbibliothek bereit. Playwright ist ausschließlich ein Entwicklungswerkzeug für die Tests und wird nicht mit dem Nutzerpaket installiert.

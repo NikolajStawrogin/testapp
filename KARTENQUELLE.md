@@ -1,17 +1,17 @@
 # Kartenquelle: Vergleich und Entscheidungsvorlage
 
-Stand: 3. November 2026. Status: vorläufige Empfehlung für Straßen; lokaler Bezirksprototyp für Taipei City und New Taipei City umgesetzt.
+Stand: 3. November 2026. Status: lokale Bezirks-, Fluss- und Straßenkarte für beide Städte in Version 0.7 umgesetzt. Der heutige amtliche Vollständigkeitsnachweis bleibt offen.
 Nach Umgebungswechsel wiederhergestellt und um neu gelesene offizielle Quellen ergänzt.
 
-## Empfehlung und offene Entscheidung
+## Umgesetzte Darstellung und verbleibende Datenprüfung
 
-Für dieses Quiz ist MapLibre GL JS als Kartendarstellung mit eigenen, OSM-basierten Straßenobjekten der bevorzugte Planungsvorschlag. Amtliche Namen und Bezirksgrenzen benötigen zusätzliche Quellenprüfung. Google Maps ist eine grundsätzlich mögliche Alternative; es ist weder technisch ausgeschlossen noch als Kartenquelle festgelegt.
+Version 0.7 stellt lokale OSM-Straßenobjekte und Bezirks-/Flussflächen gemeinsam als SVG dar. Straßen werden abhängig vom sichtbaren Ausschnitt und Zoom dargestellt, volle Einheiten beim Überfahren hervorgehoben und für Antworten geografisch getroffen. Das benötigt keine Karten-API, externen Kacheln oder Hostingkosten. MapLibre bleibt eine spätere Darstellungsoption bei weiterem Umfang. Amtliche Namensaktualität und Bezirksgrenzen benötigen weiterhin Quellenprüfung.
 
-Für den ersten Bezirksprototyp werden lokale CC0-Geometrien aus `g0v/twgeojson` direkt als SVG dargestellt. Das erfüllt die Bezirksauswahl und den Zoom ohne Kartenbibliothek oder externen Dienst. Dieser vereinfachte Referenzbestand ist nicht als aktueller amtlicher Grenzstand bestätigt; Quelle, feste Git-Version und Änderungen stehen in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). MapLibre und OSM bleiben Kandidaten für den noch nicht implementierten Straßenmodus.
+Die Bezirkskarte verwendet lokale CC0-Geometrien aus `g0v/twgeojson`. Dieser vereinfachte Referenzbestand ist nicht als aktueller amtlicher Grenzstand bestätigt; Quelle, feste Git-Version und Änderungen stehen in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-Der entscheidende Aufwand ist ein verlässlicher Straßenkatalog: ganze Straßen, Sections, Lanes und Alleys müssen jeweils richtig benannt, zusammengefasst und auswählbar sein. Das liefert eine sichtbare Karte allein nicht. Die endgültige Wahl bleibt bis zur Taipei-Daten-, Lizenz- und Kostenprüfung offen.
+Der Straßenkatalog unterscheidet Straßen, Sections, Lanes und Alleys als eigene auswählbare Einheiten. Namensherkunft und Zugehörigkeit zu Bezirken sind dokumentiert; gleiche Namen im selben Bezirk werden ohne künstliche Geometrieverbindungen zu einer Aufgabe vereinigt. Die implementierte Darstellung und der lokale Betrieb sind überprüfbar. Der heutige amtliche Vollständigkeitsnachweis und der abschließende Rechteabgleich vor öffentlicher Veröffentlichung bleiben offen.
 
-Die vertiefte Namensrecherche steht in [OFFIZIELLE_NAMEN.md](OFFIZIELLE_NAMEN.md). Konkrete Postverzeichnisse wurden als Kandidaten identifiziert und private Kopien inhaltlich geprüft. Sie enthalten landesweite Namenspaare sowie die zwölf Taipei- und 29 New-Taipei-Bezirksnamen, aber keine Straßenverläufe oder vollständige geografische Lane-/Alley-Zuordnung. Damit wird die Namensreferenz greifbarer; die Entscheidung für eine Geometriequelle ist weiterhin offen.
+Die vertiefte Namensrecherche steht in [OFFIZIELLE_NAMEN.md](OFFIZIELLE_NAMEN.md). Die geprüften Postkopien liefern eindeutige Namenspaare; nummerierte Gassen werden aus belegten Basisnamen und Adresszusätzen gebildet. Weitere englische Namen stammen aus OSM oder werden ausdrücklich als fehlend behandelt. Für die Geometrien sind ein flächendeckender OSM-Kachelstand von 2021 und ein Innenstadt-Auszug von 2026 fest versioniert und lokal archiviert. Die Zuordnung von 22.039 Einheiten zu allen 41 Bezirken, Namensherkunft, Bearbeitung und Grenzen sind in [data/STREETS-SOURCE.md](data/STREETS-SOURCE.md) und [data/street-coverage.json](data/street-coverage.json) dokumentiert.
 
 ## Verbindliche Vorgaben: lokal auf dem eigenen Rechner, keine Hostinggebühren
 

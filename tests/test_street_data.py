@@ -55,6 +55,13 @@ class StreetDataTests(unittest.TestCase):
         self.assertTrue(any(f["unit"] == "alley" and f["nameSource"] == "postal-numbered" and "Aly." in f["nameEn"] for f in self.features))
         self.assertEqual(Counter(f["nameSource"] for f in self.features), self.data["coverage"]["names"])
 
+    def test_no_ambiguous_identical_street_questions_within_one_district(self):
+        identities = []
+        for feature in self.features:
+            for district in feature["districtIds"]:
+                identities.append((feature["cityId"], feature["nameZh"].replace("臺", "台"), district))
+        self.assertEqual(len(identities), len(set(identities)))
+
     def test_all_archived_sources_match_the_manifest(self):
         with ZipFile(ROOT / "data/street-sources.zip") as archive:
             manifest = json.loads(archive.read("manifest.json"))
@@ -62,6 +69,13 @@ class StreetDataTests(unittest.TestCase):
             for entry in manifest["entries"]:
                 self.assertFalse(entry.get("missing"), entry["path"])
                 self.assertEqual(hashlib.sha256(archive.read(entry["path"])).hexdigest(), entry["sha256"])
+
+    def test_newer_partial_extract_preserves_small_street_classes(self):
+        self.assertIn("service", self.data["source"]["olderClassesPreserved"])
+        self.assertNotIn("service", self.data["source"]["newerHighwayClasses"])
+        names = {feature["nameZh"] for feature in self.features if feature["cityId"] == "taipei"}
+        for name in ["通安街108巷", "新生南路一段12巷9弄", "忠孝東路四段205巷29弄", "通化街200巷"]:
+            self.assertIn(name, names)
 
 
 if __name__ == "__main__":

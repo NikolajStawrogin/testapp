@@ -38,8 +38,8 @@ Keine Force-Pushes und keine Überschreibung fremder Änderungen. Bei zwischenze
 
 - [x] Vorhandenen Stand prüfen und Ausgangscommit erstellen (`ad9b634`).
 - [x] Ausgangsstand auf GitHub bestätigen (`main`, `ad9b634`).
-- [x] Straßendaten und Abdeckung prüfen: 18.003 Einheiten, alle 41 Bezirke, vier bestandene Datenprüfungen. Fehlende englische Namen und ältere Geometrien ausdrücklich dokumentiert.
-- [ ] Straßenmodus und Menü vollständig umsetzen.
-- [ ] Browser- und Datenprüfungen bestehen lassen.
+- [x] Straßendaten und Abdeckung prüfen: 22.039 Einheiten, alle 41 Bezirke, fünf bestandene Datenprüfungen. Fehlende englische Namen und ältere Geometrien ausdrücklich dokumentiert.
+- [x] Straßenmodus und Menü umsetzen: Erkundung, Lernkarten, Quiz, Filter, Suche, Navigation, Hilfe, Einstellungen und Lernstand-Sicherung.
+- [x] Integrationsstand prüfen: 33 gemeinsam bestandene Prüfungen; anschließend neun Straßen-/Menü-Browserprüfungen und sechs Datenprüfungen mit dem erweiterten Gassenbestand erneut bestanden.
 - [ ] Lokales Paket und Einzeldatei prüfen.
 - [ ] Abschlussstand pushen und entfernten Commit bestätigen.
