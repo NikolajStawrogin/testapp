@@ -117,7 +117,7 @@ Vorläufig empfohlen: MapLibre für die Darstellung, OSM-basierte Straßenverlä
 
 ## Abgrenzung
 
-Bildquiz, eigenständige Smartphone-Bereitstellung, öffentliche Nutzerkonten und Synchronisation gehören nicht zur ersten Version. Lokale Bereitstellung ohne Hostinggebühren ist festgelegt. Eine öffentliche Veröffentlichung ist nicht freigegeben.
+Bildquiz, Store-Apps, öffentliche Nutzerkonten und Synchronisation gehören nicht zur ersten Version. Der lokale Betrieb bleibt erhalten. Ergänzend hat der Nutzer am 3. November 2026 die kostenlose öffentliche Bereitstellung über GitHub Pages beauftragt. Freunde sollen die App ohne GitHub-Konto über einen Link öffnen können; Details und notwendige einmalige Repository-Einstellung stehen in `GITHUB_PAGES.md`.
 
 ## Stand des ersten Prototyps
 

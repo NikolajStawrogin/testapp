@@ -17,7 +17,7 @@ def main():
     parser.add_argument("--html", type=Path, help="Optional additional path for the standalone browser file")
     args = parser.parse_args()
     subprocess.run([sys.executable, str(ROOT / "tools/export_standalone.py")], check=True)
-    names = [".gitignore", "index.html", "styles.css", "app.js", "street-map.js", "server.py", "Start.bat",
+    names = [".gitignore", ".nojekyll", "GITHUB_PAGES.md", "index.html", "styles.css", "app.js", "street-map.js", "server.py", "Start.bat",
              "README.md", "ANFORDERUNGEN.md", "KARTENQUELLE.md", "OFFIZIELLE_NAMEN.md", "THIRD_PARTY_NOTICES.md",
              "UMSETZUNGSPLAN.md", "PRUEFBERICHT.md", "Taipei-kennen.html"]
     paths = [ROOT / name for name in names]

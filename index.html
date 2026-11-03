@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <meta name="description" content="Lerne 41 Verwaltungsbezirke in Taipei City und New Taipei City. Lokal, ohne Konto und ohne Hosting.">
-  <title>Taipei kennen · Bezirke lernen</title>
+  <meta name="description" content="Lerne Straßen, Bezirke und Flüsse in Taipei und New Taipei. Ohne Konto, mit Kartenquiz und lokal gespeichertem Lernfortschritt.">
+  <title>Taipei kennen · Straßen, Bezirke und Flüsse lernen</title>
   <link rel="stylesheet" href="styles.css?v=0.7">
   <script src="data/districts.js?v=0.7" defer></script>
   <script src="data/metro.js?v=0.7" defer></script>
@@ -31,7 +31,7 @@
       <span>Taipei <span class="brand-light">kennen.</span></span>
     </a>
     <div class="header-right">
-      <span class="local-badge"><span></span> Auf deinem Rechner</span>
+      <span class="local-badge"><span></span> Fortschritt lokal</span>
       <button id="menu-toggle" class="button button-quiet menu-toggle" aria-expanded="false" aria-controls="main-menu">Menü <span aria-hidden="true">☰</span></button>
       <button class="button button-quiet" id="progress-open"><svg class="icon"><use href="#i-chart"/></svg>Dein Fortschritt</button>
     </div>
@@ -205,7 +205,7 @@
     <h3>Flüsse</h3><p>淡水河 · Tamsui River, 基隆河 · Keelung River, 新店溪 · Xindian River und 大漢溪 · Dahan River. Vereinfachte Flussflächen der taiwanischen Water Resources Agency (RIVERPOLY), aus einem <a href="https://github.com/hankc0215/ARIA/blob/89dbc71b78a3c1b9cb6896f4b3d59576942685e3/interactive_risk_map_light.html" target="_blank" rel="noopener noreferrer">veröffentlichten GIS-Datenauszug</a>. Gezeigt werden nur Teile innerhalb beider Städte; die Flüsse setzen sich außerhalb fort. Der aktuelle Primärbestand und die englischen Namensschreibweisen wurden nicht erneut amtlich abgeglichen. Die Flächen sind eine Lernhilfe und keine aktuelle Vermessungs- oder Wasserstandskarte. Herkunft und Bearbeitung sind in data/RIVERS-SOURCE.md dokumentiert.</p>
     <h3>Metro-Linien</h3><p>Geografische Linienverläufe aus OpenStreetMap, Datenstände Juni bis September 2026, über den <a href="https://github.com/davidyen1124/mrt-app/blob/32a31120995022944ef4c59cf0484ce15b22bccc/data/taipei_lines.geo.json" target="_blank" rel="noopener noreferrer">dokumentierten OSM-Datenauszug</a>. Zusätzliche Linien stammen aus den <a href="https://github.com/rareone0602/taipei-mrt-minecraft/tree/aaaa1d71ce30ebb4371c13ed83f6e199a2e8cfcd/data/lines" target="_blank" rel="noopener noreferrer">OSM-Routendaten für New Taipei</a>. Gezeigt werden Abschnitte innerhalb von Taipei City und New Taipei City, einschließlich Kreislinie, Flughafen-MRT, Danhai-, Ankeng- und Sanying-Linie sowie der Abzweige. Die Linien lassen sich jederzeit als Lernhilfe abschalten.</p><p>© OpenStreetMap contributors, <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener noreferrer">ODbL 1.0</a>. Originaldaten und Lizenzhinweis liegen im Ordner <code>data</code>.</p>
     <h3>Namen</h3><p>Traditionelle chinesische Namen und englische Schreibweisen nach der untersuchten Kopie des Postverzeichnisses, Ausgabe 109/06. Der direkte Abgleich mit der heutigen <a href="https://www.post.gov.tw/post/internet/Download/all_list.jsp?ID=2201" target="_blank" rel="noopener noreferrer">Originalquelle von Chunghwa Post</a> steht aus. Einzelheiten sind in OFFIZIELLE_NAMEN.md dokumentiert.</p>
-    <h3>Lokale Nutzung</h3><p>Die App lädt keine Karten, Schriftdateien oder Tracker aus dem Internet. Die Links hier werden erst beim Anklicken geöffnet. Lernfortschritt wird im lokalen Browserspeicher gehalten. Beim Löschen dieses Speichers kann er verloren gehen.</p>
+    <h3>Bereitstellung und lokaler Lernstand</h3><p>App-Dateien und Kartendaten werden gemeinsam bereitgestellt. Es werden keine externen Karten-APIs, Schriftendienste oder Analysetracker eingebunden. Quellenlinks werden erst beim Anklicken geöffnet. Bei der Online-Version liefert GitHub Pages die Dateien aus; dabei gelten GitHubs Hosting- und Datenschutzbedingungen. Dein Lernfortschritt bleibt im lokalen Browserspeicher. Beim Löschen dieses Speichers kann er verloren gehen. Ein Wechsel von der lokalen App zur Website übernimmt den Lernstand nicht automatisch; dafür stehen Export und Import bereit.</p>
   </dialog>
   <div id="toast" class="toast" role="status" hidden></div>
   <noscript><p class="noscript">Bitte JavaScript aktivieren, um die lokale Lernkarte zu verwenden.</p></noscript>

@@ -33,6 +33,8 @@ Für den geprüften Funktionsstand ergaben lokales `git rev-parse HEAD` und entf
 
 ## Grenzen der Aussage
 
+Ergänzung GitHub Pages: Die beiden neuen Prüfungen in `tests/test_pages.py` sind bestanden (10,483 s). Sie prüfen alle acht lokalen App-Ressourcen, eine vollständige Quizrunde mit gespeichertem Ergebnis und das Handy-Menü unter dem echten Projekt-Unterpfad `/testapp/`. Das öffentliche Repository ist lesbar. Die Aktivierung selbst ist noch nicht als erfolgreich bestätigt: Sowohl Lesen als auch Anlegen der Pages-Einstellung über die GitHub-API werden in der Ausführungsumgebung mit „Forbidden“ blockiert. Code-Pushes funktionieren; die einmalige Pages-Quellwahl muss deshalb über die Repository-Einstellungen erfolgen.
+
 Browserprüfungen laufen in Chromium einschließlich mobiler Touch-Emulation. Es ist damit kein Test auf jedem echten Android-/iOS-Gerät belegt. Die Einzeldatei wird isoliert über einen lokalen Testserver ohne weitere App-Dateien geprüft; die verwaltete Browserumgebung schränkt direkte `file://`-Navigation ein.
 
 Die Datenprüfungen belegen den enthaltenen Bestand und seine Zuordnung, keine heutige amtliche Vollständigkeit. Geometrien außerhalb des Zentrums stammen aus einer 2021 versionierten Quelle, ergänzt um einen Innenstadt-Auszug von 2026. Englische Namen stammen aus dokumentierten Referenzen beziehungsweise aus regelbasierten numerischen Adresszusätzen; 1.363 wählbare Einheiten haben keine englische Zuordnung und werden standardmäßig nicht abgefragt. Aktueller Originalabgleich und abschließende Rechteprüfung vor öffentlicher Veröffentlichung bleiben offen.

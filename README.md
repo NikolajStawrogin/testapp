@@ -3,6 +3,12 @@
 Lokale Browser-Lernapp 0.7 für alle 41 Verwaltungsbezirke von Taipei City (12) und New Taipei City (29), vier große Flüsse und 22.240 wählbare Straßeneinheiten.
 Die App läuft im Browser auf dem eigenen Rechner. Kein Konto, kein bezahltes Hosting, kein Karten-API-Schlüssel und keine externen Kartenabrufe.
 
+## Über einen Link mit Freunden teilen
+
+Die App ist für das kostenlose GitHub Pages im öffentlichen Repository vorbereitet. Nach einmaliger Aktivierung ist sie unter **https://nikolajstawrogin.github.io/testapp/** ohne GitHub-Konto und ohne Installation nutzbar. Die dafür nötige Repository-Einstellung und die Prüfung der Bereitstellung stehen in [GITHUB_PAGES.md](GITHUB_PAGES.md). Ein Code-Push allein aktiviert diese Einstellung nicht. Danach werden Updates auf `main` automatisch veröffentlicht.
+
+Der Lernstand bleibt pro Browser und Website-Adresse lokal. Vorhandene lokale Lernstände können über Export/Import übernommen werden.
+
 ## Lokal starten
 
 ### Einfacher Start im Browser
@@ -70,7 +76,7 @@ Der Fortschritt gehört zum verwendeten Browser und zur lokalen Adresse. Für de
 
 ## Noch nicht enthalten
 
-Bildquiz, Store-Apps, Konten und Synchronisierung gehören weiterhin nicht zum implementierten Umfang. Straßenbilder werden im Menü als spätere Erweiterung erläutert. Eine eigene Online-Bereitstellung oder PWA-Installation ist noch nicht eingerichtet. Die App bleibt statisch und kann später auf kostenlosem statischem Hosting bereitgestellt werden; aktuelle Rechtefragen der Namens- und Flussreferenzen müssen vor einer öffentlichen Veröffentlichung abschließend geklärt werden.
+Bildquiz, Store-Apps, Konten und Synchronisierung gehören weiterhin nicht zum implementierten Umfang. Straßenbilder werden im Menü als spätere Erweiterung erläutert. Eine PWA-Installation ist nicht eingerichtet. Die öffentliche Web-Bereitstellung wurde inzwischen vom Nutzer beauftragt und für GitHub Pages vorbereitet; die einmalige Freischaltung in den Repository-Einstellungen ist separat erforderlich. Die dokumentierten Quellen- und Rechte-Nachweisgrenzen der Namens- und Flussreferenzen bleiben transparent ausgewiesen.
 
 Der Straßenbestand deckt beide Stadtgebiete ab, belegt jedoch keine lückenlose heutige amtliche Straßenabdeckung: Der flächendeckende OSM-Kachelstand ist von Dezember 2021, der ergänzende Innenstadt-Auszug von September 2026. Der Abdeckungsbericht nennt Aufgaben und englische Namensabdeckung je Bezirk. 1.363 wählbare Aufgaben haben keinen belegten englischen Namen. Die vollständigen Quellenkopien und ihr Hash-Manifest sind mitgeliefert. Geometrien und Namensreferenzen sind in [data/STREETS-SOURCE.md](data/STREETS-SOURCE.md) und [data/street-coverage.json](data/street-coverage.json) nachvollziehbar dokumentiert.
 

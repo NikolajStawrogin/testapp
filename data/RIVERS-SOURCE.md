@@ -25,6 +25,6 @@ Traditionelle chinesische Namen werden unverändert aus `RIVER_NAME` übernommen
 
 ## Rechte und Quellenangabe
 
-Die Flussdaten stammen vom oben genannten staatlichen Anbieter. Die sichtbare Kartenquellenangabe nennt die Water Resources Agency, auch im Quiz. Die GitHub-Kopie erklärt keine gesonderte Datenlizenz. Aus ihrer öffentlichen Verfügbarkeit wird keine CC0- oder MIT-Lizenz für die Flussdaten abgeleitet. Die aktuellen Bedingungen des Primäranbieters, einschließlich der Anwendbarkeit der [taiwanischen Government Data Open License](https://data.gov.tw/license), sind vor einer öffentlichen Veröffentlichung ausdrücklich zu prüfen. Eine öffentliche Veröffentlichung ist für diesen persönlichen lokalen Prototyp nicht vorgesehen.
+Die Flussdaten stammen vom oben genannten staatlichen Anbieter. Die sichtbare Kartenquellenangabe nennt die Water Resources Agency, auch im Quiz. Die GitHub-Kopie erklärt keine gesonderte Datenlizenz. Aus ihrer öffentlichen Verfügbarkeit wird keine CC0- oder MIT-Lizenz für die Flussdaten abgeleitet. Die aktuellen Bedingungen des Primäranbieters, einschließlich der Anwendbarkeit der [taiwanischen Government Data Open License](https://data.gov.tw/license), sind noch nicht abschließend verifiziert. Inzwischen hat der Nutzer eine öffentliche GitHub-Pages-Bereitstellung beauftragt; die Quellenangaben und diese Nachweisgrenzen werden dabei weiter ausgewiesen.
 
 Zum erneuten Erzeugen der lokalen Daten wird für die Entwicklung `shapely` benötigt. Die fertige Browser-App benötigt weder dieses Paket noch einen Online-Abruf.
