@@ -1,0 +1,62 @@
+"""Export the learning app as one self-contained HTML file."""
+
+import argparse
+from pathlib import Path
+import re
+from urllib.parse import quote, urlsplit
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def local_resource(url):
+    parsed = urlsplit(url)
+    if parsed.scheme or parsed.netloc:
+        raise ValueError(f"Externe Ressource im Export nicht erlaubt: {url}")
+    path = (ROOT / parsed.path).resolve()
+    if not path.is_relative_to(ROOT):
+        raise ValueError("Ressource liegt außerhalb des Projekts")
+    return path.read_text(encoding="utf-8")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, default=ROOT / "Taipei-kennen.html")
+    args = parser.parse_args()
+    html = (ROOT / "index.html").read_text(encoding="utf-8")
+    scripts = []
+
+    def inline_styles(match):
+        css = local_resource(match.group(1))
+        if "</style" in css.lower():
+            raise ValueError("Unerwarteter Style-Abschluss in CSS")
+        return "<style>\n" + css + "\n</style>"
+
+    def collect_script(match):
+        text = local_resource(match.group(1))
+        text = re.sub(r"</script", lambda token: "<\\/" + token.group(0)[2:], text, flags=re.IGNORECASE)
+        scripts.append(text)
+        return ""
+
+    html, style_count = re.subn(r'<link rel="stylesheet" href="([^"]+)">', inline_styles, html)
+    html, script_count = re.subn(r'<script src="([^"]+)" defer></script>', collect_script, html)
+    if style_count != 1 or script_count != 4:
+        raise ValueError("Unerwartete Ressourcenliste; Export muss überprüft werden")
+    # Inline scripts run after the complete UI has been parsed; inline defer would not delay them.
+    html = html.replace("</body>", "\n" + "\n".join("<script>\n" + text + "\n</script>" for text in scripts) + "\n</body>")
+    html = html.replace('class="brand" href="index.html"', 'class="brand" href=""')
+    html = html.replace("Originaldaten und Lizenzhinweis liegen im Ordner <code>data</code>.",
+                        "Die verwendeten geografischen Daten sind in dieser HTML-Datei enthalten. Originaldaten und ausführliche Rechtehinweise sind zusätzlich im ZIP-Paket verfügbar.")
+    html = html.replace("Herkunft und Bearbeitung sind in data/RIVERS-SOURCE.md dokumentiert.",
+                        "Die bearbeiteten Flussflächen sind in dieser Datei enthalten; Originalauszug und ausführliche Herkunftshinweise liegen zusätzlich im ZIP-Paket.")
+    svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#315b45"/><text x="32" y="44" font-size="40" text-anchor="middle" fill="#d9eb96">北</text></svg>'
+    html = html.replace("</head>", '<link rel="icon" href="data:image/svg+xml,' + quote(svg, safe="") + '">\n</head>')
+    notice = "\n<!-- Self-contained browser edition. District geometry: g0v/twgeojson, CC0. Metro data: copyright OpenStreetMap contributors, ODbL 1.0, https://opendatacommons.org/licenses/odbl/1-0/ . The geographic Metro database embedded below is offered under ODbL 1.0. -->\n"
+    html = html.replace("<!doctype html>", "<!doctype html>" + notice)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(html, encoding="utf-8")
+    print(f"Browser-Datei erstellt: {args.output} ({args.output.stat().st_size} Bytes)")
+
+
+if __name__ == "__main__":
+    main()
