@@ -1,0 +1,73 @@
+{
+  "neighborhoods": {
+    "url": "https://raw.githubusercontent.com/codeforgermany/click_that_hood/48ba05ad4c6969e3b3c25735492169227ae411f1/public/data/duesseldorf.geojson",
+    "sha256": "9273d9bebe3a92f04a1e52bee47dc3afe5e2ed88a0d6cb5c92f390c84147e96e",
+    "license": "ODbL-1.0"
+  },
+  "streets": [
+    {
+      "file": "quality0.json",
+      "url": "https://raw.githubusercontent.com/ckrey/stressmap/78230754655af475a492de0af267722869d3afe1/app/data/duesseldorf/quality_0.json",
+      "sha256": "1a2aee135a104acc0093ab5c03b7d3cf8682d0957bd20ae5011d3cb28da1d1ec",
+      "license": "ODbL-1.0"
+    },
+    {
+      "file": "quality1.json",
+      "url": "https://raw.githubusercontent.com/ckrey/stressmap/78230754655af475a492de0af267722869d3afe1/app/data/duesseldorf/quality_1.json",
+      "sha256": "e8570b9bc7296f805b84371e04fff3555133e4cde54f4b4d9798a5d5f7564f26",
+      "license": "ODbL-1.0"
+    },
+    {
+      "file": "quality2.json",
+      "url": "https://raw.githubusercontent.com/ckrey/stressmap/78230754655af475a492de0af267722869d3afe1/app/data/duesseldorf/quality_2.json",
+      "sha256": "f611983786c8f25432aef7252a13f72ee9717ca9473da3efb25ee057ffbd0792",
+      "license": "ODbL-1.0"
+    },
+    {
+      "file": "quality3.json",
+      "url": "https://raw.githubusercontent.com/ckrey/stressmap/78230754655af475a492de0af267722869d3afe1/app/data/duesseldorf/quality_3.json",
+      "sha256": "6b4298bd12c98b2bef1911d0a0df8f3328c83cf71cb60e237b6e381fc12a83e6",
+      "license": "ODbL-1.0"
+    },
+    {
+      "file": "quality4.json",
+      "url": "https://raw.githubusercontent.com/ckrey/stressmap/78230754655af475a492de0af267722869d3afe1/app/data/duesseldorf/quality_4.json",
+      "sha256": "d2c844f1db97f77b0bcbcc47d6a142cf744f43694f33aefaef5f501246a2b2cf",
+      "license": "ODbL-1.0"
+    },
+    {
+      "file": "quality5.json",
+      "url": "https://raw.githubusercontent.com/ckrey/stressmap/78230754655af475a492de0af267722869d3afe1/app/data/duesseldorf/quality_5.json",
+      "sha256": "74df757c68cc1e87819cb76e96568de897927e7d2f7d7e1f7603c7c961edf131",
+      "license": "ODbL-1.0"
+    },
+    {
+      "file": "quality6.json",
+      "url": "https://raw.githubusercontent.com/ckrey/stressmap/78230754655af475a492de0af267722869d3afe1/app/data/duesseldorf/quality_6.json",
+      "sha256": "f463f9a2de5cb1614598391561f5f1e0990028199bdaaeef3f339684ed56981a",
+      "license": "ODbL-1.0"
+    },
+    {
+      "file": "quality7.json",
+      "url": "https://raw.githubusercontent.com/ckrey/stressmap/78230754655af475a492de0af267722869d3afe1/app/data/duesseldorf/quality_7.json",
+      "sha256": "f5a6c52570793b8646f6c1930b06b74a728dfb70224a399c72bd3b584686fc00",
+      "license": "ODbL-1.0"
+    },
+    {
+      "file": "quality8.json",
+      "url": "https://raw.githubusercontent.com/ckrey/stressmap/78230754655af475a492de0af267722869d3afe1/app/data/duesseldorf/quality_8.json",
+      "sha256": "f463f9a2de5cb1614598391561f5f1e0990028199bdaaeef3f339684ed56981a",
+      "license": "ODbL-1.0"
+    },
+    {
+      "file": "quality9.json",
+      "url": "https://raw.githubusercontent.com/ckrey/stressmap/78230754655af475a492de0af267722869d3afe1/app/data/duesseldorf/quality_9.json",
+      "sha256": "f463f9a2de5cb1614598391561f5f1e0990028199bdaaeef3f339684ed56981a",
+      "license": "ODbL-1.0"
+    }
+  ],
+  "assignment": {
+    "source": "Düsseldorfer Stadtbezirk-/Stadtteilgliederung; feste Zuordnung in tools/build_duesseldorf_data.py",
+    "note": "Die zehn Stadtbezirksflächen werden als Vereinigung der 50 Stadtteile gebildet."
+  }
+}

@@ -49,3 +49,7 @@ Englische Namensmetadaten verwenden die separat dokumentierten Postreferenz-Kopi
 ## Weitere Bestandteile
 
 Die App lädt keine externen Schriftdateien, Kartenkacheln oder JavaScript-Bibliotheken. Die Icons bestehen aus im Projekt enthaltenen SVG-Linienzeichnungen. Python stellt nur den lokalen Dateiserver über seine Standardbibliothek bereit. Playwright ist ausschließlich ein Entwicklungswerkzeug für die Tests und wird nicht mit dem Nutzerpaket installiert.
+
+## Düsseldorf · regionale Erweiterung
+
+Stadtteilgrenzen und Straßen stammen aus OpenStreetMap-Auszügen in den Projekten codeforgermany/click_that_hood und ckrey/stressmap. © OpenStreetMap contributors, Open Database License 1.0: https://www.openstreetmap.org/copyright und https://opendatacommons.org/licenses/odbl/1-0/ . Die abgeleitete Düsseldorfer Geodatenbank wird unter ODbL 1.0 bereitgestellt. Originalkopien, festgehaltene Versionen und SHA-256 stehen unter data/duesseldorf. Stadtbezirke werden aus den dokumentierten Stadtteilzuordnungen abgeleitet. Diese historischen Daten sind kein aktuell amtlich geprüftes Straßenverzeichnis. Der vorgesehene Originaldatenabruf für Flüsse und Stadtbahn ist noch blockiert; es werden keine ersatzweise erfundenen Verläufe ausgeliefert. Einzelheiten: REGIONEN.md.
