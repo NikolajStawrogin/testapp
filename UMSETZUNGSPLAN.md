@@ -42,4 +42,4 @@ Keine Force-Pushes und keine Überschreibung fremder Änderungen. Bei zwischenze
 - [x] Straßenmodus und Menü umsetzen: Erkundung, Lernkarten, Quiz, Filter, Suche, Navigation, Hilfe, Einstellungen und Lernstand-Sicherung.
 - [x] Integrationsstand prüfen: 36 gemeinsam bestandene Prüfungen; vier betroffene mobile Prüfungen nach der Sichtkorrektur erneut bestanden. Die Einzeldatei besteht drei zusätzliche isolierte Prüfungen einschließlich eines vollständig offline gespielten mobilen Quiz.
 - [x] Lokales Paket und Einzeldatei prüfen: drei isolierte Browserprüfungen einschließlich Offline-Spiel; ZIP mit 43 Dateien, bestandener CRC-Prüfung und bytegleichem Vergleich aller Inhalte.
-- [ ] Abschlussstand pushen und entfernten Commit bestätigen.
+- [x] Abschlussstand pushen und entfernten Commit bestätigen: Funktionsstand `1ea96cffabd99272a10b2911ff35a270bf28f433` auf `main`; `git ls-remote origin refs/heads/main` stimmt mit dem lokalen HEAD überein. Der Arbeitsbaum war danach sauber.

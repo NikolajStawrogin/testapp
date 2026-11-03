@@ -8,6 +8,15 @@ Die endgültige Browser-Einzeldatei wurde in einem isolierten Verzeichnis geprü
 
 Das lokale ZIP-Paket enthält 43 Dateien einschließlich Einzeldatei, Quellenarchiven, Datenskripten und Tests. `tools/package_app.py` hat die CRC-Prüfung bestanden und jeden archivierten Inhalt bytegenau mit seiner Quelldatei verglichen. Die Browser-Einzeldatei und das vollständige Paket sind jeweils etwa 21 MB groß. Git-interne Dateien und temporäre Entwicklungswerkzeuge sind nicht enthalten.
 
+## Git-Zwischenstände
+
+- `ad9b634`: bisherige geprüfte Bezirks-/Fluss-/Metro-App gesichert und gepusht.
+- `b6d4ac5`: reproduzierbare Straßenquellen und Abdeckungsprüfungen gepusht.
+- `088a2db`: Straßenlernen, Quiz, Navigation, Einstellungen und Lernstand-Sicherung gepusht.
+- `1ea96cf`: ganze Straßen aus Sections, Schutz vor verräterischen Untereinheitsnamen und verbesserte mobile Aufgabenanzeige gepusht.
+
+Für den geprüften Funktionsstand ergaben lokales `git rev-parse HEAD` und entferntes `git ls-remote origin refs/heads/main` identisch `1ea96cffabd99272a10b2911ff35a270bf28f433`. `git status --short --branch` zeigte anschließend keine offenen Änderungen. Die abschließende Dokumentation ergänzt diesen Stand; Anwendungscode und Daten bleiben dabei unverändert.
+
 ## Prüfumfang
 
 - Alle 41 Bezirke, beide Städte, Flüsse und Metro bleiben nutzbar.
