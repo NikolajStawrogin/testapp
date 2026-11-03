@@ -10,6 +10,29 @@
   const overlaps = (a, b) => a[0] <= b[2] && a[2] >= b[0] && a[1] <= b[3] && a[3] >= b[1];
   const bounds = points => points.reduce((box, point) => [Math.min(box[0], point[0]), Math.min(box[1], point[1]), Math.max(box[2], point[0]), Math.max(box[3], point[1])], [Infinity, Infinity, -Infinity, -Infinity]);
 
+  // Fixed world-space cells avoid scanning the entire city after each gesture.
+  class SpatialIndex {
+    constructor(items) {
+      this.cells = new Map();
+      for (const item of items) {
+        const [left, top, right, bottom] = item.bounds.map(value => Math.floor(value / 64));
+        for (let x = left; x <= right; x++) for (let y = top; y <= bottom; y++) {
+          const key = `${x},${y}`;
+          if (!this.cells.has(key)) this.cells.set(key, []);
+          this.cells.get(key).push(item);
+        }
+      }
+    }
+    query(view) {
+      const found = new Set();
+      const [left, top, right, bottom] = view.map(value => Math.floor(value / 64));
+      for (let x = left; x <= right; x++) for (let y = top; y <= bottom; y++) {
+        for (const item of this.cells.get(`${x},${y}`) || []) if (overlaps(item.bounds, view)) found.add(item);
+      }
+      return [...found];
+    }
+  }
+
   function distanceToSegment(point, a, b) {
     const dx = b[0] - a[0], dy = b[1] - a[1];
     const fraction = dx || dy ? Math.max(0, Math.min(1, ((point[0] - a[0]) * dx + (point[1] - a[1]) * dy) / (dx * dx + dy * dy))) : 0;
@@ -33,6 +56,8 @@
         const points = part.map(project);
         return { bounds: bounds(points), d: points.map((point, index) => `${index ? "L" : "M"}${point[0].toFixed(3)},${point[1].toFixed(3)}`).join("") };
       });
+      this.itemIndex = new SpatialIndex(this.items.values());
+      this.backgroundIndex = new SpatialIndex(this.background);
       this.paths = new Map();
       this.labels = new Map();
       this.visible = [];
@@ -40,7 +65,9 @@
       this.backgroundPath = node("path", { class: "street-background", "aria-hidden": "true" });
       root.append(this.backgroundPath);
       this.highlightPath = node("path", { class: "street-highlight", "aria-hidden": "true", "pointer-events": "none" });
-      highlight.append(this.highlightPath);
+      this.solutionHalo = node("path", { class: "street-solution-halo", "aria-hidden": "true" });
+      this.solutionPath = node("path", { class: "street-solution", "aria-hidden": "true" });
+      highlight.append(this.highlightPath, this.solutionHalo, this.solutionPath);
     }
 
     render(options) {
@@ -48,14 +75,18 @@
       this.root.style.display = options.visible ? "" : "none";
       this.labelRoot.style.display = options.visible ? "" : "none";
       this.highlightRoot.style.display = options.visible ? "" : "none";
+      document.getElementById("map-content").classList.toggle("has-street-solution", Boolean(options.visible && options.correctId));
+      const solution = this.items.get(options.correctId);
+      this.solutionHalo.setAttribute("d", solution?.d || "");
+      this.solutionPath.setAttribute("d", solution?.d || "");
+      this.solutionPath.dataset.id = options.correctId || "";
       if (!options.visible) { this.visible = []; return; }
       const inverse = options.matrix.inverse();
       const cornerA = new DOMPoint(options.viewport.left, options.viewport.top).matrixTransform(inverse);
       const cornerB = new DOMPoint(options.viewport.right, options.viewport.bottom).matrixTransform(inverse);
       const view = [cornerA.x, cornerA.y, cornerB.x, cornerB.y];
       const detail = options.zoom >= 5;
-      const visible = [...this.items.values()].filter(item => overlaps(item.bounds, view)
-        && (detail || item.feature.category !== "local" || item.feature.id === options.correctId));
+      const visible = this.itemIndex.query(view).filter(item => detail || item.feature.category !== "local" || item.feature.id === options.correctId);
       visible.sort((a, b) => Number(options.pool.has(b.feature.id)) - Number(options.pool.has(a.feature.id))
         || ({ major: 0, secondary: 1, local: 2 }[a.feature.category] - { major: 0, secondary: 1, local: 2 }[b.feature.category]));
       this.visible = visible.slice(0, 1600);
@@ -65,7 +96,7 @@
         if (item && overlaps(item.bounds, view) && !ids.has(id)) { this.visible.push(item); ids.add(id); }
       }
       for (const [id, path] of this.paths) if (!ids.has(id)) { path.remove(); this.paths.delete(id); }
-      this.backgroundPath.setAttribute("d", options.zoom >= 7 ? this.background.filter(item => overlaps(item.bounds, view)).map(item => item.d).join("") : "");
+      this.backgroundPath.setAttribute("d", options.zoom >= 7 ? this.backgroundIndex.query(view).map(item => item.d).join("") : "");
       for (const item of this.visible) {
         const { feature } = item;
         let path = this.paths.get(feature.id);
@@ -153,7 +184,7 @@
       const position = new DOMPoint(clientX, clientY).matrixTransform(matrix.inverse());
       const point = [position.x, position.y];
       const scale = Math.hypot(matrix.a, matrix.b);
-      const tolerance = (touch ? 13 : 7) / scale;
+      const tolerance = (touch ? 30 : 9) / scale;
       const nearby = [point[0] - tolerance, point[1] - tolerance, point[0] + tolerance, point[1] + tolerance];
       const hits = [];
       for (const item of this.visible) {

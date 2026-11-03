@@ -118,3 +118,11 @@ Für die Datenprüfungen allein werden keine Zusatzpakete benötigt: `python -m 
 Ganze Straßen werden zusätzlich zu ihren Sections angeboten: 229 abgeleitete ganze Straßen integrieren 28 bereits vorhandene ganze Straßenstücke, insgesamt sind 22.240 Einheiten wählbar. `tools/build_street_data.py` ruft am Ende die reproduzierbare Erzeugung in `tools/build_street_parents.py` auf. Bei einer Frage zu einer ganzen Straße werden auch verräterische Section- und Gassenbeschriftungen desselben Namens verborgen.
 
 Ein geprüftes lokales Paket einschließlich Einzeldatei, Quellenarchiven und Tests wird mit `python tools/package_app.py` erzeugt. Optional: `--output /gewünschter/pfad/app.zip --html /gewünschter/pfad/app.html`. Die Paketprüfung vergleicht alle archivierten Dateien bytegenau mit den lokalen Quellen.
+
+## Bedienungsverbesserungen in 0.8
+
+Die Gebietsauswahl steht groß und mittig über der Karte. Ausgewählte Namen erscheinen direkt auf der Karte; die Metro-Legende darunter ist aufklappbar und zunächst geschlossen. Die Info verdeckt keine Zoomtasten. Kartenobjekte erhalten beim Anklicken keine rechteckigen Fokusrahmen; Tastaturfokus bleibt durch eine Kontur am Objekt erkennbar.
+
+Straßenlösungen liegen mit kräftiger grüner Linie und weißem Rand über den übrigen Kartenebenen. Andere Straßen und Metro-Linien werden während der Auflösung abgeblendet. Beim Kapitelwechsel zeigt die App eine Ladeanzeige, bevor die lokale Geometrieaufbereitung beginnt.
+
+Zoom und Verschieben verändern sofort den bestehenden Kartenausschnitt. Eine räumliche Indizierung begrenzt die anschließende Straßensuche auf relevante Zellen; der Aufbau von Straßen und Beschriftungen erfolgt erst 120 ms nach der letzten Bewegung. Straßenbeschriftungen werden während der Bewegung kurz verborgen. Es werden beim Zoomen keine externen Kartendaten nachgeladen. Finger dürfen bis zu 30 CSS-Pixel vom Straßenverlauf entfernt sein; die Touch-Auswahl mit Bestätigung und dem Wechsel zu benachbarten Straßen bleibt erhalten. Während einer laufenden Runde ist das Gebiet gegen versehentliches Wechseln gesperrt.

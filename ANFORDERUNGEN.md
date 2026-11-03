@@ -126,3 +126,14 @@ Die 41 Bezirke beider Städte sind als lokale Karte mit freier Erkundung, Lernka
 Version 0.6 ergänzt die vier großen Flüsse als Orientierung und optionale Lernaufgaben. Im Bezirksquiz lassen Flüsse Kartenklicks durch; während einer Flussfrage sind nur die gewählten Flüsse antwortbar und ihre Flächen immer sichtbar. Fluss-Namensanzeige und Teilnahme werden unabhängig gespeichert. Quellen- und Namensnachweisgrenzen stehen in `data/RIVERS-SOURCE.md`.
 
 Version 0.7 setzt Straßen-Erkundung, Lernkarten und Quiz für 22.240 Einheiten einschließlich aus Sections abgeleiteter ganzer Straßen in allen 41 Bezirken um. Gebiet, Straßenklassen, Namenseinheiten, Suchbegriff und Einzelaufgaben sind wählbar. Das Hauptmenü bietet Start, Entdecken, Lernen, Quiz, Fortschritt, Einstellungen und Hilfe, einschließlich mobilem Menü und Lernstand-Sicherung. `data/STREETS-SOURCE.md` und der Abdeckungsbericht belegen den verwendeten Bestand und benennen Lücken. Der flächendeckende Geometriestand ist älter (2021), der Innenstadt-Auszug neuer (2026). Ein heutiger amtlicher Vollständigkeitsnachweis, der aktuelle Originalabgleich aller englischen Namen und der abschließende Rechteabgleich für eine öffentliche Veröffentlichung sind damit weiterhin nicht erbracht.
+
+## Bedienbarkeit und Kartenleistung · Ergänzung 0.8
+
+- Nach einer falschen Straßenantwort muss die vollständige richtige Straßeneinheit klar erkennbar sein: kräftige grüne Linie mit weißem Rand über den Kartenebenen; übrige Straßen und Metro treten zurück.
+- Ein Klick auf ein Kartenobjekt darf keinen rechteckigen Fokusrahmen erzeugen. Tastaturbedienung und eine am Objekt erkennbare Fokusmarkierung bleiben erhalten.
+- Namen und Lage der Auswahl werden in einer Infobox direkt innerhalb der Karte angezeigt, vor der Metro-Legende und auf kleinen Displays ohne Überdeckung der Zoomtasten.
+- Die Metro-/Stadtbahnlegende ist aufklappbar und nach dem Öffnen der App standardmäßig geschlossen.
+- Beim Wechsel von Startseite oder Themenauswahl in die Karte erscheint vor der lokalen Geometrieaufbereitung eine sichtbare Ladeanzeige. Eine erfundene Prozentangabe ist nicht erforderlich.
+- Während Zoom und Verschieben darf nicht für jedes Eingabeereignis der Straßen-DOM neu aufgebaut werden. Der Kartenausschnitt wird sofort transformiert; aufwendige Straßendetails werden nach Ende der Bewegung erneuert. Eine räumliche Indizierung beschränkt die Suche auf relevante Kartenzellen. Externe Nachladeabrufe sind weiterhin ausgeschlossen.
+- Die geografische Finger-Trefferzone bleibt unabhängig vom Zoom mindestens 30 CSS-Pixel im Radius. Nahe Straßen können vor der endgültigen Quizantwort gewechselt und bestätigt werden; Pinch und Ziehen dürfen keine Antworten abgeben.
+- „Taipei City“, „New Taipei City“ und „beide Städte“ werden über ein mindestens 44 Pixel hohes Auswahlfeld mittig über der Karte gewählt. Während einer laufenden Runde bleibt das gewählte Gebiet gesperrt.

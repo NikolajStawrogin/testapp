@@ -612,7 +612,13 @@
       $("zoom-range").value = String(Math.round(this.zoom * 100));
       $("zoom-level").textContent = `${Math.round(this.zoom * 100)} %`;
       this.updateLabels();
-      this.renderStreets();
+      // Keep gesture work small: transform existing vectors immediately, rebuild after input settles.
+      this.svg.classList.add("is-moving");
+      clearTimeout(this.settleTimer);
+      this.settleTimer = setTimeout(() => {
+        this.svg.classList.remove("is-moving");
+        this.renderStreets();
+      }, 120);
     }
 
     reset() {
@@ -815,14 +821,15 @@
       return label;
   }
 
-  function renderDetail(feature, title) {
+  function renderDetail(feature, title, description) {
+    $("map-detail").hidden = !feature;
     const content = $("map-detail").lastElementChild;
     const strong = document.createElement("strong");
     const paragraph = document.createElement("p");
     strong.textContent = title || (feature ? readableName(feature) : "Ein Gefühl für Taipei bekommen");
-    paragraph.textContent = feature ? feature.description : state.stage === "session"
+    paragraph.textContent = description || (feature ? feature.description : state.stage === "session"
       ? "Die gesuchte Fläche wird nach deiner Antwort aufgelöst."
-      : "Klicke auf einen Bezirk oder einen zum Mitüben gewählten Fluss, um Namen und Lage kennenzulernen.";
+      : "Klicke auf einen Bezirk oder einen zum Mitüben gewählten Fluss, um Namen und Lage kennenzulernen.");
     if (feature) {
       const city = document.createElement("small");
       city.className = "detail-city";
@@ -917,10 +924,11 @@
         : answer.correct ? "Genau richtig!" : answer.chosenId ? "Noch nicht ganz." : "Für die nächste Runde merken.";
       description.textContent = round.kind === "cards" ? target.description
         : answer.correct ? target.description
-        : `${answer.chosenId ? `Gewählt: ${readableName(byId.get(answer.chosenId))}. ` : ""}Gesucht: ${readableName(target)}. Die richtige Fläche ist grün markiert.`;
+        : `${answer.chosenId ? `Gewählt: ${readableName(byId.get(answer.chosenId))}. ` : ""}Gesucht: ${readableName(target)}. Die richtige ${isStreet ? "Straße" : isRiver ? "Flussfläche" : "Bezirksfläche"} ist grün markiert.`;
       $("feedback").replaceChildren(heading, description);
       $("feedback").classList.toggle("wrong", round.kind === "quiz" && !answer.correct);
-      renderDetail(target);
+      renderDetail(target, round.kind === "quiz" ? `Lösung: ${readableName(target)}` : null,
+        answer.chosenId && !answer.correct ? `Deine Auswahl: ${readableName(byId.get(answer.chosenId))}` : null);
     } else {
       renderDetail(null, isStreet ? "Welche Straße ist gesucht?" : isRiver ? "Welcher Fluss ist gesucht?" : "Welcher Bezirk ist gesucht?");
     }
@@ -1010,6 +1018,8 @@
       chip.append(swatch, code, name);
       $("metro-legend-items").append(chip);
     }
+    $("city-scope").disabled = state.stage === "session";
+    $("city-scope").title = state.stage === "session" ? "Beende die Runde, um das Gebiet zu wechseln." : "Lerngebiet auswählen";
     $("map-state").textContent = state.stage === "setup" ? "Entdecken" : state.stage === "results" ? "Rundenauswertung" : state.round.kind === "quiz" ? "Quiz" : "Lernkarten";
     $("map-title").textContent = state.scope === "all" ? "Taipei & New Taipei" : cityById.get(state.scope).nameEn;
     $("map-city-zh").textContent = state.scope === "all" ? "臺北市 · 新北市" : cityById.get(state.scope).nameZh;
@@ -1176,6 +1186,17 @@
     window.scrollTo({ top: 0, behavior: "instant" });
   }
 
+  async function withLoading(action) {
+    const loading = $("chapter-loading");
+    if (!loading.hidden) return;
+    loading.hidden = false;
+    document.body.setAttribute("aria-busy", "true");
+    // Yield across a paint before the expensive initial geometry preparation.
+    await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 40)));
+    try { action(); }
+    finally { loading.hidden = true; document.body.removeAttribute("aria-busy"); }
+  }
+
   function chooseSubject(subject) {
     state.subject = subject;
     state.stage = "setup";
@@ -1188,9 +1209,9 @@
   }
 
   buildPicker();
-  for (const button of document.querySelectorAll("[data-nav]")) button.addEventListener("click", () => navigate(button.dataset.nav));
-  for (const button of document.querySelectorAll("[data-subject]")) button.addEventListener("click", () => chooseSubject(button.dataset.subject));
-  for (const button of document.querySelectorAll("[data-start]")) button.addEventListener("click", () => {
+  for (const button of document.querySelectorAll("[data-nav]")) button.addEventListener("click", () => ["explore", "cards", "quiz"].includes(button.dataset.nav) ? withLoading(() => navigate(button.dataset.nav)) : navigate(button.dataset.nav));
+  for (const button of document.querySelectorAll("[data-subject]")) button.addEventListener("click", () => withLoading(() => chooseSubject(button.dataset.subject)));
+  for (const button of document.querySelectorAll("[data-start]")) button.addEventListener("click", () => withLoading(() => {
     const subject = button.dataset.start;
     state.view = "practice";
     state.mode = "explore";
@@ -1201,7 +1222,7 @@
     } else if (!state.selected.size) state.selected = new Set(scopeFeatures().map(feature => feature.id));
     chooseSubject(subject === "streets" ? "streets" : "districts");
     window.scrollTo({ top: 0, behavior: "instant" });
-  });
+  }));
   document.querySelector(".brand").addEventListener("click", event => { event.preventDefault(); navigate("home"); });
   $("menu-toggle").addEventListener("click", () => {
     const open = $("main-menu").classList.toggle("is-open");

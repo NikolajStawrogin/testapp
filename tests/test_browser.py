@@ -351,6 +351,7 @@ class BrowserTests(unittest.TestCase):
         self.assertFalse(self.page.locator("#metro-layer").is_visible())
         self.page.locator("#show-metro").check()
         self.assertTrue(self.page.locator("#metro-layer").is_visible())
+        self.page.locator("#metro-legend summary").click()
         self.page.locator("#language").select_option("zh")
         self.assertEqual(self.page.locator('.metro-chip[data-line="BR"] .metro-name').inner_text(), "文湖線")
         self.page.locator("#language").select_option("en")
