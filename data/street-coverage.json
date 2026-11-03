@@ -1,0 +1,590 @@
+{
+  "streetUnits": 18003,
+  "byCity": {
+    "new-taipei": 12546,
+    "taipei": 5457
+  },
+  "byCategory": {
+    "secondary": 996,
+    "local": 16138,
+    "major": 869
+  },
+  "byUnit": {
+    "street": 3834,
+    "lane": 9473,
+    "alley": 4071,
+    "section": 625
+  },
+  "names": {
+    "missing": 1315,
+    "postal-exact": 3237,
+    "postal-numbered": 13310,
+    "osm-name-en": 141
+  },
+  "districts": [
+    {
+      "id": "zhongzheng",
+      "cityId": "taipei",
+      "nameZh": "中正區",
+      "nameEn": "Zhongzheng Dist.",
+      "streets": 281,
+      "withEnglish": 279,
+      "units": {
+        "street": 84,
+        "section": 54,
+        "lane": 120,
+        "alley": 23
+      }
+    },
+    {
+      "id": "datong",
+      "cityId": "taipei",
+      "nameZh": "大同區",
+      "nameEn": "Datong Dist.",
+      "streets": 213,
+      "withEnglish": 209,
+      "units": {
+        "street": 57,
+        "lane": 123,
+        "alley": 14,
+        "section": 19
+      }
+    },
+    {
+      "id": "zhongshan",
+      "cityId": "taipei",
+      "nameZh": "中山區",
+      "nameEn": "Zhongshan Dist.",
+      "streets": 439,
+      "withEnglish": 435,
+      "units": {
+        "street": 72,
+        "section": 32,
+        "lane": 270,
+        "alley": 65
+      }
+    },
+    {
+      "id": "songshan",
+      "cityId": "taipei",
+      "nameZh": "松山區",
+      "nameEn": "Songshan Dist.",
+      "streets": 276,
+      "withEnglish": 273,
+      "units": {
+        "street": 42,
+        "lane": 145,
+        "alley": 69,
+        "section": 20
+      }
+    },
+    {
+      "id": "daan",
+      "cityId": "taipei",
+      "nameZh": "大安區",
+      "nameEn": "Da’an Dist.",
+      "streets": 359,
+      "withEnglish": 356,
+      "units": {
+        "section": 45,
+        "lane": 203,
+        "alley": 61,
+        "street": 50
+      }
+    },
+    {
+      "id": "wanhua",
+      "cityId": "taipei",
+      "nameZh": "萬華區",
+      "nameEn": "Wanhua Dist.",
+      "streets": 299,
+      "withEnglish": 294,
+      "units": {
+        "street": 55,
+        "section": 20,
+        "lane": 148,
+        "alley": 76
+      }
+    },
+    {
+      "id": "xinyi",
+      "cityId": "taipei",
+      "nameZh": "信義區",
+      "nameEn": "Xinyi Dist.",
+      "streets": 321,
+      "withEnglish": 318,
+      "units": {
+        "street": 51,
+        "lane": 159,
+        "section": 13,
+        "alley": 98
+      }
+    },
+    {
+      "id": "shilin",
+      "cityId": "taipei",
+      "nameZh": "士林區",
+      "nameEn": "Shilin Dist.",
+      "streets": 881,
+      "withEnglish": 821,
+      "units": {
+        "street": 177,
+        "section": 37,
+        "lane": 489,
+        "alley": 178
+      }
+    },
+    {
+      "id": "beitou",
+      "cityId": "taipei",
+      "nameZh": "北投區",
+      "nameEn": "Beitou Dist.",
+      "streets": 722,
+      "withEnglish": 612,
+      "units": {
+        "street": 224,
+        "lane": 340,
+        "section": 33,
+        "alley": 125
+      }
+    },
+    {
+      "id": "neihu",
+      "cityId": "taipei",
+      "nameZh": "內湖區",
+      "nameEn": "Neihu Dist.",
+      "streets": 640,
+      "withEnglish": 627,
+      "units": {
+        "street": 74,
+        "lane": 345,
+        "section": 20,
+        "alley": 201
+      }
+    },
+    {
+      "id": "nangang",
+      "cityId": "taipei",
+      "nameZh": "南港區",
+      "nameEn": "Nangang Dist.",
+      "streets": 308,
+      "withEnglish": 275,
+      "units": {
+        "street": 78,
+        "lane": 159,
+        "alley": 54,
+        "section": 17
+      }
+    },
+    {
+      "id": "wenshan",
+      "cityId": "taipei",
+      "nameZh": "文山區",
+      "nameEn": "Wenshan Dist.",
+      "streets": 988,
+      "withEnglish": 916,
+      "units": {
+        "street": 111,
+        "lane": 494,
+        "alley": 347,
+        "section": 36
+      }
+    },
+    {
+      "id": "nt-wanli",
+      "cityId": "new-taipei",
+      "nameZh": "萬里區",
+      "nameEn": "Wanli Dist.",
+      "streets": 77,
+      "withEnglish": 39,
+      "units": {
+        "street": 77
+      }
+    },
+    {
+      "id": "nt-jinshan",
+      "cityId": "new-taipei",
+      "nameZh": "金山區",
+      "nameEn": "Jinshan Dist.",
+      "streets": 132,
+      "withEnglish": 95,
+      "units": {
+        "street": 76,
+        "lane": 55,
+        "alley": 1
+      }
+    },
+    {
+      "id": "nt-banqiao",
+      "cityId": "new-taipei",
+      "nameZh": "板橋區",
+      "nameEn": "Banqiao Dist.",
+      "streets": 1722,
+      "withEnglish": 1687,
+      "units": {
+        "section": 40,
+        "lane": 861,
+        "alley": 610,
+        "street": 211
+      }
+    },
+    {
+      "id": "nt-xizhi",
+      "cityId": "new-taipei",
+      "nameZh": "汐止區",
+      "nameEn": "Xizhi Dist.",
+      "streets": 940,
+      "withEnglish": 876,
+      "units": {
+        "street": 171,
+        "lane": 520,
+        "alley": 226,
+        "section": 23
+      }
+    },
+    {
+      "id": "nt-shenkeng",
+      "cityId": "new-taipei",
+      "nameZh": "深坑區",
+      "nameEn": "Shenkeng Dist.",
+      "streets": 156,
+      "withEnglish": 139,
+      "units": {
+        "street": 32,
+        "lane": 86,
+        "section": 8,
+        "alley": 30
+      }
+    },
+    {
+      "id": "nt-shiding",
+      "cityId": "new-taipei",
+      "nameZh": "石碇區",
+      "nameEn": "Shiding Dist.",
+      "streets": 73,
+      "withEnglish": 33,
+      "units": {
+        "street": 47,
+        "lane": 12,
+        "section": 14
+      }
+    },
+    {
+      "id": "nt-ruifang",
+      "cityId": "new-taipei",
+      "nameZh": "瑞芳區",
+      "nameEn": "Ruifang Dist.",
+      "streets": 158,
+      "withEnglish": 89,
+      "units": {
+        "street": 117,
+        "lane": 34,
+        "alley": 1,
+        "section": 6
+      }
+    },
+    {
+      "id": "nt-pingxi",
+      "cityId": "new-taipei",
+      "nameZh": "平溪區",
+      "nameEn": "Pingxi Dist.",
+      "streets": 53,
+      "withEnglish": 12,
+      "units": {
+        "street": 48,
+        "lane": 2,
+        "section": 3
+      }
+    },
+    {
+      "id": "nt-shuangxi",
+      "cityId": "new-taipei",
+      "nameZh": "雙溪區",
+      "nameEn": "Shuangxi Dist.",
+      "streets": 83,
+      "withEnglish": 22,
+      "units": {
+        "street": 83
+      }
+    },
+    {
+      "id": "nt-gongliao",
+      "cityId": "new-taipei",
+      "nameZh": "貢寮區",
+      "nameEn": "Gongliao Dist.",
+      "streets": 93,
+      "withEnglish": 58,
+      "units": {
+        "street": 84,
+        "lane": 7,
+        "alley": 1,
+        "section": 1
+      }
+    },
+    {
+      "id": "nt-xindian",
+      "cityId": "new-taipei",
+      "nameZh": "新店區",
+      "nameEn": "Xindian Dist.",
+      "streets": 1131,
+      "withEnglish": 1042,
+      "units": {
+        "street": 292,
+        "lane": 632,
+        "alley": 161,
+        "section": 46
+      }
+    },
+    {
+      "id": "nt-pinglin",
+      "cityId": "new-taipei",
+      "nameZh": "坪林區",
+      "nameEn": "Pinglin Dist.",
+      "streets": 40,
+      "withEnglish": 10,
+      "units": {
+        "section": 7,
+        "street": 33
+      }
+    },
+    {
+      "id": "nt-wulai",
+      "cityId": "new-taipei",
+      "nameZh": "烏來區",
+      "nameEn": "Wulai Dist.",
+      "streets": 34,
+      "withEnglish": 19,
+      "units": {
+        "street": 22,
+        "lane": 9,
+        "section": 3
+      }
+    },
+    {
+      "id": "nt-yonghe",
+      "cityId": "new-taipei",
+      "nameZh": "永和區",
+      "nameEn": "Yonghe Dist.",
+      "streets": 464,
+      "withEnglish": 457,
+      "units": {
+        "street": 67,
+        "lane": 257,
+        "alley": 122,
+        "section": 18
+      }
+    },
+    {
+      "id": "nt-zhonghe",
+      "cityId": "new-taipei",
+      "nameZh": "中和區",
+      "nameEn": "Zhonghe Dist.",
+      "streets": 1493,
+      "withEnglish": 1454,
+      "units": {
+        "section": 18,
+        "lane": 772,
+        "street": 140,
+        "alley": 563
+      }
+    },
+    {
+      "id": "nt-tucheng",
+      "cityId": "new-taipei",
+      "nameZh": "土城區",
+      "nameEn": "Tucheng Dist.",
+      "streets": 1012,
+      "withEnglish": 949,
+      "units": {
+        "alley": 270,
+        "street": 139,
+        "lane": 586,
+        "section": 17
+      }
+    },
+    {
+      "id": "nt-sanxia",
+      "cityId": "new-taipei",
+      "nameZh": "三峽區",
+      "nameEn": "Sanxia Dist.",
+      "streets": 375,
+      "withEnglish": 298,
+      "units": {
+        "street": 146,
+        "lane": 182,
+        "alley": 38,
+        "section": 9
+      }
+    },
+    {
+      "id": "nt-shulin",
+      "cityId": "new-taipei",
+      "nameZh": "樹林區",
+      "nameEn": "Shulin Dist.",
+      "streets": 847,
+      "withEnglish": 811,
+      "units": {
+        "lane": 511,
+        "alley": 168,
+        "street": 153,
+        "section": 15
+      }
+    },
+    {
+      "id": "nt-yingge",
+      "cityId": "new-taipei",
+      "nameZh": "鶯歌區",
+      "nameEn": "Yingge Dist.",
+      "streets": 466,
+      "withEnglish": 440,
+      "units": {
+        "street": 107,
+        "lane": 243,
+        "alley": 113,
+        "section": 3
+      }
+    },
+    {
+      "id": "nt-sanchong",
+      "cityId": "new-taipei",
+      "nameZh": "三重區",
+      "nameEn": "Sanchong Dist.",
+      "streets": 466,
+      "withEnglish": 451,
+      "units": {
+        "street": 187,
+        "section": 40,
+        "lane": 209,
+        "alley": 30
+      }
+    },
+    {
+      "id": "nt-xinzhuang",
+      "cityId": "new-taipei",
+      "nameZh": "新莊區",
+      "nameEn": "Xinzhuang Dist.",
+      "streets": 1046,
+      "withEnglish": 1008,
+      "units": {
+        "street": 207,
+        "alley": 188,
+        "lane": 629,
+        "section": 22
+      }
+    },
+    {
+      "id": "nt-taishan",
+      "cityId": "new-taipei",
+      "nameZh": "泰山區",
+      "nameEn": "Taishan Dist.",
+      "streets": 278,
+      "withEnglish": 238,
+      "units": {
+        "lane": 135,
+        "street": 110,
+        "alley": 22,
+        "section": 11
+      }
+    },
+    {
+      "id": "nt-linkou",
+      "cityId": "new-taipei",
+      "nameZh": "林口區",
+      "nameEn": "Linkou Dist.",
+      "streets": 404,
+      "withEnglish": 385,
+      "units": {
+        "street": 118,
+        "lane": 240,
+        "section": 17,
+        "alley": 29
+      }
+    },
+    {
+      "id": "nt-luzhou",
+      "cityId": "new-taipei",
+      "nameZh": "蘆洲區",
+      "nameEn": "Luzhou Dist.",
+      "streets": 230,
+      "withEnglish": 219,
+      "units": {
+        "street": 53,
+        "lane": 146,
+        "alley": 24,
+        "section": 7
+      }
+    },
+    {
+      "id": "nt-wugu",
+      "cityId": "new-taipei",
+      "nameZh": "五股區",
+      "nameEn": "Wugu Dist.",
+      "streets": 203,
+      "withEnglish": 164,
+      "units": {
+        "street": 97,
+        "lane": 77,
+        "alley": 7,
+        "section": 22
+      }
+    },
+    {
+      "id": "nt-bali",
+      "cityId": "new-taipei",
+      "nameZh": "八里區",
+      "nameEn": "Bali Dist.",
+      "streets": 172,
+      "withEnglish": 146,
+      "units": {
+        "street": 98,
+        "section": 11,
+        "lane": 58,
+        "alley": 5
+      }
+    },
+    {
+      "id": "nt-tamsui",
+      "cityId": "new-taipei",
+      "nameZh": "淡水區",
+      "nameEn": "Tamsui Dist.",
+      "streets": 675,
+      "withEnglish": 630,
+      "units": {
+        "alley": 176,
+        "street": 106,
+        "lane": 348,
+        "section": 45
+      }
+    },
+    {
+      "id": "nt-sanzhi",
+      "cityId": "new-taipei",
+      "nameZh": "三芝區",
+      "nameEn": "Sanzhi Dist.",
+      "streets": 76,
+      "withEnglish": 54,
+      "units": {
+        "street": 64,
+        "section": 6,
+        "lane": 6
+      }
+    },
+    {
+      "id": "nt-shimen",
+      "cityId": "new-taipei",
+      "nameZh": "石門區",
+      "nameEn": "Shimen Dist.",
+      "streets": 36,
+      "withEnglish": 8,
+      "units": {
+        "street": 36
+      }
+    }
+  ],
+  "raw": {
+    "ways": 56523,
+    "unnamedOrGenericWays": 23593
+  },
+  "missingTiles": [],
+  "currentOfficialCompletenessVerified": false
+}
