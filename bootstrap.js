@@ -35,7 +35,7 @@
       document.body.append(script);
       resolve();
     } else {
-      script.src = path + "?v=0.10";
+      script.src = path + "?v=0.11";
       script.onload = resolve;
       script.onerror = () => reject(new Error("Die Datei „" + path + "“ konnte nicht geladen werden."));
       document.head.append(script);

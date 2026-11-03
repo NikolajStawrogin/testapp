@@ -43,7 +43,7 @@ class DuesseldorfDataTests(unittest.TestCase):
         self.assertTrue(self.data['complete'])
         self.assertEqual({r['nameZh'] for r in self.data['rivers']['features']},{'Rhein','Düssel','Nördliche Düssel','Südliche Düssel','Itter','Kittelbach'})
         for river in self.data['rivers']['features']:
-            self.assertTrue(river['cityIds']);self.assertTrue(river['sourceIds']);self.assertGreaterEqual(river['lengthMeters'],400)
+            self.assertTrue(river['cityIds']);self.assertTrue(river['districtIds']);self.assertTrue(all(id.startswith('dd-') for id in river['districtIds']));self.assertTrue(river['sourceIds']);self.assertGreaterEqual(river['lengthMeters'],400)
             self.assertIn(river['geometry']['type'],['Polygon','MultiPolygon'])
         manifest=json.loads((SOURCE/'layers-source-manifest.json').read_text())
         for row in manifest['sources']:

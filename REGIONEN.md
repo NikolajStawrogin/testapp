@@ -1,8 +1,10 @@
 # Regionen und Düsseldorf-Erweiterung
 
-## Umfang und Bedienung · 0.10
+## Umfang und Bedienung · 0.11
 
-Einstieg: Stadt wählen → Thema wählen → Entdecken, Lernkarten oder Quiz. Taipei/New Taipei bleiben eine gemeinsame Lernregion. Düsseldorf verwendet deutsche Originalnamen und enthält 50 Stadtteile, zehn Stadtbezirke, 2.891 benannte Straßen-/Wegeeinheiten und sechs Gewässer: Rhein, Düssel, Nördliche Düssel, Südliche Düssel, Itter und Kittelbach.
+Einstieg: Stadt wählen → Thema wählen → Entdecken, Lernkarten oder Quiz. Taipei/New Taipei bleiben eine gemeinsame Lernregion. Düsseldorf verwendet deutsche Originalnamen. Quiz und Gebietsauswahl verwenden die 50 Stadtteile alphabetisch nach Namen wie Eller oder Wersten. Enthalten sind 2.891 benannte Straßen-/Wegeeinheiten und sechs Gewässer: Rhein, Düssel, Nördliche Düssel, Südliche Düssel, Itter und Kittelbach.
+
+Das Feld über der Karte bietet „Ganz Düsseldorf“ und die 50 Stadtteilnamen. Die darunterliegende Liste erlaubt mehrere Stadtteile für eine gemeinsame Runde. Nummerierte Stadtbezirke sind keine auswählbare Quiz-Ebene mehr. Ihre Geometrien und frühere Lernergebnisse bleiben als Bestandsdaten erhalten. Alte ausgewählte Stadtbezirke werden in ihre zugehörigen Stadtteile übersetzt.
 
 Die Flüsse lassen sich einzeln mitüben, gemeinsam mit Gebieten oder als reine Flussrunde. Flussflächen und Namen sind unabhängig schaltbar; die gesuchte Bezeichnung bleibt bis zur Auflösung verborgen. Richtige und falsche Antworten, Fehlerwiederholung, Lernkarten und Lernstand verwenden dieselben Funktionen wie bei Taipei.
 
@@ -39,4 +41,4 @@ Die bisherigen Schlüssel `taipei-kennen.settings.v1` und `taipei-kennen.progres
 
 Beim Upgrade des Düsseldorfer Zwischenstands mit Datenversion 1 auf Version 2 werden die erstmals verfügbaren Bahn- und Flussebenen initial eingeblendet und Flüsse vorausgewählt. Bisherige Quizantworten bleiben erhalten. Danach werden die eigenen Anzeigeeinstellungen wieder unverändert respektiert.
 
-Eine bewusste Stadtauswahl öffnet zuerst die Themen. Neuladen innerhalb einer Region kann die gespeicherte Ansicht wiederherstellen. Gebietsebene und Gebietsauswahl bleiben während laufender Runden gesperrt. Die Offline-Einzeldatei enthält beide Regionen und sämtliche Skripte; im Spiel erfolgen keine externen Datenabrufe.
+Eine bewusste Stadtauswahl öffnet zuerst die Themen. Neuladen innerhalb einer Region kann die gespeicherte Ansicht wiederherstellen. Die Gebietsauswahl bleibt während laufender Runden gesperrt. Die Offline-Einzeldatei enthält beide Regionen und sämtliche Skripte; im Spiel erfolgen keine externen Datenabrufe.

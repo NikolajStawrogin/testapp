@@ -1,5 +1,15 @@
 # Prüfung der Straßen- und Menüerweiterung
 
+## Aktueller Stand 0.11 · Düsseldorfer Stadtteil-Auswahl
+
+Gebietsauswahl und Quiz verwenden die 50 alphabetisch sortierten Stadtteilnamen wie Eller oder Wersten. Nummerierte Stadtbezirke und die bisherige Ebenenauswahl erscheinen nicht mehr als Quiz-Auswahl. Die Liste erlaubt mehrere Stadtteile für eine Runde; Straßen und Flüsse werden nach den ausgewählten Stadtteilen gefiltert. Bisherige ausgewählte Stadtbezirke werden in ihre zugehörigen Stadtteile übertragen, historische Antworten bleiben erhalten. Die Daten enthalten weiterhin die alten Stadtbezirksgeometrien und Kennungen, damit vorhandene Lernstände lesbar bleiben.
+
+Elf Düsseldorfer Browserprüfungen bestanden in 15,490 s. Ein weiterer Lauf mit elf Prüfungen für eine gemeinsame Eller-/Wersten-Runde, Datenzuordnung, Pages-Unterpfad und die Offline-Einzeldatei beider Regionen bestand in 26,614 s. Wegen eines überlappenden Tests sind damit 21 unterschiedliche Prüfungen abgedeckt. Keine JavaScript-Fehler oder externen Laufzeitabrufe wurden festgestellt. Syntaxprüfung und `git diff --check` bestanden.
+
+Die folgenden Abschnitte dokumentieren die früheren Versionen.
+
+---
+
 ## Aktueller Stand 0.10 · Düsseldorf mit Flüssen und Bahnlinien
 
 Die zuvor fehlenden Ebenen sind über andere öffentlich archivierte Quellen umgesetzt. Ein Originalserver-Abruf oder eine weitere Netzwerkfreigabe ist für diesen Stand nicht nötig. Enthalten sind sechs OSM-Flüsse sowie 26 aus VRR-Haltefolgen abgeleitete Bahnlinien (zwölf U-Bahn-/Stadtbahnlinien, sechs S-Bahnlinien, sieben Straßenbahnlinien, SkyTrain). Die Bahnarten sind einzeln schaltbar und werden gespeichert. Die ausdrücklich schematische Darstellung verbindet belegte Haltestellen; exakte Gleiskurven und aktuelle Betriebsdaten werden nicht zugesagt. Flussflächen sind angenäherte Flächen um archivierte OSM-Mittellinien.

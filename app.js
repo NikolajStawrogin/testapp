@@ -74,9 +74,13 @@
   const storedIds = Array.isArray(savedSettings?.selected) ? savedSettings.selected.filter(id => byId.has(id) && !byId.get(id).kind) : null;
   const expandLegacyAll = !german && savedSettings?.datasetVersion !== DATA.version && storedIds?.length === legacyTaipei.length
     && legacyTaipei.every(feature => storedIds.includes(feature.id));
-  const initialLevel = german && savedSettings?.areaLevel === "borough" ? "borough" : "neighborhood";
-  const initialIds = !storedIds || expandLegacyAll ? features.filter(feature => !german || feature.level === initialLevel).map(feature => feature.id) : storedIds;
-  const storedScope = ["all", ...cities.map(city => city.id)].includes(savedSettings?.scope) ? savedSettings.scope : null;
+  const initialLevel = "neighborhood";
+  const migratedIds = german && storedIds ? [...new Set(storedIds.flatMap(id => {
+    const feature = byId.get(id);
+    return feature.level === "borough" ? features.filter(child => child.level === "neighborhood" && child.cityId === feature.cityId).map(child => child.id) : [id];
+  }))] : storedIds;
+  const initialIds = !migratedIds || expandLegacyAll ? features.filter(feature => !german || feature.level === initialLevel).map(feature => feature.id) : migratedIds;
+  const storedScope = (german ? ["all", ...features.filter(feature => feature.level === "neighborhood").map(feature => feature.id)] : ["all", ...cities.map(city => city.id)]).includes(savedSettings?.scope) ? savedSettings.scope : null;
   const initialScope = expandLegacyAll ? "all" : storedScope || (initialIds.length && initialIds.every(id => byId.get(id).cityId === "taipei") ? "taipei" : "all");
   const state = {
     areaLevel: initialLevel,
@@ -106,7 +110,7 @@
     selectedRivers: new Set(Array.isArray(savedSettings?.selectedRivers) && !upgradeLayers
       ? savedSettings.selectedRivers.filter(id => rivers.some(river => river.id === id)) : rivers.map(river => river.id)),
     scope: initialScope,
-    selected: new Set(initialIds.filter(id => initialScope === "all" || byId.get(id).cityId === initialScope)),
+    selected: new Set(initialIds.filter(id => initialScope === "all" || (german ? id === initialScope : byId.get(id).cityId === initialScope))),
     roundSize: savedSettings?.roundSize === "all" || savedSettings?.roundSize === 12 ? "all"
       : [5, 10].includes(savedSettings?.roundSize) ? savedSettings.roundSize : 10,
     inspected: null,
@@ -125,7 +129,7 @@
     const key = [state.scope, [...state.selected].sort().join(), [...state.streetCategories].sort().join(), [...state.streetUnits].sort().join(), !german && (state.onlyBilingual || state.language === "en"), state.streetSearch].join("|");
     if (streetCandidateCache?.key !== key) {
       const query = searchText(state.streetSearch.trim());
-      streetCandidateCache = { key, features: streets.filter(feature => (state.scope === "all" || feature.cityId === state.scope || feature.cityIds?.includes(state.scope))
+      streetCandidateCache = { key, features: streets.filter(feature => (state.scope === "all" || (german ? feature.districtIds.includes(state.scope) : feature.cityId === state.scope || feature.cityIds?.includes(state.scope)))
         && feature.districtIds.some(id => state.selected.has(id)) && state.streetCategories.has(feature.category)
         && state.streetUnits.has(feature.unit) && (german || !(state.onlyBilingual || state.language === "en") || feature.nameEn)
         && (!query || searchText(`${feature.nameZh} ${feature.nameEn}`).includes(query))) };
@@ -159,11 +163,11 @@
   }
 
   function scopeFeatures() {
-    return features.filter(feature => (!german || feature.level === state.areaLevel) && (state.scope === "all" || feature.cityId === state.scope));
+    return features.filter(feature => (!german || feature.level === state.areaLevel) && (state.scope === "all" || (german ? feature.id === state.scope : feature.cityId === state.scope)));
   }
 
   function scopeRivers() {
-    return rivers.filter(river => state.scope === "all" || river.cityIds.includes(state.scope));
+    return rivers.filter(river => state.scope === "all" || (german ? river.districtIds?.includes(state.scope) : river.cityIds.includes(state.scope)));
   }
 
   function selectedFeatures() {
@@ -179,7 +183,7 @@
       || (state.stage === "session" && state.round.ids.includes(feature.id)));
     if (state.subject === "streets") return false;
     return feature.kind === "river" ? state.includeRivers && state.selectedRivers.has(feature.id)
-      && (state.scope === "all" || feature.cityIds.includes(state.scope)) : state.selected.has(feature.id);
+      && scopeRivers().some(river => river.id === feature.id) : state.selected.has(feature.id);
   }
 
   function currentTarget() {
@@ -191,6 +195,7 @@
   }
 
   function featureContext(feature) {
+    if (german) return feature.kind === "street" ? "Düsseldorf · " + feature.districtIds.filter(id => byId.get(id).level === "neighborhood").map(id => byId.get(id).nameZh).join(" / ") : feature.kind === "river" ? "Fluss · Düsseldorf" : "Düsseldorf";
     if (feature.kind === "street") return cityName(cityById.get(feature.cityId)) + " · "
       + feature.districtIds.map(id => state.language === "en" ? byId.get(id).nameEn : byId.get(id).nameZh).join(" / ");
     return feature.kind === "river" ? "Fluss · " + feature.cityIds.map(id => cityName(cityById.get(id))).join(" / ")
@@ -793,6 +798,14 @@
   function buildPicker() {
     const root = $("district-picker");
     root.replaceChildren();
+    if (german) {
+      const grid = document.createElement("div");
+      grid.className = "district-picker";
+      for (const feature of scopeFeatures().sort((a,b) => a.nameZh.localeCompare(b.nameZh,"de"))) grid.append(createDistrictChoice(feature));
+      root.append(grid);
+      $("river-picker").replaceChildren(...scopeRivers().map(createDistrictChoice));
+      return;
+    }
     for (const city of cities) {
       const members = scopeFeatures().filter(feature => feature.cityId === city.id);
       if (!members.length) continue;
@@ -1007,6 +1020,11 @@
     $("mobile-question").hidden = state.stage !== "session";
     $("language").value = state.language;
     for (const city of cities) $("show-labels-" + city.id).checked = state.labelsByCity[city.id];
+    if (german) {
+      const input = $("show-neighborhood-labels");
+      input.checked = cities.every(city => state.labelsByCity[city.id]);
+      input.indeterminate = !input.checked && cities.some(city => state.labelsByCity[city.id]);
+    }
     $("show-metro").checked = state.metro;
     for (const input of document.querySelectorAll("[data-transport-kind]")) input.checked = state.metroKinds[input.dataset.transportKind];
     $("show-rivers").checked = riversVisible();
@@ -1038,9 +1056,9 @@
     $("city-scope").disabled = state.stage === "session";
     $("city-scope").title = state.stage === "session" ? "Beende die Runde, um das Gebiet zu wechseln." : "Lerngebiet auswählen";
     $("map-state").textContent = state.stage === "setup" ? "Entdecken" : state.stage === "results" ? "Rundenauswertung" : state.round.kind === "quiz" ? "Quiz" : "Lernkarten";
-    $("map-title").textContent = state.scope === "all" ? REGION.name : german ? cityName(cityById.get(state.scope)) : cityById.get(state.scope).nameEn;
+    $("map-title").textContent = state.scope === "all" ? REGION.name : german ? byId.get(state.scope).nameZh : cityById.get(state.scope).nameEn;
     $("map-city-zh").textContent = german ? "" : state.scope === "all" ? "臺北市 · 新北市" : cityById.get(state.scope).nameZh;
-    $("map-scope-note").textContent = german ? `${scopeFeatures().length} ${state.areaLevel === "borough" ? "Stadtbezirke" : "Stadtteile"}` : state.scope === "all" ? "12 + 29 Bezirke · beide Städte" : `${scopeFeatures().length} Bezirke`;
+    $("map-scope-note").textContent = german ? `${scopeFeatures().length} ${scopeFeatures().length === 1 ? "Stadtteil" : "Stadtteile"}` : state.scope === "all" ? "12 + 29 Bezirke · beide Städte" : `${scopeFeatures().length} Bezirke`;
     $("area-level").value = state.areaLevel;
     $("area-level").disabled = state.stage === "session";
     renderSetup();
@@ -1360,6 +1378,10 @@
     state.language = event.target.value;
     saveSettings();
     render();
+  });
+  if (german) $("show-neighborhood-labels").addEventListener("change", event => {
+    for (const city of cities) state.labelsByCity[city.id] = event.target.checked;
+    saveSettings(); render();
   });
   for (const city of cities) $("show-labels-" + city.id).addEventListener("change", event => {
     state.labelsByCity[city.id] = event.target.checked;

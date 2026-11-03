@@ -96,6 +96,7 @@ def main():
     metro=json.loads(metro_file.read_text()) if metro_file.exists() else {'lines':[],'features':[],'note':'Originaldatenabruf noch ausstehend.'}
     for river in rivers['features']:
         river['cityIds']=[city['id'] for city in [{'id':f'dd-b{n}'} for n in BOROUGHS] if any(river_geo.intersects(shape(f['geometry'])) for f in neighborhoods if f['cityId']==city['id'])] if (river_geo:=shape(river['geometry'])) else []
+        river['districtIds']=[f['id'] for f in neighborhoods if river_geo.intersection(shape(f['geometry'])).area>0]
         nearby=sorted([(river_geo.intersection(shape(f['geometry'])).area,f['nameZh']) for f in neighborhoods if river_geo.intersection(shape(f['geometry'])).area>0],reverse=True)[:4]
         river['description']='Im Düsseldorfer Stadtgebiet verläuft dieses Gewässer unter anderem bei '+', '.join(name for _,name in nearby)+'.'
     if (SOURCE/'layers-source-manifest.json').exists():

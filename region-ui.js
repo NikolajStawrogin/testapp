@@ -26,34 +26,37 @@
   document.querySelector("#metro-legend summary").textContent = "U-Bahn, S-Bahn & Straßenbahn · Legende";
   if (!data.metro.lines.length) $("show-metro").disabled = true;
   const areaCard = document.querySelector('[data-start="districts"]');
-  areaCard.querySelector("strong").textContent = "Stadtteile & Stadtbezirke";
-  areaCard.querySelector("strong+span").textContent = "50 Stadtteile · 10 Stadtbezirke · zwei Lernstufen";
+  areaCard.querySelector("strong").textContent = "Stadtteile kennenlernen";
+  areaCard.querySelector("strong+span").textContent = "50 Namen · von Angermund bis Wittlaer";
   areaCard.querySelector(".home-card-icon").textContent = "⌖";
   document.querySelector('[data-start="streets"] .home-card-icon').textContent = "↗";
   document.querySelector('[data-start="rivers"] .home-card-icon').textContent = "≈";
   if (data.rivers.features.length) document.querySelector('[data-start="rivers"] strong+span').textContent = data.rivers.features.map(f => f.nameZh).join(" · ");
   document.querySelector('[data-subject="districts"]').textContent = "Gebiete & Flüsse";
-  document.querySelector('.subject.active strong').textContent = "Stadtteile & Stadtbezirke";
-  document.querySelector('.subject.active small').textContent = "50 Stadtteile in 10 Stadtbezirken";
-  $("area-level-field").hidden = false;
+  document.querySelector('.subject.active strong').textContent = "Stadtteile";
+  document.querySelector('.subject.active small').textContent = "50 Stadtteile · Eller, Wersten, Bilk und mehr";
+  $("area-level-field").hidden = true;
   $("district-picker").setAttribute("aria-label", "Gebiete auswählen");
   $("district-picker").previousElementSibling.querySelector(".section-label").textContent = "03 / DEINE GEBIETE";
-  $("city-scope").replaceChildren(new Option("Ganz Düsseldorf", "all"), ...data.districts.cities.map(city => new Option(city.nameZh, city.id)));
+  $("city-scope").replaceChildren(new Option("Ganz Düsseldorf", "all"), ...data.districts.features.filter(feature => feature.level === "neighborhood").sort((a,b) => a.nameZh.localeCompare(b.nameZh,"de")).map(feature => new Option(feature.nameZh, feature.id)));
   $("language").replaceChildren(new Option("Deutsch · Originalnamen", "de"));
   $("language").disabled = true;
   const labelSettings = document.querySelector(".label-settings");
   labelSettings.replaceChildren();
   const legend = document.createElement("legend");
-  legend.textContent = "Gebietsnamen anzeigen · je Stadtbezirk";
+  legend.textContent = "Stadtteilnamen auf der Karte";
   labelSettings.append(legend);
+  const namesLabel = document.createElement("label");
+  namesLabel.className = "checkbox-row";
+  const namesInput = document.createElement("input");
+  namesInput.type = "checkbox"; namesInput.id = "show-neighborhood-labels";
+  namesLabel.append(namesInput, document.createTextNode("Stadtteilnamen anzeigen"));
+  labelSettings.append(namesLabel);
   for (const city of data.districts.cities) {
-    const label = document.createElement("label");
-    label.className = "checkbox-row";
     const input = document.createElement("input");
     input.id = "show-labels-" + city.id;
-    input.type = "checkbox";
-    label.append(input, document.createTextNode(city.nameZh));
-    labelSettings.append(label);
+    input.type = "checkbox"; input.hidden = true;
+    labelSettings.append(input);
   }
   const units = document.querySelector('[name="street-unit"]').closest("fieldset");
   units.hidden = true;
@@ -86,7 +89,7 @@
   const help = $("help-dialog");
   for (const node of [...help.children].slice(1)) node.remove();
   const text = document.createElement("p");
-  text.textContent = "Wähle zuerst ein Thema. Bei Gebieten kannst du zwischen 50 Stadtteilen und 10 Stadtbezirken wechseln und die Auswahl auf einen Stadtbezirk eingrenzen. Straßen werden als ganze benannte Verläufe gespielt. Bahnarten lassen sich in den Einstellungen einzeln einblenden. Ihre Linien sind schematische Verbindungen zwischen VRR-Haltestellen. Rhein und weitere enthaltene Flüsse lassen sich einzeln mitüben; für reine Flussrunden hebe die Gebietsauswahl auf. Karte ziehen und mit Rad oder zwei Fingern zoomen. Eine Finger-Auswahl wird vor der Quizantwort bestätigt; an Kreuzungen hilft Andere Straße. Lernkarten werden nicht bewertet. Unter Fortschritt kannst du den Lernstand sichern und wieder einlesen; Sicherungen gelten jeweils für die ausgewählte Stadt. Über Stadt wechseln kehrst du zur Stadtauswahl zurück.";
+  text.textContent = "Wähle zuerst ein Thema. Wähle oben einen Stadtteil wie Eller oder Wersten oder wähle in der Liste mehrere Stadtteile für eine gemeinsame Runde. Geübt werden die Stadtteilnamen. Auch das Straßenquiz lässt sich so auf deine Stadtteile eingrenzen. Straßen werden als ganze benannte Verläufe gespielt. Bahnarten lassen sich in den Einstellungen einzeln einblenden. Ihre Linien sind schematische Verbindungen zwischen VRR-Haltestellen. Rhein und weitere enthaltene Flüsse lassen sich einzeln mitüben; für reine Flussrunden hebe die Gebietsauswahl auf. Karte ziehen und mit Rad oder zwei Fingern zoomen. Eine Finger-Auswahl wird vor der Quizantwort bestätigt; an Kreuzungen hilft Andere Straße. Lernkarten werden nicht bewertet. Unter Fortschritt kannst du den Lernstand sichern und wieder einlesen; Sicherungen gelten jeweils für die ausgewählte Stadt. Über Stadt wechseln kehrst du zur Stadtauswahl zurück.";
   help.append(text);
   // Preserve the shared sources-button listener installed by app.js.
   const button = document.createElement("button");button.id="help-sources";button.className="button button-secondary";button.textContent="Datenquellen";help.append(button);

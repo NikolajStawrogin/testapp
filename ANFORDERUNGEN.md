@@ -141,3 +141,8 @@ Version 0.7 setzt Straßen-Erkundung, Lernkarten und Quiz für 22.240 Einheiten 
 ## Mehrere Lernregionen · Erweiterung 0.9
 
 Der Nutzer hat beide Düsseldorfer Gebietsebenen sowie den vollen bisherigen Umfang einschließlich Straßen, Flüssen und Stadtbahn bestätigt. Die Anwendung startet mit einer Stadtauswahl und zeigt danach erst die Themen. Taipei/New Taipei bleiben als gemeinsame Region erhalten. Düsseldorf verwendet deutsche Originalnamen; Lernstände und Einstellungen müssen je Region getrennt bleiben. Ein Regionswechsel darf bestehende Lernstände nicht löschen. Straßen, die Gebietsgrenzen überschreiten, müssen in jeder betroffenen Auswahl auffindbar sein. Die Quelle darf weder fehlende Klassifizierungen noch einen fehlenden aktuellen amtlichen Abgleich verschleiern. Die konkreten Anforderungen und Datenquellen stehen in REGIONEN.md. Seit 0.10 sind sechs Flüsse und getrennt schaltbare U-Bahn-, S-Bahn-, Straßenbahn- und SkyTrain-Ebenen aus öffentlichen Archiven eingebunden. Die schematische Verbindung von Haltestellen wird ausdrücklich erläutert.
+
+
+## Düsseldorfer Quiz-Auswahl nach Stadtteilnamen · 0.11
+
+Nach aktualisiertem Nutzerwunsch wird Düsseldorf über die 50 Stadtteilnamen wie Eller oder Wersten ausgewählt, ohne nummerierte Stadtbezirke als Quiz-Optionen. Die Auswahl über der Karte und die alphabetische Mehrfachauswahl verwenden dieselben Stadtteile; Straßen- und Flussauswahl folgen dieser Eingrenzung. Alte Bezirks-Auswahlen werden auf ihre Stadtteile übertragen, vorhandene Ergebnisse bleiben erhalten. Taipei behält die bisherige Stadtauswahl.

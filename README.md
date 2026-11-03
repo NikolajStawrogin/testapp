@@ -127,9 +127,9 @@ Straßenlösungen liegen mit kräftiger grüner Linie und weißem Rand über den
 
 Zoom und Verschieben verändern sofort den bestehenden Kartenausschnitt. Eine räumliche Indizierung begrenzt die anschließende Straßensuche auf relevante Zellen; der Aufbau von Straßen und Beschriftungen erfolgt erst 120 ms nach der letzten Bewegung. Straßenbeschriftungen werden während der Bewegung kurz verborgen. Es werden beim Zoomen keine externen Kartendaten nachgeladen. Finger dürfen bis zu 30 CSS-Pixel vom Straßenverlauf entfernt sein; die Touch-Auswahl mit Bestätigung und dem Wechsel zu benachbarten Straßen bleibt erhalten. Während einer laufenden Runde ist das Gebiet gegen versehentliches Wechseln gesperrt.
 
-## Stadtauswahl und Düsseldorf · 0.10
+## Stadtauswahl und Düsseldorf · 0.11
 
-Wähle zuerst Taipei/New Taipei oder Düsseldorf und danach das Thema. Düsseldorf enthält 50 Stadtteile, zehn Stadtbezirke, 2.891 benannte Straßen-/Wegeeinheiten und sechs Flüsse: Rhein, Düssel, Nördliche und Südliche Düssel, Itter und Kittelbach. Flüsse sind einzeln mitspielbar; Flächen und Namen sind getrennt einstellbar. Beide Gebietsebenen, Suche, Lernkarten, Quiz, Touch-Auswahl, Fehlerwiederholung und regionale Lernstände nutzen dieselbe App.
+Wähle zuerst Taipei/New Taipei oder Düsseldorf und danach das Thema. Düsseldorf bietet eine alphabetische Auswahl von 50 Stadtteilen, 2.891 benannte Straßen-/Wegeeinheiten und sechs Flüsse: Rhein, Düssel, Nördliche und Südliche Düssel, Itter und Kittelbach. Flüsse sind einzeln mitspielbar; Flächen und Namen sind getrennt einstellbar. Quizfragen verwenden Stadtteilnamen wie Eller oder Wersten. Das große Auswahlfeld über der Karte grenzt auch Straßen und Flüsse nach Stadtteilen ein. Mehrere Stadtteile lassen sich in der Liste für eine gemeinsame Runde wählen. Suche, Lernkarten, Quiz, Touch-Auswahl, Fehlerwiederholung und regionale Lernstände nutzen dieselbe App. Frühere Nummern-Auswahlen werden in die zugehörigen Stadtteile übertragen.
 
 26 archivierte Bahnlinien dienen zur Orientierung: zwölf U-Bahn-/Stadtbahnlinien, sechs S-Bahnlinien, sieben Straßenbahnlinien und SkyTrain. Die vier Bahnarten lassen sich einzeln ein-/ausblenden. Sie verbinden belegte VRR-Haltestellen schematisch; es sind keine exakten Gleiskurven und keine Echtzeitfahrplandaten. Die Legende zeigt diese Einschränkung ausdrücklich.
 
