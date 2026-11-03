@@ -1,35 +1,42 @@
 # Regionen und Düsseldorf-Erweiterung
 
-## Ziel und akzeptierter Umfang
+## Umfang und Bedienung · 0.10
 
-Einstieg: Stadt wählen → Thema wählen → Entdecken, Lernkarten oder Quiz. Die bisherigen beiden taiwanischen Städte bleiben eine gemeinsame Lernregion. Düsseldorf ist eine eigene Region mit deutschen Originalnamen, 50 Stadtteilen und zehn Stadtbezirken als getrennt wählbaren Gebietsebenen. Auch Straßen, Rhein und weitere Flüsse sowie Stadtbahn sollen dieselben Auswahl-, Beschriftungs-, Lern-, Quiz- und Fortschrittsfunktionen erhalten. Die Browser-App bleibt lokal lauffähig, ohne Konto, API-Schlüssel oder kostenpflichtigen Dienst.
+Einstieg: Stadt wählen → Thema wählen → Entdecken, Lernkarten oder Quiz. Taipei/New Taipei bleiben eine gemeinsame Lernregion. Düsseldorf verwendet deutsche Originalnamen und enthält 50 Stadtteile, zehn Stadtbezirke, 2.891 benannte Straßen-/Wegeeinheiten und sechs Gewässer: Rhein, Düssel, Nördliche Düssel, Südliche Düssel, Itter und Kittelbach.
 
-## Aktueller Zwischenstand und offene Voraussetzung
+Die Flüsse lassen sich einzeln mitüben, gemeinsam mit Gebieten oder als reine Flussrunde. Flussflächen und Namen sind unabhängig schaltbar; die gesuchte Bezeichnung bleibt bis zur Auflösung verborgen. Richtige und falsche Antworten, Fehlerwiederholung, Lernkarten und Lernstand verwenden dieselben Funktionen wie bei Taipei.
 
-Stadtauswahl, gezieltes Laden der jeweiligen regionalen Daten, beide Düsseldorfer Gebietsebenen und 2.891 benannte Straßen- und Wegeeinheiten sind umgesetzt. Alle 50 Stadtteile besitzen Straßeneinträge. Fluss- und Stadtbahndaten sind noch nicht enthalten: Der Zugriff auf die Originalquellen wird von der Netzwerkpolitik der laufenden Cloud-Umgebung mit 403 verweigert. Diese Themen bleiben im Düsseldorfer Zwischenstand deaktiviert und werden ausdrücklich als ausstehend bezeichnet. Das ist kein abgeschlossener Funktionsumfang.
+Als Orientierung stehen 26 Linien aus dem archivierten VRR-Bestand bereit: zwölf U-Bahn-/Stadtbahnlinien, sechs S-Bahnlinien, sieben Straßenbahnlinien und SkyTrain. Die vier Bahnarten sind einzeln schaltbar; die Auswahl wird gespeichert. Die Legende startet geschlossen. Bahnlinien sind **schematische Verbindungen zwischen belegten Haltestellen**, keine exakten Gleiskurven. Farben kennzeichnen Verkehrsarten; S-Bahn und SkyTrain haben zusätzliche Strichmuster. Es handelt sich um einen Datenstand, keinen aktuellen Fahrplan und keine Zusage vollständiger aktueller Betriebsdaten.
 
-Ein gespeicherter Konfigurationsentwurf ergänzt ausschließlich `opendata.duesseldorf.de`, `www.duesseldorf.de` und `overpass-api.de`. Das Konfigurationstool meldet `status: saved` und `requires_publish: true`. Der Nutzer muss die Änderungen in den Umgebungseinstellungen prüfen und speichern und anschließend die Umgebung veröffentlichen. Erst ein erfolgreicher Abruf belegt, dass die Änderung in dieser Sitzung wirkt.
+Die Browser-App bleibt lokal lauffähig, ohne Konto, API-Schlüssel oder kostenpflichtigen Dienst. Alle Geodaten liegen lokal. Die zunächst blockierten Originalabrufe sind für diese Version keine Voraussetzung mehr: Die fehlenden Ebenen wurden aus separat veröffentlichten, fest versionierten Datenarchiven aufgebaut. Es ist keine weitere Freigabe durch den Nutzer nötig.
 
-Nach Freigabe:
+## Datenquellen und Grenzen
 
-1. `PYTHONPATH=/tmp/duesseldorf-deps python tools/collect_duesseldorf_data.py` sammelt Straßen mit OSM-Straßenklasse, benannte Gewässer und U-Linien samt Geometrien. Originalantwort, Abfrage, Zeitstempel und SHA-256 bleiben erhalten. Der Live-Abruf ist bisher nicht ausgeführt oder als erfolgreich getestet.
-2. `PYTHONPATH=/tmp/duesseldorf-deps python tools/build_duesseldorf_data.py` erzeugt das lokale Regionalpaket neu. Die Alternative für dauerhaftes Setup ist eine eigene Python-Umgebung mit `shapely==2.1.2`; `/tmp` ist nicht als dauerhafte Installation vorausgesetzt.
-3. Datenabdeckung, reale Linien/Flüsse, beide Gebietsebenen, Quiz, Touch, Speicherung, Import/Export und Offline-Einzeldatei prüfen; Dokumentation und Paket aktualisieren; committen und pushen.
+- **Stadtteile:** OSM-Auszug aus Click That ’Hood, Commit `48ba05ad4c6969e3b3c25735492169227ae411f1`, GeoJSON-Zeitstempel Juni 2015. Zehn Stadtbezirke werden aus der festen Stadtteilzuordnung vereinigt; keine frei gezeichneten Grenzen.
+- **Straßen:** zehn OSM-basierte Qualitätsdateien aus `ckrey/stressmap`, Commit `78230754655af475a492de0af267722869d3afe1` vom 23. März 2023. Der tatsächliche OSM-Datenstand kann älter sein. Namen und Geometrien sind enthalten, Straßenklassen fehlen. Deshalb bleiben diese Einheiten ausdrücklich „Ohne Straßenklasse“. Fahrradqualität wird nicht als Straßenhierarchie ausgegeben. Benannte Wege sind eingeschlossen; alle 50 Stadtteile besitzen Einträge. Das ist kein aktuell amtlich geprüftes Straßenverzeichnis und keine Vollständigkeitszusage.
+- **Gewässer:** `3ddruck12/flowtrail-pegel`, Commit `93b556e4314df05c6b2e887bc13721cb468f5ab2`, Datei `osm-waterways.geojson`, Auszugsversion 27.05.2026. Enthält ausdrücklich OSM-Flüsse und Kanäle mit ODbL-Hinweis. Für diese App werden benannte Flüsse innerhalb der Stadtgrenze vereinigt; sehr kurze Randfragmente unter 400 Metern entfallen. Die blauen Flächen sind angenäherte Puffer um echte Mittellinien, keine vermessenen Ufer. Kleine Bäche sind im Quellauszug nicht vollständig enthalten. Ortsbeschreibungen nennen die größten Überschneidungen mit den Stadtteilflächen.
+- **Verkehr:** VRR-GTFS-Haltestellen und geordnete Haltefolgen, Version 25.08.2026, archiviert in `n3koBomb/linienblick`, Commit `b71ba453fb72696120ae591caeacae074768d6d2`. Verarbeitet werden nur U- und S-Bahn, reguläre Straßenbahnlinien und SkyTrain mit passenden Düsseldorfer Haltestellen. Doppelte Betreiberkennungen derselben Liniennummer und identische Verbindungen werden zusammengeführt. Busse, RE/RB und E-Sonderlinien sind nicht Teil dieser Orientierungsebene. Die Originaldateien enthalten keine GTFS-Shapes; die App kennzeichnet die schematische Darstellung ausdrücklich.
+- **Nutzungsrechte:** OSM-Geodaten © OpenStreetMap contributors, ODbL 1.0. VRR wird als Datenherausgeber genannt. Der im Manifest verlinkte Verkehrsverbund-Katalog nennt für den offiziellen VRR-GTFS-Bestand CC BY ohne Versionsangabe; eine bestimmte Lizenzversion wird nicht erfunden. Die archivierte Originalquellen- und Katalogreferenz stehen im Datenpaket. Es wurde kein fremder App-Code übernommen.
 
-## Datenbasis des Zwischenstands
+Originalkopien, unveränderliche Quell-URLs und SHA-256 stehen unter `data/duesseldorf/`. `source-manifest.json` dokumentiert Gebiete/Straßen, `layers-source-manifest.json` Gewässer/Verkehr. Die Flussquelle wird verlustfrei und reproduzierbar mit gzip gespeichert. `coverage.json` zählt die Abdeckung.
 
-- Stadtteile: OSM-Auszug aus Click That ’Hood, festgehaltener Repository-Commit `48ba05ad4c6969e3b3c25735492169227ae411f1`, mit GeoJSON-Zeitstempeln vom Juni 2015. Die Metadaten nennen OpenStreetMap als Herkunft. Die zehn Stadtbezirke werden aus der festen Stadtteilzuordnung vereinigt; es werden keine frei gezeichneten Grenzen verwendet.
-- Straßen: zehn Qualitätsdateien des OSM-basierten Projekts `ckrey/stressmap`, Commit `78230754655af475a492de0af267722869d3afe1` vom 23. März 2023. Der tatsächliche OSM-Datenstand kann älter sein. Namen und Geometrien sind enthalten, Straßenklassen fehlen. Deshalb bleiben diese Einheiten ausdrücklich „Ohne Straßenklasse“; Fahrradqualitätswerte werden nicht als Straßenhierarchie ausgegeben.
-- Alle benannten Quellverläufe innerhalb der Stadtgrenze werden je Name zusammengeführt. Benannte Wege sind eingeschlossen. Teilstücke außerhalb der Stadtgrenze werden entfernt. Kreuzt eine Straße mehrere Stadtteile oder Stadtbezirke, gehört sie zu jeder betroffenen Gebietsauswahl.
-- Rohdaten liegen unter `data/duesseldorf/`. `source-manifest.json` hält unveränderliche Quell-URLs und SHA-256 fest. `coverage.json` zählt die Abdeckung pro Stadtteil. Keine Zusage aktueller amtlicher Vollständigkeit.
-- Geodaten: © OpenStreetMap contributors, ODbL 1.0. Erläuterungen und Quellen stehen auch im Düsseldorfer Quellen-Dialog. Beim geplanten Overpass-Auszug werden Fluss-Mittellinien zu angenäherten sichtbaren Flächen gepuffert; diese sind keine vermessenen Ufergrenzen.
+## Reproduzieren und aktualisieren
+
+Entwicklungsabhängigkeit: `shapely==2.1.2` in einer eigenen Python-Umgebung installieren. Die fertige App benötigt kein Python-Paket.
+
+1. `python tools/build_duesseldorf_layers.py` prüft die archivierten Quell-Hashes und erzeugt Fluss- und Bahn-Ebenen ohne Netzwerkzugriff.
+2. `python tools/build_duesseldorf_data.py` erzeugt das vollständige regionale Datenpaket samt Gebietszuordnung und Abdeckung.
+3. `python -m unittest discover -s tests -v` prüft die Anwendung. Browserprüfungen benötigen Playwright und Chromium.
+4. `python tools/export_standalone.py` erzeugt die selbstständige Browserdatei; `python tools/package_app.py` baut und prüft das vollständige ZIP mit Quellen und Tests.
+
+Der ältere `collect_duesseldorf_data.py` bleibt ein optionaler Direktabruf für spätere Aktualisierungen. Er ist für den reproduzierbaren Stand 0.10 nicht nötig. Die Cloud-Sperre der direkten Originalserver bleibt damit eine Eigenschaft dieser Entwicklungsumgebung und blockiert diese Version nicht mehr.
 
 ## Gemeinsame Funktionen und Bestandsschutz
 
-`bootstrap.js` zeigt zunächst die Stadtauswahl. Mit `?region=taipei` bzw. `?region=duesseldorf` wird nur das benötigte regionale Datenpaket geladen. `region-ui.js` lokalisiert die Oberfläche; `app.js` und `street-map.js` bleiben gemeinsame Lern- und Kartenlogik. Unbekannte Regionen führen sicher zur Stadtauswahl.
+`bootstrap.js` zeigt zuerst die Stadtauswahl. `?region=taipei` und `?region=duesseldorf` laden jeweils nur das benötigte regionale Paket. `region-ui.js` lokalisiert die Oberfläche; `app.js` und `street-map.js` bleiben gemeinsame Lern- und Kartenlogik. Unbekannte Regionen führen zur Stadtauswahl.
 
-Die alten Schlüssel `taipei-kennen.settings.v1` und `taipei-kennen.progress.v1` bleiben erhalten. Düsseldorf verwendet `duesseldorf-kennen.settings.v1` und `duesseldorf-kennen.progress.v1`. Es gibt keine automatische Vermischung oder Überschreibung zwischen Städten. Neue Sicherungen enthalten die Region; alte Sicherungen ohne Region werden weiterhin als Taipei-Sicherungen erkannt. Ein Import in die falsche Region wird vor der Übernahme abgewiesen.
+Die bisherigen Schlüssel `taipei-kennen.settings.v1` und `taipei-kennen.progress.v1` bleiben erhalten. Düsseldorf verwendet eigene Schlüssel `duesseldorf-kennen.settings.v1` und `duesseldorf-kennen.progress.v1`. Sicherungen enthalten die Region; alte Sicherungen ohne Region bleiben Taipei-Sicherungen. Ein Import in die falsche Region wird abgewiesen.
 
-Bei einer erneuten bewussten Stadtauswahl werden zunächst die Themen gezeigt. Ein Neuladen innerhalb einer Region kann die zuletzt gespeicherte Ansicht wiederherstellen. Gebietsebene und Gebietsauswahl sind während laufender Runden gesperrt.
+Beim Upgrade des Düsseldorfer Zwischenstands mit Datenversion 1 auf Version 2 werden die erstmals verfügbaren Bahn- und Flussebenen initial eingeblendet und Flüsse vorausgewählt. Bisherige Quizantworten bleiben erhalten. Danach werden die eigenen Anzeigeeinstellungen wieder unverändert respektiert.
 
-Die Offline-Einzeldatei enthält beide regionalen Datenpakete und sämtliche Skripte. Der Starter wählt intern das gewünschte Paket, ohne Dateinachladen oder Netzwerkaufrufe. Die ZIP-Ausgabe enthält zusätzlich Quellen, Datengeneratoren, Herkunftshinweise und Tests.
+Eine bewusste Stadtauswahl öffnet zuerst die Themen. Neuladen innerhalb einer Region kann die gespeicherte Ansicht wiederherstellen. Gebietsebene und Gebietsauswahl bleiben während laufender Runden gesperrt. Die Offline-Einzeldatei enthält beide Regionen und sämtliche Skripte; im Spiel erfolgen keine externen Datenabrufe.

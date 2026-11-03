@@ -6,8 +6,8 @@
   <meta name="color-scheme" content="light">
   <meta name="description" content="Lerne Straßen, Bezirke und Flüsse in Taipei und New Taipei. Ohne Konto, mit Kartenquiz und lokal gespeichertem Lernfortschritt.">
   <title>Taipei kennen · Straßen, Bezirke und Flüsse lernen</title>
-  <link rel="stylesheet" href="styles.css?v=0.9">
-  <script src="bootstrap.js?v=0.9" defer></script>
+  <link rel="stylesheet" href="styles.css?v=0.10">
+  <script src="bootstrap.js?v=0.10" defer></script>
 </head>
 <body>
   <svg class="icon-library" aria-hidden="true"><defs>
@@ -38,7 +38,7 @@
     <section id="region-view" class="home-view" aria-label="Stadt auswählen">
       <div class="home-cards region-cards">
         <a class="home-card" href="?region=taipei#topics" data-region="taipei"><span class="home-card-icon" aria-hidden="true">北</span><strong>Taipei & New Taipei</strong><span>41 Bezirke · Straßen · Flüsse</span><small>Traditionelles Chinesisch und Englisch →</small></a>
-        <a class="home-card" href="?region=duesseldorf#topics" data-region="duesseldorf"><span class="home-card-icon" aria-hidden="true">D</span><strong>Düsseldorf</strong><span>10 Stadtbezirke · 50 Stadtteile · Straßen</span><small>Deutsche Originalnamen · erste Themen öffnen →</small></a>
+        <a class="home-card" href="?region=duesseldorf#topics" data-region="duesseldorf"><span class="home-card-icon" aria-hidden="true">D</span><strong>Düsseldorf</strong><span>10 Stadtbezirke · 50 Stadtteile · Straßen · Flüsse</span><small>Mit U-Bahn, S-Bahn und Straßenbahn zur Orientierung →</small></a>
       </div>
       <p class="home-data-note">Ohne Anmeldung, ohne laufende Kosten. Einstellungen und Lernstände bleiben je Stadt getrennt in deinem Browser.</p>
     </section>
@@ -48,7 +48,7 @@
         <h1 id="page-heading">Taipei wird vertrauter.</h1>
         <p class="intro-copy">Straßen, Bezirke und Flüsse in Taipei und New Taipei kennenlernen.</p>
       </div>
-      <span class="version-badge">Lernapp · 0.9</span>
+      <span class="version-badge">Lernapp · 0.10</span>
     </section>
 
     <section id="home-view" hidden class="home-view" aria-label="Startseite">
@@ -138,6 +138,12 @@
             <p class="label-settings-note">Auch außerhalb deiner Auswahl als Orientierung sichtbar. Der gesuchte Name bleibt bis zur Auflösung verborgen.</p>
           </fieldset>
           <label class="checkbox-row"><input type="checkbox" id="show-metro" checked><span>Metro-Linien anzeigen</span></label>
+          <fieldset id="transport-kind-settings" class="transport-kind-settings" hidden><legend>Bahnarten</legend>
+            <label class="checkbox-row"><input type="checkbox" data-transport-kind="metro" checked><span>U-Bahn / Stadtbahn</span></label>
+            <label class="checkbox-row"><input type="checkbox" data-transport-kind="suburban" checked><span>S-Bahn</span></label>
+            <label class="checkbox-row"><input type="checkbox" data-transport-kind="tram" checked><span>Straßenbahn</span></label>
+            <label class="checkbox-row"><input type="checkbox" data-transport-kind="other" checked><span>SkyTrain</span></label>
+          </fieldset>
           <label class="checkbox-row"><input type="checkbox" id="show-rivers" checked><span>Flüsse anzeigen</span></label>
           <label class="checkbox-row"><input type="checkbox" id="show-river-labels" checked><span>Flussnamen anzeigen</span></label>
           <label class="checkbox-row"><input type="checkbox" id="show-street-labels" checked><span>Straßennamen anzeigen</span></label>

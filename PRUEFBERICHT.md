@@ -1,5 +1,17 @@
 # Prüfung der Straßen- und Menüerweiterung
 
+## Aktueller Stand 0.10 · Düsseldorf mit Flüssen und Bahnlinien
+
+Die zuvor fehlenden Ebenen sind über andere öffentlich archivierte Quellen umgesetzt. Ein Originalserver-Abruf oder eine weitere Netzwerkfreigabe ist für diesen Stand nicht nötig. Enthalten sind sechs OSM-Flüsse sowie 26 aus VRR-Haltefolgen abgeleitete Bahnlinien (zwölf U-Bahn-/Stadtbahnlinien, sechs S-Bahnlinien, sieben Straßenbahnlinien, SkyTrain). Die Bahnarten sind einzeln schaltbar und werden gespeichert. Die ausdrücklich schematische Darstellung verbindet belegte Haltestellen; exakte Gleiskurven und aktuelle Betriebsdaten werden nicht zugesagt. Flussflächen sind angenäherte Flächen um archivierte OSM-Mittellinien.
+
+**Prüfungen:** 15 Düsseldorfer Daten-/Browserprüfungen bestanden in 14,289 s. Enthalten: Quell-Hashes, reale Haltestellen als Linienendpunkte, Flussquiz mit falscher Antwort und erfolgreicher Fehlerwiederholung, versteckte Namen, Touch-Auswahl, getrennte Bahnarten und Sicherungsregionen sowie Upgrade alter Lernstände ohne Fortschrittsverlust. Sechs gezielte bestehende Prüfungen für Pages-Unterpfad, Taipei-Metro, alte Lernstände, Fluss- und Straßenquiz bestanden in 92,640 s. Zwei zusätzliche Einzeldatei-Prüfungen für mobiles Düsseldorfer Flussquiz und mobiles Taipei-Straßenquiz bestanden isoliert und offline in 14,340 s. Damit sind 23 gezielte Prüfungen dieses Ausbaus abgeschlossen; ein erneuter vollständiger Lauf sämtlicher übriger unveränderter Tests wurde nicht behauptet.
+
+Ein zusätzlicher gezielter Upgrade-Nachlauf bestand in 1,872 s; dabei bleibt auch eine ausdrücklich leere Gebietsauswahl erhalten. Die beiden Offline-Datengeneratoren erzeugen byteidentische Ergebnisse. Sie prüfen die SHA-256 der festgehaltenen Archive vor der Verarbeitung. Es gab in den Browserprüfungen keine JavaScript-Fehler und keine externen Laufzeitabrufe. JavaScript-Syntax und `git diff --check` bestanden. Die Quellen, ihre Grenzen und Lizenznachweise stehen in REGIONEN.md und data/duesseldorf/layers-source-manifest.json. Die bekannten Einschränkungen echter Gerätetests und direkter file://-Navigation gelten weiter.
+
+Die folgenden Abschnitte dokumentieren frühere Zwischenstände. Dort erwähnte ausstehende Düsseldorfer Ebenen beschreiben den damaligen Stand und sind mit 0.10 erledigt.
+
+---
+
 Stand: 3. November 2026. Zielversion 0.7.
 
 Der abschließende gemeinsame Lauf mit 36 Prüfungen ist bestanden (450,679 s): 29 Browserprüfungen und sieben Datenprüfungen. Nach der mobilen Sichtprüfung wurden Menübeschriftung und Aufgabenanzeige über der Karte verbessert; die vier betroffenen mobilen Bezirks-/Fluss-/Straßenprüfungen sind danach erneut bestanden (32,375 s und 41,734 s).

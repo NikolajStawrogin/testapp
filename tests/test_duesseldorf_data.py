@@ -38,11 +38,35 @@ class DuesseldorfDataTests(unittest.TestCase):
         if not (SOURCE/'streets-normalized.json').exists():
             self.assertEqual({f['category'] for f in self.data['streets']['features']},{'unclassified'})
         self.assertIn('amtlich',self.data['note'])
-    def test_pending_layers_are_explicit_or_have_real_data(self):
-        if self.data['complete']:
-            self.assertTrue(any(f['nameZh']=='Rhein' for f in self.data['rivers']['features']))
-            self.assertTrue(any('Düssel' in f['nameZh'] for f in self.data['rivers']['features']))
-            self.assertGreaterEqual(len(self.data['metro']['lines']),8)
-            self.assertTrue((SOURCE/'overpass-manifest.json').exists())
-        else:
-            self.assertFalse(self.data['rivers']['features']);self.assertFalse(self.data['metro']['features'])
+    def test_water_and_transit_layers_have_archived_sources(self):
+        import gzip
+        self.assertTrue(self.data['complete'])
+        self.assertEqual({r['nameZh'] for r in self.data['rivers']['features']},{'Rhein','Düssel','Nördliche Düssel','Südliche Düssel','Itter','Kittelbach'})
+        for river in self.data['rivers']['features']:
+            self.assertTrue(river['cityIds']);self.assertTrue(river['sourceIds']);self.assertGreaterEqual(river['lengthMeters'],400)
+            self.assertIn(river['geometry']['type'],['Polygon','MultiPolygon'])
+        manifest=json.loads((SOURCE/'layers-source-manifest.json').read_text())
+        for row in manifest['sources']:
+            raw=(SOURCE/row['file']).read_bytes()
+            self.assertEqual(hashlib.sha256(raw).hexdigest(),row['sha256'])
+            if row.get('uncompressedSha256'):self.assertEqual(hashlib.sha256(gzip.decompress(raw)).hexdigest(),row['uncompressedSha256'])
+    def test_transit_groups_and_schematic_links_match_source_stops(self):
+        from collections import Counter
+        metro=self.data['metro'];lines=metro['lines']
+        self.assertEqual(Counter(line['kind'] for line in lines),{'metro':12,'suburban':6,'tram':7,'other':1})
+        self.assertEqual(len({l['id'] for l in lines}),26)
+        self.assertEqual(metro['geometryModel'],'gtfs-stop-links')
+        self.assertTrue({'S1','S6','S8','S11','S28','S68','701','U79'}.issubset({l['id'] for l in lines}))
+        stops=json.loads((SOURCE/'transit-stops-source.json').read_text())['stops']
+        coords={(round(s['lon'],7),round(s['lat'],7)) for s in stops}
+        ids={s['id'] for s in stops}
+        for line in lines:
+            self.assertTrue(set(line['stopIds']).issubset(ids));self.assertTrue(line['sourceRouteIds'])
+        # Every rendered link has two endpoints; at least one is a real stop,
+        # except very short pieces clipped from links at the city boundary.
+        real=0;total=0
+        for feature in metro['features']:
+            for link in feature['geometry']['coordinates']:
+                self.assertEqual(len(link),2)
+                total+=1;real+=int(any(tuple(point) in coords for point in link))
+        self.assertGreater(real/total,.95)

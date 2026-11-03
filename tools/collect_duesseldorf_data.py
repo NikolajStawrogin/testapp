@@ -1,6 +1,7 @@
 """Collect reproducible OSM streets, named waterways and U-lines for Düsseldorf.
 
-Run only when overpass-api.de is allowed by the environment network policy.
+Optional updater: run only when overpass-api.de is allowed by the environment network policy.
+The shipped archive workflow uses build_duesseldorf_layers.py and needs no network.
 All downloaded source data is retained with query, retrieval time and SHA-256.
 The browser never contacts Overpass or any other external map service.
 """

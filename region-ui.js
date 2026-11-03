@@ -21,6 +21,9 @@
     $("show-rivers").disabled = true;
     $("show-river-labels").disabled = true;
   }
+  $("transport-kind-settings").hidden = false;
+  $("show-metro").nextElementSibling.textContent = "Bahnlinien anzeigen · schematisch";
+  document.querySelector("#metro-legend summary").textContent = "U-Bahn, S-Bahn & Straßenbahn · Legende";
   if (!data.metro.lines.length) $("show-metro").disabled = true;
   const areaCard = document.querySelector('[data-start="districts"]');
   areaCard.querySelector("strong").textContent = "Stadtteile & Stadtbezirke";
@@ -65,7 +68,7 @@
   $("taipei-map").setAttribute("aria-label", "Zoombare Lernkarte von Düsseldorf. Stadtteile, Stadtbezirke, Straßen und Flüsse mit Maus, Tastatur oder Touch auswählen.");
   document.querySelector('.map-panel').setAttribute("aria-label", "Interaktive Karte von Düsseldorf");
   document.querySelector('.metro-legend-note').textContent = data.metro.note;
-  document.querySelector('.map-footer>span').replaceChildren(document.createTextNode("Geodaten: © OpenStreetMap contributors · ODbL · "), Object.assign(document.createElement("span"), { id:"river-credit" }), Object.assign(document.createElement("span"), { id:"metro-credit" }), Object.assign(document.createElement("span"), { id:"street-credit" }));
+  document.querySelector('.map-footer>span').replaceChildren(document.createTextNode("Karte/Flüsse: © OSM · ODbL · Bahn: VRR (Haltefolgen) · "), Object.assign(document.createElement("span"), { id:"river-credit" }), Object.assign(document.createElement("span"), { id:"metro-credit" }), Object.assign(document.createElement("span"), { id:"street-credit" }));
   const sources = $("sources-dialog");
   for (const node of [...sources.children].slice(1)) node.remove();
   const p = document.createElement("p");
@@ -83,7 +86,7 @@
   const help = $("help-dialog");
   for (const node of [...help.children].slice(1)) node.remove();
   const text = document.createElement("p");
-  text.textContent = "Wähle zuerst ein Thema. Bei Gebieten kannst du zwischen 50 Stadtteilen und 10 Stadtbezirken wechseln und die Auswahl auf einen Stadtbezirk eingrenzen. Straßen werden als ganze benannte Verläufe gespielt. Rhein und weitere enthaltene Flüsse lassen sich einzeln mitüben; für reine Flussrunden hebe die Gebietsauswahl auf. Karte ziehen und mit Rad oder zwei Fingern zoomen. Eine Finger-Auswahl wird vor der Quizantwort bestätigt; an Kreuzungen hilft Andere Straße. Lernkarten werden nicht bewertet. Unter Fortschritt kannst du den Lernstand sichern und wieder einlesen; Sicherungen gelten jeweils für die ausgewählte Stadt. Über Stadt wechseln kehrst du zur Stadtauswahl zurück.";
+  text.textContent = "Wähle zuerst ein Thema. Bei Gebieten kannst du zwischen 50 Stadtteilen und 10 Stadtbezirken wechseln und die Auswahl auf einen Stadtbezirk eingrenzen. Straßen werden als ganze benannte Verläufe gespielt. Bahnarten lassen sich in den Einstellungen einzeln einblenden. Ihre Linien sind schematische Verbindungen zwischen VRR-Haltestellen. Rhein und weitere enthaltene Flüsse lassen sich einzeln mitüben; für reine Flussrunden hebe die Gebietsauswahl auf. Karte ziehen und mit Rad oder zwei Fingern zoomen. Eine Finger-Auswahl wird vor der Quizantwort bestätigt; an Kreuzungen hilft Andere Straße. Lernkarten werden nicht bewertet. Unter Fortschritt kannst du den Lernstand sichern und wieder einlesen; Sicherungen gelten jeweils für die ausgewählte Stadt. Über Stadt wechseln kehrst du zur Stadtauswahl zurück.";
   help.append(text);
   // Preserve the shared sources-button listener installed by app.js.
   const button = document.createElement("button");button.id="help-sources";button.className="button button-secondary";button.textContent="Datenquellen";help.append(button);

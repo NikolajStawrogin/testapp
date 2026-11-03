@@ -69,9 +69,10 @@
   }
 
   const savedSettings = load(SETTINGS_KEY);
+  const upgradeLayers = german && savedSettings && savedSettings.datasetVersion < DATA.version;
   const legacyTaipei = features.filter(feature => feature.cityId === "taipei");
   const storedIds = Array.isArray(savedSettings?.selected) ? savedSettings.selected.filter(id => byId.has(id) && !byId.get(id).kind) : null;
-  const expandLegacyAll = savedSettings?.datasetVersion !== DATA.version && storedIds?.length === legacyTaipei.length
+  const expandLegacyAll = !german && savedSettings?.datasetVersion !== DATA.version && storedIds?.length === legacyTaipei.length
     && legacyTaipei.every(feature => storedIds.includes(feature.id));
   const initialLevel = german && savedSettings?.areaLevel === "borough" ? "borough" : "neighborhood";
   const initialIds = !storedIds || expandLegacyAll ? features.filter(feature => !german || feature.level === initialLevel).map(feature => feature.id) : storedIds;
@@ -97,11 +98,12 @@
     labelsByCity: Object.fromEntries(cities.map(city => [city.id,
       typeof savedSettings?.labelsByCity?.[city.id] === "boolean"
         ? savedSettings.labelsByCity[city.id] : savedSettings?.labels !== false])),
-    metro: Boolean(METRO.lines.length) && savedSettings?.metro !== false,
-    rivers: Boolean(rivers.length) && savedSettings?.rivers !== false,
+    metro: Boolean(METRO.lines.length) && (upgradeLayers || savedSettings?.metro !== false),
+    metroKinds: Object.fromEntries(["metro", "suburban", "tram", "other"].map(kind => [kind, savedSettings?.metroKinds?.[kind] !== false])),
+    rivers: Boolean(rivers.length) && (upgradeLayers || savedSettings?.rivers !== false),
     riverLabels: savedSettings?.riverLabels !== false,
     includeRivers: Boolean(rivers.length) && savedSettings?.includeRivers === true,
-    selectedRivers: new Set(Array.isArray(savedSettings?.selectedRivers)
+    selectedRivers: new Set(Array.isArray(savedSettings?.selectedRivers) && !upgradeLayers
       ? savedSettings.selectedRivers.filter(id => rivers.some(river => river.id === id)) : rivers.map(river => river.id)),
     scope: initialScope,
     selected: new Set(initialIds.filter(id => initialScope === "all" || byId.get(id).cityId === initialScope)),
@@ -148,7 +150,7 @@
       areaLevel: state.areaLevel, view: state.view, subject: state.subject, streetCategories: [...state.streetCategories], streetUnits: [...state.streetUnits],
       excludedStreets: [...state.excludedStreets], onlyBilingual: state.onlyBilingual,
       streetLabels: state.streetLabels, streetSearch: state.streetSearch,
-      mode: state.mode, language: state.language, labelsByCity: state.labelsByCity, metro: state.metro,
+      mode: state.mode, language: state.language, labelsByCity: state.labelsByCity, metro: state.metro, metroKinds: state.metroKinds,
       rivers: state.rivers, riverLabels: state.riverLabels, includeRivers: state.includeRivers,
       selectedRivers: [...state.selectedRivers],
       selected: [...state.selected], roundSize: state.roundSize,
@@ -412,10 +414,12 @@
           const casing = document.createElementNS(SVG_NS, "path");
           casing.setAttribute("d", d);
           casing.setAttribute("class", "metro-casing");
+          casing.dataset.kind = line.kind || "metro";
           $("metro-casings").append(casing);
           const path = document.createElementNS(SVG_NS, "path");
           path.setAttribute("d", d);
           path.setAttribute("class", "metro-line");
+          path.dataset.kind = line.kind || "metro";
           path.setAttribute("stroke", line.color);
           path.setAttribute("data-line", line.id);
           path.setAttribute("data-relation", feature.properties.relation);
@@ -696,6 +700,7 @@
 
     render() {
       $("metro-layer").style.display = state.metro ? "" : "none";
+      for (const path of $("metro-layer").querySelectorAll("[data-kind]")) path.style.display = state.metroKinds[path.dataset.kind] ? "" : "none";
       $("river-layer").style.display = riversVisible() ? "" : "none";
       const inSession = state.stage === "session";
       const target = inSession ? state.round.ids[state.round.position] : null;
@@ -991,7 +996,7 @@
     $("practice-view").hidden = state.view !== "practice";
     document.body.dataset.subject = state.subject;
     $("home-street-count").textContent = `${streets.length.toLocaleString("de-DE")} Straßeneinheiten · ${german ? "50 Stadtteile" : "41 Bezirke"}`;
-    $("home-data-note").textContent = german && !window.DUESSELDORF_DATA.complete ? "Düsseldorf im Aufbau: Stadtteile, Stadtbezirke und Straßen sind verfügbar. Flüsse und Stadtbahn sind noch nicht verfügbar." : "Lokale Karte mit Metro und Flüssen. Datenstand und Namensherkunft sind unter Hilfe → Datenquellen dokumentiert.";
+    $("home-data-note").textContent = german && !window.DUESSELDORF_DATA.complete ? "Düsseldorf im Aufbau: Stadtteile, Stadtbezirke und Straßen sind verfügbar. Flüsse und Stadtbahn sind noch nicht verfügbar." : german ? "Lokale Karte mit sechs Flüssen und U-Bahn, S-Bahn, Straßenbahn sowie SkyTrain. Bahnlinien verbinden Haltestellen schematisch. Datenstand unter Hilfe → Datenquellen." : "Lokale Karte mit Metro und Flüssen. Datenstand und Namensherkunft sind unter Hilfe → Datenquellen dokumentiert.";
     for (const button of document.querySelectorAll("[data-nav]")) {
       if ((state.view === "home" && button.dataset.nav === "home") || (state.view === "practice" && button.dataset.nav === state.mode)) button.setAttribute("aria-current", "page");
       else button.removeAttribute("aria-current");
@@ -1003,6 +1008,7 @@
     $("language").value = state.language;
     for (const city of cities) $("show-labels-" + city.id).checked = state.labelsByCity[city.id];
     $("show-metro").checked = state.metro;
+    for (const input of document.querySelectorAll("[data-transport-kind]")) input.checked = state.metroKinds[input.dataset.transportKind];
     $("show-rivers").checked = riversVisible();
     $("show-rivers").disabled = !rivers.length || currentTarget()?.kind === "river";
     $("show-river-labels").checked = state.riverLabels;
@@ -1014,6 +1020,7 @@
     $("metro-credit").hidden = !state.metro;
     $("metro-legend-items").replaceChildren();
     for (const line of METRO.lines) {
+      if (!state.metroKinds[line.kind || "metro"]) continue;
       const chip = document.createElement("span");
       chip.className = "metro-chip";
       chip.dataset.line = line.id;
@@ -1359,6 +1366,7 @@
     saveSettings();
     render();
   });
+  for (const input of document.querySelectorAll("[data-transport-kind]")) input.addEventListener("change", event => { state.metroKinds[input.dataset.transportKind] = event.target.checked; saveSettings(); render(); });
   $("show-metro").addEventListener("change", event => {
     state.metro = event.target.checked;
     saveSettings();

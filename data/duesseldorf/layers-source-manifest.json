@@ -1,0 +1,36 @@
+{
+  "sources": [
+    {
+      "file": "waterways-source.geojson.gz",
+      "uncompressedSha256": "c827c3cb0f4179535ffde2c48fafb2079a1e02a4947dcb4c87b9ed584902918c",
+      "url": "https://raw.githubusercontent.com/3ddruck12/flowtrail-pegel/93b556e4314df05c6b2e887bc13721cb468f5ab2/osm-waterways.geojson",
+      "commit": "93b556e4314df05c6b2e887bc13721cb468f5ab2",
+      "dataVersion": "2026-05-27T1531",
+      "attribution": "© OpenStreetMap contributors",
+      "license": "ODbL-1.0",
+      "sha256": "012d5fdc6b40ad4da88051472b2d3a93f4537bd4d449f054436d5490092d3908"
+    },
+    {
+      "file": "transit-lines-source.json",
+      "url": "https://raw.githubusercontent.com/n3koBomb/linienblick/b71ba453fb72696120ae591caeacae074768d6d2/site/public/data/lines-duesseldorf.json",
+      "commit": "b71ba453fb72696120ae591caeacae074768d6d2",
+      "attribution": "VRR; archived GTFS-derived stop sequences via n3koBomb/linienblick",
+      "geometry": "straight-segments-between-stop-coordinates",
+      "sha256": "c7519dc8f3f2c85be90b19ee885fecd6af2f31423a2027ce73e335932e92d8ad"
+    },
+    {
+      "file": "transit-stops-source.json",
+      "url": "https://raw.githubusercontent.com/n3koBomb/linienblick/b71ba453fb72696120ae591caeacae074768d6d2/site/public/data/stops-duesseldorf.json",
+      "commit": "b71ba453fb72696120ae591caeacae074768d6d2",
+      "attribution": "VRR; archived GTFS-derived stop coordinates via n3koBomb/linienblick",
+      "sha256": "ef19097a21617f6524df87f6b78d5c9fa9858f2b032cb77b5829ccb650a3d2eb"
+    }
+  ],
+  "transitLicenseEvidence": {
+    "url": "https://github.com/highsource/verbundkarte/blob/efa7436687f0eb0506a265b120bf75b8ad5d51ca/README.md",
+    "publisher": "Verkehrsverbund Rhein-Ruhr (VRR)",
+    "licenseLabel": "CC BY; Version in dieser Katalogangabe nicht genannt",
+    "primaryDatasetUrl": "https://www.opendata-oepnv.de/dataset/soll-fahrplandaten-vrr-gtfs",
+    "note": "Öffentlicher Verkehrsverbund-Katalog nennt für den offiziellen VRR-GTFS-Bestand CC BY. Der aktuelle Originaldownload ist in dieser Umgebung gesperrt; es wird keine bestimmte CC-BY-Version erfunden."
+  }
+}

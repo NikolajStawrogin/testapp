@@ -119,3 +119,8 @@ Die Einstellung „Vollzugriff“ hat laut anschließender Prüfung die separate
 Die nötigen Dokumentationsdomains sind erneut im aktuellen Konfigurationsentwurf gespeichert, aber nicht nachweislich angewendet oder veröffentlicht. Aus dem verfügbaren Werkzeugumfang kann die Veröffentlichung nicht selbst ausgelöst werden. Ein Neustart allein ist kein Nachweis, dass der Entwurf aktiv wurde. Es werden keine weiteren Änderungen am Chatmenü als Lösung zugesagt.
 
 Die Prüfung amtlicher Taipei-Daten und ihrer Lizenz bleibt notwendig. Google-Preise sind für den vorgeschlagenen lokalen Betrieb ohne Google-Dienste kein erforderlicher Prüfschritt mehr; ihre Unkenntnis blockiert diesen Vorschlag nicht. Die bereits erlaubten offiziellen GitHub-Quellen liefern technische und betriebliche Teilnachweise. Bis Datenabdeckung und gebührenfreie Bereitstellung nachgewiesen sind, bleibt die Empfehlung vorläufig.
+
+
+## Düsseldorf · verfügbare Quellen seit 0.10
+
+Die regionale App enthält nun sechs aus tatsächlichen OSM-Gewässer-Mittellinien abgeleitete Flüsse und 26 schematische Bahnlinien aus belegten VRR-GTFS-Haltestellenfolgen. Die Gewässerquelle ist ein fest versioniertes Archiv von 3ddruck12/flowtrail-pegel (27.05.2026); die Verkehrsquelle ein VRR-Auszug aus n3koBomb/linienblick (25.08.2026). Schienenverläufe werden ausdrücklich als Haltestellenverbindungen gekennzeichnet und nicht als exakte Gleisgeometrien ausgegeben. Die vier Bahnarten sind separat schaltbar. Quellenkopien, Versionsreferenzen und Prüfsummen werden lokal mitgeliefert, sodass die Version ohne externe Karten-API, Cloud-Freigabe oder bezahlten Dienst funktioniert. Einzelheiten und Nutzungsrechte: REGIONEN.md und THIRD_PARTY_NOTICES.md.

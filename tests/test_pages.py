@@ -62,7 +62,7 @@ class PagesTests(unittest.TestCase):
             page.wait_for_selector('body[data-ready="true"]', state="attached")
             self.assertTrue(page.locator("#home-view").is_visible())
             assets = ["styles.css", "bootstrap.js", "region-ui.js", "street-map.js", "app.js", "data/districts.js", "data/metro.js", "data/rivers.js", "data/streets.js", "data/street-parents.js"]
-            assets = [asset + "?v=0.9" for asset in assets]
+            assets = [asset + "?v=0.10" for asset in assets]
             for asset in assets:
                 self.assertEqual(responses.get(self.url + asset), 200, asset)
             page.locator('[data-start="streets"]').click()

@@ -94,3 +94,66 @@ class RegionBrowserTests(unittest.TestCase):
         self.assertEqual(self.page.locator('.district-shape[data-id="dd-altstadt"]').evaluate('el=>getComputedStyle(el).webkitTapHighlightColor'),'rgba(0, 0, 0, 0)')
         self.assertFalse(self.page.evaluate('document.documentElement.scrollWidth>innerWidth'))
         self.page.screenshot(path='/workspace/duesseldorf-mobile.png',full_page=True)
+
+    def river_point(self,id):
+        self.page.locator('#taipei-map').scroll_into_view_if_needed()
+        return self.page.locator(f'.river-hit[data-id="{id}"]').evaluate("""el=>{
+          const p=new DOMPoint(+el.dataset.anchorX,+el.dataset.anchorY).matrixTransform(el.getScreenCTM());return {x:p.x,y:p.y};}""")
+    def test_river_quiz_wrong_answer_retry_and_name_visibility(self):
+        self.open('duesseldorf');self.chapter('rivers')
+        self.assertEqual(self.page.locator('#river-picker input:checked').count(),6)
+        self.assertEqual(self.page.locator('#district-picker input:checked').count(),0)
+        self.page.locator('#show-river-labels').uncheck()
+        self.assertEqual(self.page.locator('.river-label:visible').count(),0)
+        self.page.locator('[data-mode="quiz"]').click();self.page.locator('#round-size').select_option('all');self.page.locator('#start-button').click()
+        rivers=self.page.evaluate('window.DUESSELDORF_DATA.rivers.features');first=None
+        for index in range(6):
+            name=self.page.locator('#question-name').inner_text();target=next(r for r in rivers if r['nameZh']==name)
+            chosen=next(r for r in rivers if r['id']!=target['id']) if index==0 else target
+            if index==0:first=target
+            point=self.river_point(chosen['id']);self.page.mouse.click(point['x'],point['y'])
+            self.assertIn('Noch nicht ganz' if index==0 else 'Genau richtig',self.page.locator('#feedback').inner_text())
+            self.assertIn(target['nameZh'],self.page.locator('#map-detail').inner_text())
+            self.assertIn('is-correct',self.page.locator(f'.river-shape[data-id="{target["id"]}"]').get_attribute('class'))
+            self.page.locator('#next-button').click()
+        self.assertIn('5 / 6',self.page.locator('#result-score').inner_text())
+        self.page.locator('#retry-errors').click();self.assertEqual(self.page.locator('#question-name').inner_text(),first['nameZh'])
+        point=self.river_point(first['id']);self.page.mouse.click(point['x'],point['y']);self.page.locator('#next-button').click()
+        stats=self.page.evaluate('JSON.parse(localStorage.getItem("duesseldorf-kennen.progress.v1"))')
+        self.assertEqual(stats['districts'][first['id']],{'attempts':2,'correct':1})
+    def test_transit_kinds_toggle_persist_and_do_not_answer_quiz(self):
+        self.open('duesseldorf');self.chapter('districts')
+        self.assertEqual(self.page.locator('.metro-line:visible').count(),26)
+        self.page.locator('[data-transport-kind="suburban"]').uncheck()
+        self.assertEqual(self.page.locator('.metro-line[data-kind="suburban"]:visible').count(),0)
+        self.assertEqual(self.page.locator('.metro-line[data-kind="metro"]:visible').count(),12)
+        self.page.locator('#metro-legend summary').click();self.assertIn('Schematische',self.page.locator('.metro-legend-note').inner_text())
+        self.assertEqual(self.page.locator('.metro-chip').count(),20)
+        self.page.locator('[data-mode="quiz"]').click();self.page.locator('#start-button').click()
+        self.page.locator('[data-transport-kind="tram"]').uncheck();self.assertFalse(self.page.locator('#feedback').is_visible())
+        self.page.reload();self.page.wait_for_selector('body[data-ready="true"]',state='attached')
+        self.assertFalse(self.page.locator('[data-transport-kind="suburban"]').is_checked())
+        self.assertFalse(self.page.locator('[data-transport-kind="tram"]').is_checked())
+        self.assertEqual(self.page.locator('.metro-line:visible').count(),13)
+    def test_previous_dusseldorf_settings_gain_layers_without_losing_progress(self):
+        self.open('duesseldorf')
+        self.page.evaluate("""() => {
+          localStorage.setItem('duesseldorf-kennen.settings.v1',JSON.stringify({datasetVersion:1,view:'home',metro:false,rivers:false,selectedRivers:[],selected:[]}));
+          localStorage.setItem('duesseldorf-kennen.progress.v1',JSON.stringify({rounds:3,districts:{'dd-bilk':{attempts:4,correct:3}}}));
+        }""")
+        self.page.reload();self.page.wait_for_selector('body[data-ready="true"]',state='attached')
+        self.assertEqual(self.page.locator('#district-picker input:checked').count(),0,'An explicitly empty area selection survives the data upgrade')
+        self.chapter('rivers')
+        self.assertTrue(self.page.locator('#show-metro').is_checked());self.assertTrue(self.page.locator('#show-rivers').is_checked())
+        self.assertEqual(self.page.locator('#river-picker input:checked').count(),6)
+        self.assertEqual(self.page.evaluate('JSON.parse(localStorage.getItem("duesseldorf-kennen.progress.v1")).rounds'),3)
+    def test_mobile_river_touch_and_map_layers(self):
+        self.context.close();self.context=self.browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
+        self.page=self.context.new_page();self.page.on('pageerror',lambda e:self.errors.append(str(e)))
+        self.open('duesseldorf');self.chapter('rivers');self.page.locator('[data-mode="quiz"]').tap();self.page.locator('#start-button').tap()
+        name=self.page.locator('#mobile-question-name').inner_text()
+        target=self.page.evaluate('(name)=>window.DUESSELDORF_DATA.rivers.features.find(r=>r.nameZh===name)',name)
+        p=self.river_point(target['id']);self.page.touchscreen.tap(p['x'],p['y'])
+        self.assertIn('Genau richtig',self.page.locator('#feedback').inner_text())
+        self.assertTrue(self.page.locator('#map-detail').is_visible());self.assertFalse(self.page.evaluate('document.documentElement.scrollWidth>innerWidth'))
+        self.page.screenshot(path='/workspace/duesseldorf-rivers-mobile.png',full_page=True)
