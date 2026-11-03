@@ -1,6 +1,6 @@
 # Taipei kennen
 
-Lokale Browser-Lernapp 0.7 für alle 41 Verwaltungsbezirke von Taipei City (12) und New Taipei City (29), vier große Flüsse und 22.039 benannte Straßeneinheiten.
+Lokale Browser-Lernapp 0.7 für alle 41 Verwaltungsbezirke von Taipei City (12) und New Taipei City (29), vier große Flüsse und 22.240 wählbare Straßeneinheiten.
 Die App läuft im Browser auf dem eigenen Rechner. Kein Konto, kein bezahltes Hosting, kein Karten-API-Schlüssel und keine externen Kartenabrufe.
 
 ## Lokal starten
@@ -46,7 +46,7 @@ Die App funktioniert nach dem Bereitstellen der Dateien ohne Internetverbindung.
 ## Was bereits funktioniert
 
 - Startseite mit Einstiegen für Bezirke, Straßen und Flüsse. Hauptmenü mit Start, Entdecken, Lernen, Quiz, Fortschritt, Einstellungen und Hilfe; auf schmalen Bildschirmen als aufklappbares Menü.
-- Straßen in allen 41 Bezirken auswählen, erkunden, als Lernkarten ansehen und im Kartenquiz finden. Straßensuche, Einzelwahl, drei Straßenklassen sowie getrennte Filter für Straßen, Sections, Lanes und Alleys. Standardmäßig sind Haupt-/Verbindungsstraßen und Straßen/Sections gewählt; kleine Gassen können schrittweise zugeschaltet werden.
+- Straßen in allen 41 Bezirken auswählen, erkunden, als Lernkarten ansehen und im Kartenquiz finden. Straßensuche, Einzelwahl, drei Straßenklassen sowie getrennte Filter für ganze Straßen, Sections, Lanes und Alleys. Ganze Straßen wie 忠孝東路 sind zusätzlich zu ihren sieben einzelnen Sections lernbar. Standardmäßig sind Haupt-/Verbindungsstraßen und Straßen/Sections gewählt; kleine Gassen können schrittweise zugeschaltet werden.
 - Maus-Hover hebt die gesamte gewählte Straßeneinheit hervor, ein Klick wählt sie. Auf Touch-Geräten wird die angetippte Straße zuerst hervorgehoben und anschließend bestätigt. An Kreuzungen ist zwischen nahen Straßen wechselbar. Verschieben und Zoomen geben keine Quizantwort ab. Der Zielname bleibt vor der Auflösung verborgen.
 - Straßenfilter und Einzelauswahl werden gespeichert. Fehlende englische Namen sind ausdrücklich gekennzeichnet und standardmäßig aus dem Quiz ausgeschlossen; reine Englisch-Aufgaben enthalten keine erfundenen Ersatznamen. Die Namensherkunft ist dokumentiert und keine pauschale Zusage heutiger amtlicher Verifikation.
 - Lernstand als JSON sichern und nach ausdrücklicher Bestätigung wieder einlesen. Ungültige Dateien werden abgewiesen; ein Import beendet gegebenenfalls die laufende Runde. Fortschritt, Fehlerwiederholung und Lernkarten funktionieren auch für Straßen.
@@ -72,7 +72,7 @@ Der Fortschritt gehört zum verwendeten Browser und zur lokalen Adresse. Für de
 
 Bildquiz, Store-Apps, Konten und Synchronisierung gehören weiterhin nicht zum implementierten Umfang. Straßenbilder werden im Menü als spätere Erweiterung erläutert. Eine eigene Online-Bereitstellung oder PWA-Installation ist noch nicht eingerichtet. Die App bleibt statisch und kann später auf kostenlosem statischem Hosting bereitgestellt werden; aktuelle Rechtefragen der Namens- und Flussreferenzen müssen vor einer öffentlichen Veröffentlichung abschließend geklärt werden.
 
-Der Straßenbestand deckt beide Stadtgebiete ab, belegt jedoch keine lückenlose heutige amtliche Straßenabdeckung: Der flächendeckende OSM-Kachelstand ist von Dezember 2021, der ergänzende Innenstadt-Auszug von September 2026. Der Abdeckungsbericht nennt Aufgaben und englische Namensabdeckung je Bezirk. 1.362 Aufgaben haben keinen belegten englischen Namen. Die vollständigen Quellenkopien und ihr Hash-Manifest sind mitgeliefert. Geometrien und Namensreferenzen sind in [data/STREETS-SOURCE.md](data/STREETS-SOURCE.md) und [data/street-coverage.json](data/street-coverage.json) nachvollziehbar dokumentiert.
+Der Straßenbestand deckt beide Stadtgebiete ab, belegt jedoch keine lückenlose heutige amtliche Straßenabdeckung: Der flächendeckende OSM-Kachelstand ist von Dezember 2021, der ergänzende Innenstadt-Auszug von September 2026. Der Abdeckungsbericht nennt Aufgaben und englische Namensabdeckung je Bezirk. 1.363 wählbare Aufgaben haben keinen belegten englischen Namen. Die vollständigen Quellenkopien und ihr Hash-Manifest sind mitgeliefert. Geometrien und Namensreferenzen sind in [data/STREETS-SOURCE.md](data/STREETS-SOURCE.md) und [data/street-coverage.json](data/street-coverage.json) nachvollziehbar dokumentiert.
 
 Die Bezirksgeometrien sind ein vereinfachter, älterer Referenzbestand aus dem unter CC0 bereitgestellten Projekt `g0v/twgeojson`. Ein Abgleich mit aktuellen amtlichen Grenzen steht aus. Die Namensreferenz ist in [OFFIZIELLE_NAMEN.md](OFFIZIELLE_NAMEN.md) mit ihren Nachweisgrenzen beschrieben. Dieser Prototyp ist keine amtliche Karten- oder Grenzauskunft.
 
@@ -108,3 +108,7 @@ Geprüft in dieser Cloud-Umgebung mit Chromium auf Linux, für Touch in mobiler 
 Die zusätzlichen Prüfungen in `tests/test_streets_browser.py` behandeln Straßenquiz, Hover und Lösungsverdeckung, Fehlerwiederholung, Lernkarten und Tastatur, Sections/Lanes/Alleys, äußere New-Taipei-Bezirke, fehlende englische Namen, Menüwechsel, Einstellungen, Sicherung und Import sowie Touch-Gesten und Straßenauswahl an Kreuzungen. Sämtliche Browserprüfungen laufen auch bei aktivierter Metro-Ebene.
 
 Für die Datenprüfungen allein werden keine Zusatzpakete benötigt: `python -m unittest discover -s tests -p test_street_data.py -v`. Zum erneuten Erzeugen des Straßenkatalogs aus dem mitgelieferten Quellenarchiv benötigen ausschließlich die Entwicklungswerkzeuge `mapbox-vector-tile` und `shapely`; danach `python tools/build_street_data.py` ausführen. Jeder archivierte Datenteil wird vorher gegen seine Prüfsumme geprüft.
+
+Ganze Straßen werden zusätzlich zu ihren Sections angeboten: 229 abgeleitete ganze Straßen integrieren 28 bereits vorhandene ganze Straßenstücke, insgesamt sind 22.240 Einheiten wählbar. `tools/build_street_data.py` ruft am Ende die reproduzierbare Erzeugung in `tools/build_street_parents.py` auf. Bei einer Frage zu einer ganzen Straße werden auch verräterische Section- und Gassenbeschriftungen desselben Namens verborgen.
+
+Ein geprüftes lokales Paket einschließlich Einzeldatei, Quellenarchiven und Tests wird mit `python tools/package_app.py` erzeugt. Optional: `--output /gewünschter/pfad/app.zip --html /gewünschter/pfad/app.html`. Die Paketprüfung vergleicht alle archivierten Dateien bytegenau mit den lokalen Quellen.

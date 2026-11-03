@@ -12,6 +12,8 @@ import json
 import math
 from pathlib import Path
 import re
+import subprocess
+import sys
 import unicodedata
 from zipfile import ZipFile
 
@@ -227,6 +229,7 @@ def main():
     (ROOT / "data/street-coverage.json").write_text(json.dumps(coverage, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps({key: value for key, value in coverage.items() if key not in ["districts", "missingTiles"]}, ensure_ascii=False), flush=True)
     print("Unversorgte Bezirke:", [row["nameZh"] for row in by_district if not row["streets"]], flush=True)
+    subprocess.run([sys.executable, str(ROOT / "tools/build_street_parents.py")], check=True)
 
 
 if __name__ == "__main__":

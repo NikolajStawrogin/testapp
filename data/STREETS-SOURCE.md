@@ -37,3 +37,11 @@ Parallele Fahrbahnen beziehungsweise nahe Teilstücke werden bis etwa 70 m Nachb
 ## Prüfung und Reproduktion
 
 `python -m unittest discover -s tests -p test_street_data.py -v` prüft sämtliche Quellhashes, alle 41 Bezirke, beide Städte, Sections/Lanes/Alleys, eindeutige IDs, Geometrien, Beschriftungspunkte und belegte Namensbeispiele. Für die erneute Datenerzeugung werden ausschließlich als Entwicklungswerkzeuge `shapely` und `mapbox-vector-tile` benötigt. Der fertige lokale Browserbetrieb benötigt keine Zusatzpakete.
+
+## Ganze Straßen zusätzlich zu Sections
+
+`tools/build_street_parents.py` erzeugt aus den dokumentierten Section-Geometrien 229 zusätzliche ganze Straßen, beispielsweise 忠孝東路 aus ihren sieben Sections. Räumlich zusammengehörige Sections werden über tatsächliche Nähe oder gemeinsame Bezirke zugeordnet; voneinander entfernte gleichnamige Straßen bleiben getrennt. Vorhandene 28 ganze Straßenstücke werden dabei integriert statt doppelt angeboten. Das tatsächlich wählbare Lernangebot umfasst damit 22.240 Einheiten; alle ursprünglichen Sections bleiben eigenständige Aufgaben.
+
+Die Ausgabe `street-parents.js` enthält die verwendeten Section-IDs, Geometrien, Beziehungen und die SHA-256-Prüfsumme des zugrunde liegenden `streets.js`. Der erzeugte ganze Straßenverlauf besteht ausschließlich aus vorhandenen Geometrien, ohne künstliche Verbindungen. Englische Basisnamen stammen aus eindeutigen Postreferenz-Einträgen oder aus belegten englischen Section-Namen, deren numerischer `Sec.`-Zusatz entfernt wird (`postal-parent`). Es wird keine neue Pinyin-Umschrift erzeugt. 226 dieser ganzen Straßen haben einen belegten Basisnamen; bei drei fehlt die englische Zuordnung. Nach Integration vorhandener Stücke haben 1.363 wählbare Einheiten keinen englischen Namen.
+
+Im Quiz wird nur der abgefragte Einheitentyp als Antwort gewählt, damit ein Klick auf eine Section nicht gleichzeitig eine geometrisch darüberliegende ganze Straße auswählt. Bei verborgenem Zielnamen werden auch Beschriftungen untergeordneter Sections/Gassen mit demselben Namensbestandteil verborgen. So verrät etwa eine beschriftete „忠孝東路四段181巷“ nicht den gesuchten übergeordneten Verlauf.

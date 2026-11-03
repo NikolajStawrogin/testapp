@@ -78,6 +78,7 @@ class StreetBrowserTests(unittest.TestCase):
 
     def test_street_quiz_hover_hidden_solution_scoring_retry_and_persistence(self):
         self.street_mode()
+        self.page.locator('[name="street-unit"][value="street"]').uncheck()
         self.search("忠孝東路")
         candidates = self.page.locator("#street-picker input:checked").evaluate_all("nodes => nodes.map(node=>node.value)")
         self.assertGreater(len(candidates), 2)
@@ -115,6 +116,32 @@ class StreetBrowserTests(unittest.TestCase):
         self.assertEqual(self.progress()["rounds"], 2)
         self.page.locator("#progress-open").click()
         self.assertIn("Geübte Straßen", self.page.locator("#progress-list").inner_text())
+
+    def test_whole_road_quiz_hides_section_and_lane_name_hints(self):
+        self.street_mode()
+        self.page.locator('[name="street-unit"][value="section"]').uncheck()
+        self.search("忠孝東路")
+        self.assertEqual(self.page.locator("#street-picker input").count(), 1)
+        self.page.locator('[data-mode="quiz"]').click()
+        self.page.locator("#start-button").click()
+        target = self.target()
+        self.assertEqual(target["nameZh"], "忠孝東路")
+        self.assertEqual(target["unit"], "street")
+        self.assertEqual(len(target["children"]), 7)
+        point = self.point(target["id"])
+        self.page.mouse.move(point["x"], point["y"])
+        for _ in range(2):
+            self.page.mouse.wheel(0, -240)
+            self.page.wait_for_timeout(80)
+        visible_names = self.page.locator(".street-label:visible").all_text_contents()
+        self.assertTrue(visible_names, "Other names should remain available as orientation")
+        self.assertFalse(any("忠孝東路" in text for text in visible_names), "Section and child-lane labels must not reveal the whole road")
+        self.assertEqual(self.page.locator(".street-highlight").get_attribute("data-id"), target["id"])
+        self.page.mouse.click(point["x"], point["y"])
+        self.assertIn("Genau richtig", self.page.locator("#feedback").inner_text())
+        self.assertEqual(self.progress()["districts"][target["id"]], {"attempts": 1, "correct": 1})
+        self.page.reload()
+        self.assertEqual(self.progress()["districts"][target["id"]]["attempts"], 1)
 
     def test_sections_lanes_and_alleys_have_independent_filters(self):
         self.street_mode()
@@ -254,6 +281,8 @@ class StreetBrowserTests(unittest.TestCase):
         self.search(lane["nameZh"])
         self.page.locator('[data-mode="quiz"]').tap()
         self.page.locator("#start-button").tap()
+        self.assertTrue(self.page.locator("#mobile-question").is_visible())
+        self.assertEqual(self.page.locator("#mobile-question-name").inner_text(), lane["nameZh"])
         self.page.locator("#taipei-map").scroll_into_view_if_needed()
         client = self.context.new_cdp_session(self.page)
 
@@ -282,7 +311,11 @@ class StreetBrowserTests(unittest.TestCase):
         self.assertIn("Genau richtig", self.page.locator("#feedback").inner_text())
         self.assertEqual(self.progress()["districts"][lane["id"]], {"attempts": 1, "correct": 1})
         self.assertFalse(self.page.evaluate("document.documentElement.scrollWidth>innerWidth"))
+        self.page.locator("#mobile-next").tap()
+        self.assertTrue(self.page.locator("#results-panel").is_visible())
+        self.assertFalse(self.page.locator("#mobile-question").is_visible())
         self.page.locator("#menu-toggle").tap()
+        self.assertGreater(float(self.page.locator("#menu-toggle").evaluate("el=>getComputedStyle(el).fontSize").replace("px", "")), 0)
         self.page.locator('[data-nav="help"]').tap()
         self.assertTrue(self.page.locator("#help-dialog").is_visible())
         self.assertEqual(self.page.locator("#menu-toggle").get_attribute("aria-expanded"), "false")

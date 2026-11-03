@@ -77,6 +77,30 @@ class StreetDataTests(unittest.TestCase):
         for name in ["通安街108巷", "新生南路一段12巷9弄", "忠孝東路四段205巷29弄", "通化街200巷"]:
             self.assertIn(name, names)
 
+    def test_whole_roads_are_reproducibly_derived_from_sections(self):
+        parent_data = json.loads((ROOT / "data/street-parents.js").read_text().split("=", 1)[1].strip().removesuffix(";"))
+        self.assertEqual(parent_data["sourceStreetSha256"], hashlib.sha256((ROOT / "data/streets.js").read_bytes()).hexdigest())
+        replaced = set(parent_data["replacedIds"])
+        combined = [feature for feature in self.features if feature["id"] not in replaced] + parent_data["features"]
+        self.assertEqual(len(combined), len({feature["id"] for feature in combined}))
+        self.assertEqual(len(combined), parent_data["coverage"]["learningUnits"])
+        by_id = {feature["id"]: feature for feature in self.features}
+        identities = []
+        for feature in combined:
+            for district in feature["districtIds"]:
+                identities.append((feature["cityId"], feature["nameZh"].replace("臺", "台"), district))
+        self.assertEqual(len(identities), len(set(identities)))
+        for parent in parent_data["features"]:
+            self.assertEqual(parent["unit"], "street")
+            self.assertTrue(parent["children"])
+            self.assertTrue(parent["geometry"]["coordinates"])
+            for id in parent["children"]:
+                self.assertEqual(by_id[id]["unit"], "section")
+                self.assertEqual(by_id[id]["cityId"], parent["cityId"])
+        zhongxiao = next(feature for feature in parent_data["features"] if feature["cityId"] == "taipei" and feature["nameZh"] == "忠孝東路")
+        self.assertEqual(len(zhongxiao["children"]), 7)
+        self.assertEqual(zhongxiao["nameEn"], "Zhongxiao E. Rd.")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

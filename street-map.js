@@ -95,7 +95,10 @@
       const occupied = [];
       const shown = new Set();
       if (options.names && options.zoom >= 3) {
-        const candidates = this.visible.filter(item => item.feature.id !== options.hiddenId && overlaps([item.anchor[0], item.anchor[1], item.anchor[0], item.anchor[1]], view));
+        const normalize = value => value.normalize("NFKC").replaceAll("臺", "台").replace(/\s/g, "");
+        const candidates = this.visible.filter(item => item.feature.id !== options.hiddenId
+          && (!options.hiddenPrefix || !normalize(item.feature.nameZh).includes(normalize(options.hiddenPrefix)))
+          && overlaps([item.anchor[0], item.anchor[1], item.anchor[0], item.anchor[1]], view));
         for (const item of candidates) {
           if (shown.size >= 65) break;
           const feature = item.feature;

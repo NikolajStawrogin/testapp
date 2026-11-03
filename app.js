@@ -5,11 +5,19 @@
   const METRO = window.TAIPEI_METRO;
   const features = DATA.features;
   const rivers = window.TAIPEI_RIVERS.features;
-  const streets = window.TAIPEI_STREETS.features;
+  const streetParents = window.TAIPEI_STREET_PARENTS;
+  const replacedStreetIds = new Set(streetParents.replacedIds);
+  const streets = window.TAIPEI_STREETS.features.filter(feature => !replacedStreetIds.has(feature.id)).concat(streetParents.features);
+  window.TAIPEI_STREETS.features = streets;
   const mapFeatures = [...features, ...rivers];
   const learningFeatures = [...mapFeatures, ...streets];
   const cities = DATA.cities;
   const byId = new Map(learningFeatures.map(feature => [feature.id, feature]));
+  const streetProgressAliases = new Map();
+  for (const [oldId, id] of Object.entries(streetParents.aliases)) {
+    if (!streetProgressAliases.has(id)) streetProgressAliases.set(id, []);
+    streetProgressAliases.get(id).push(oldId);
+  }
   const cityById = new Map(cities.map(city => [city.id, city]));
   const $ = id => document.getElementById(id);
   const SVG_NS = "http://www.w3.org/2000/svg";
@@ -48,11 +56,11 @@
   function cleanProgress(raw) {
     const result = { rounds: count(raw?.rounds), districts: {} };
     for (const feature of learningFeatures) {
-      const row = raw?.districts?.[feature.id];
-      if (!row || !count(row.attempts)) continue;
+      const rows = [feature.id, ...(streetProgressAliases.get(feature.id) || [])].map(id => raw?.districts?.[id]).filter(row => row && count(row.attempts));
+      if (!rows.length) continue;
       result.districts[feature.id] = {
-        attempts: count(row.attempts),
-        correct: Math.min(count(row.correct), count(row.attempts))
+        attempts: Math.min(Number.MAX_SAFE_INTEGER, rows.reduce((total, row) => total + count(row.attempts), 0)),
+        correct: Math.min(Number.MAX_SAFE_INTEGER, rows.reduce((total, row) => total + Math.min(count(row.correct), count(row.attempts)), 0))
       };
     }
     return result;
@@ -72,7 +80,7 @@
     subject: savedSettings?.subject === "streets" ? "streets" : "districts",
     streetCategories: new Set(Array.isArray(savedSettings?.streetCategories) ? savedSettings.streetCategories.filter(value => ["major", "secondary", "local"].includes(value)) : ["major", "secondary"]),
     streetUnits: new Set(Array.isArray(savedSettings?.streetUnits) ? savedSettings.streetUnits.filter(value => ["street", "section", "lane", "alley"].includes(value)) : ["street", "section"]),
-    excludedStreets: new Set(Array.isArray(savedSettings?.excludedStreets) ? savedSettings.excludedStreets.filter(id => byId.get(id)?.kind === "street") : []),
+    excludedStreets: new Set(Array.isArray(savedSettings?.excludedStreets) ? savedSettings.excludedStreets.map(id => streetParents.aliases[id] || id).filter(id => byId.get(id)?.kind === "street") : []),
     onlyBilingual: savedSettings?.onlyBilingual !== false,
     streetLabels: savedSettings?.streetLabels !== false,
     streetSearch: typeof savedSettings?.streetSearch === "string" ? savedSettings.streetSearch.slice(0, 120) : "",
@@ -159,6 +167,7 @@
   }
 
   function isPlayable(feature) {
+    if (feature.kind === "street" && currentTarget()?.kind === "street" && feature.unit !== currentTarget().unit) return false;
     if (feature.kind === "street") return state.subject === "streets" && (streetPool().ids.has(feature.id)
       || (state.stage === "session" && state.round.ids.includes(feature.id)));
     if (state.subject === "streets") return false;
@@ -471,8 +480,10 @@
       const answer = revealed ? state.round.answers.at(-1) : null;
       const pool = new Set(streetPool().ids);
       if (state.stage === "session") for (const id of state.round.ids) if (byId.get(id).kind === "street") pool.add(id);
+      if (target?.kind === "street") for (const id of pool) if (byId.get(id).unit !== target.unit) pool.delete(id);
       this.streets.render({ visible, pool, zoom: this.zoom, matrix, viewport: this.svg.getBoundingClientRect(),
         language: state.language, names: state.streetLabels, hiddenId: revealed ? null : target?.id,
+        hiddenPrefix: revealed ? null : target?.nameZh,
         inSession: state.stage === "session", revealed,
         correctId: revealed && target?.kind === "street" ? target.id : null,
         wrongId: answer && !answer.correct ? answer.chosenId : null,
@@ -913,6 +924,18 @@
     } else {
       renderDetail(null, isStreet ? "Welche Straße ist gesucht?" : isRiver ? "Welcher Fluss ist gesucht?" : "Welcher Bezirk ist gesucht?");
     }
+    $("mobile-question-count").textContent = $("session-count").textContent;
+    $("mobile-question-city").textContent = $("question-city").textContent;
+    $("mobile-question-instruction").textContent = $("question-instruction").textContent;
+    $("mobile-question-name").textContent = parts.main;
+    $("mobile-question-name").lang = parts.lang;
+    $("mobile-question-secondary").textContent = parts.secondary;
+    $("mobile-question-feedback").textContent = round.revealed ? $("feedback").firstElementChild.textContent : "";
+    $("mobile-question-feedback").classList.toggle("wrong", round.revealed && round.kind === "quiz" && !round.answers.at(-1).correct);
+    $("mobile-reveal").hidden = round.revealed;
+    $("mobile-reveal").textContent = round.kind === "cards" ? "Verlauf zeigen" : "Weiß ich noch nicht";
+    $("mobile-next").hidden = !round.revealed;
+    $("mobile-next").textContent = round.position === round.ids.length - 1 ? "Runde abschließen" : "Weiter";
   }
 
   function renderResults() {
@@ -958,6 +981,7 @@
     $("setup-panel").hidden = state.stage !== "setup";
     $("session-panel").hidden = state.stage !== "session";
     $("results-panel").hidden = state.stage !== "results";
+    $("mobile-question").hidden = state.stage !== "session";
     $("language").value = state.language;
     for (const city of cities) $("show-labels-" + city.id).checked = state.labelsByCity[city.id];
     $("show-metro").checked = state.metro;
@@ -1013,7 +1037,11 @@
     map.reset();
     render();
     $("question-name").setAttribute("tabindex", "-1");
-    $("question-name").focus({ preventScroll: true });
+    focusQuestion();
+  }
+
+  function focusQuestion() {
+    (window.matchMedia("(max-width: 780px)").matches ? $("mobile-question-name") : $("question-name")).focus({ preventScroll: true });
   }
 
   function selectDistrict(id, options = {}) {
@@ -1069,7 +1097,7 @@
       round.position += 1;
       round.revealed = false;
       render();
-      $("question-name").focus({ preventScroll: true });
+      focusQuestion();
     }
   }
 
@@ -1311,6 +1339,8 @@
     else beginRound(state.mode);
   });
   $("reveal-button").addEventListener("click", () => answerQuestion(null));
+  $("mobile-reveal").addEventListener("click", () => answerQuestion(null));
+  $("mobile-next").addEventListener("click", nextQuestion);
   $("next-button").addEventListener("click", nextQuestion);
   $("session-end").addEventListener("click", endRound);
   $("back-to-setup").addEventListener("click", endRound);

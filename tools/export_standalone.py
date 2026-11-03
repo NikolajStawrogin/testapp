@@ -40,7 +40,7 @@ def main():
 
     html, style_count = re.subn(r'<link rel="stylesheet" href="([^"]+)">', inline_styles, html)
     html, script_count = re.subn(r'<script src="([^"]+)" defer></script>', collect_script, html)
-    if style_count != 1 or script_count != 6:
+    if style_count != 1 or script_count != 7:
         raise ValueError("Unerwartete Ressourcenliste; Export muss überprüft werden")
     # Inline scripts run after the complete UI has been parsed; inline defer would not delay them.
     html = html.replace("</body>", "\n" + "\n".join("<script>\n" + text + "\n</script>" for text in scripts) + "\n</body>")
