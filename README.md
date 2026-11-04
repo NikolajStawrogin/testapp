@@ -49,6 +49,10 @@ python server.py --port 8766
 
 Die App funktioniert nach dem Bereitstellen der Dateien ohne Internetverbindung. Die optionalen Quellenlinks benötigen beim Öffnen Internetzugriff.
 
+## Erst auswählen, dann spielen · 0.14
+
+Die App führt dich vor dem Spiel durch Thema → Gebiet → Lernweise/Level → Kartenhilfen → Bestätigung. Erst danach öffnet sich die große Karte auf einer eigenen Spielansicht. Es gibt keine linke Einstellungsspalte mehr. Kartenoptionen lassen sich während des Spiels bei Bedarf öffnen; Ergebnisse erscheinen ohne Karte. Beim Start und beim Sprachwechsel zeigt die App einen Ladebildschirm, bevor sie die Karte aufbereitet. Details: [GEFUEHRTER_EINSTIEG.md](GEFUEHRTER_EINSTIEG.md).
+
 ## 國語 / English · 0.13
 
 Die App startet beim ersten Besuch in traditionellem Chinesisch. Über das Globus-Symbol oben rechts lässt sich die gesamte Oberfläche sofort auf Englisch umstellen. Die Sprachbezeichnung lautet 國語 beziehungsweise Mandarin; die Auswahl bleibt beim nächsten Besuch und Stadtwechsel erhalten. Laufende Quizrunden und Lernstände bleiben bestehen. Die Kartennamen sind separat einstellbar, Düsseldorfer Straßen behalten ihre Originalnamen. Details: [SPRACHEN.md](SPRACHEN.md).

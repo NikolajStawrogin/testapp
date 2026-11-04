@@ -784,8 +784,8 @@
   ],
   "m186": [
     "Wähle zuerst ein Thema. Wähle oben einen Stadtteil wie Eller oder Wersten oder wähle in der Liste mehrere Stadtteile für eine gemeinsame Runde. Geübt werden die Stadtteilnamen. Auch das Straßenquiz lässt sich so auf deine Stadtteile eingrenzen. Straßen werden als ganze benannte Verläufe gespielt. Bahnarten lassen sich in den Einstellungen einzeln einblenden. Ihre Linien sind schematische Verbindungen zwischen VRR-Haltestellen. Rhein und weitere enthaltene Flüsse lassen sich einzeln mitüben; für reine Flussrunden hebe die Gebietsauswahl auf. Karte ziehen und mit Rad oder zwei Fingern zoomen. Eine Finger-Auswahl wird vor der Quizantwort bestätigt; an Kreuzungen hilft Andere Straße. Lernkarten werden nicht bewertet. Unter Fortschritt kannst du den Lernstand sichern und wieder einlesen; Sicherungen gelten jeweils für die ausgewählte Stadt. Über Stadt wechseln kehrst du zur Stadtauswahl zurück.",
-    "Choose a topic, then a neighbourhood such as Eller or Wersten above the map, or several neighbourhoods from the list. Street quizzes use the same area selection and whole named streets. Toggle rail types in Settings; lines schematically connect VRR stops. Rivers can be practised individually; clear the area selection for a river-only round. Drag to pan and use the mouse wheel or two fingers to zoom. Confirm a finger selection before answering; at junctions use Other street. Flashcards are not scored. Export or import progress for the selected city under Progress. Change city returns to the city selection.",
-    "先選主題，再從地圖上方選擇 Eller、Wersten 等街區，或在清單中複選街區。街道測驗使用相同區域範圍，以完整街道為題。可在設定中切換交通類別；線條為連接 VRR 車站的示意線。河流可單獨練習；只練習河流時請清除區域選取。拖曳平移，用滾輪或雙指縮放。手指選路後須確認才會送出答案，路口可選「其他街道」。學習卡不計分。可在「進度」匯出或匯入目前城市的紀錄，選「切換城市」返回城市選擇。"
+    "Choose a topic, then follow the preparation steps: area, learning mode and street level, map aids, and confirmation. The map appears only after you start. Choose a whole city or neighbourhoods such as Eller and Wersten. Rail types can be toggled in Map options; lines schematically connect VRR stops. Rivers can be practised separately or with areas. Drag to pan; use the wheel or two fingers to zoom. Confirm a finger selection before answering. Flashcards are not scored. Save or restore progress under Progress. Change this round returns to preparation.",
+    "選擇主題後，依序完成區域、學習模式與街道級別、地圖輔助及確認，開始後才會顯示地圖。可以選整座城市，或 Eller、Wersten 等街區。地圖選項可切換交通類別，線條為 VRR 車站連接示意線。河流可單獨練習或搭配區域。拖曳平移，用滾輪或雙指縮放。手指選路後須確認才送出答案，學習卡不計分。可在「進度」儲存或還原紀錄；「調整本回合」可返回準備步驟。"
   ],
   "m187": [
     "Straßen starten mit Leveln: jeweils zehn neue ganze Straßen, grob nach Länge innerhalb deines Lerngebiets sortiert. Die Level-Position bleibt für jeden Stadtteil und ganz Düsseldorf getrennt gespeichert. Frühere Level mitüben ergänzt die bisherigen Straßen. Nach einer Runde kannst du direkt das nächste Level starten; alle Level sind auch einzeln wählbar. Suche und Einzelwahl findest du unter Freie Auswahl. Level-Positionen sind in der Lernstand-Sicherung enthalten.",
@@ -998,9 +998,9 @@
     "認識臺北與新北的街道、行政區與河流。"
   ],
   "m235": [
-    "Lernapp · 0.12",
-    "Learning app · 0.13",
-    "學習地圖 · 0.13"
+    "Learning app · 0.14",
+    "Learning app · 0.14",
+    "學習地圖 · 0.14"
   ],
   "m236": [
     "Startseite",
@@ -1734,8 +1734,8 @@
   ],
   "m382": [
     "Bezirke und Flüsse geben dir einen Überblick. Straßen lernst du standardmäßig in Leveln: jeweils zehn neue ganze Straßen, grob nach Länge im gewählten Gebiet sortiert. Deine Level-Position wird je Gebiet gespeichert. „Frühere Level mitüben“ ergänzt die bisherigen Straßen; nach einer Runde kannst du direkt zum nächsten Level wechseln. Unter „Freie Auswahl“ findest du Suche, Straßengrößen und Namenseinheiten. Sections (段), Lanes (巷) und Alleys (弄) sind dort eigene Aufgaben.",
-    "Districts and rivers give you an overview. Street learning starts with ten new whole streets per level, roughly ordered by length within your area. Each area remembers your level. Include earlier levels for review, then start the next level after a round. Free selection provides search, street categories and name units; sections (段), lanes (巷) and alleys (弄) are separate tasks there.",
-    "行政區與河流能幫助你建立整體概念。街道採分級學習，每級新增十條完整街道，依區域內的大約長度排序。每個區域會記住目前級別，可加入先前級別複習，回合結束後也可繼續下一級。「自由選擇」提供搜尋、街道類別與名稱單位，段、巷、弄在此模式中可分別練習。"
+    "Before playing, choose your topic, area, learning mode or street level, and map aids. Confirm the summary to open the map. Street levels add ten new whole streets at a time, roughly ordered by length in your area; each area remembers your level. Include earlier levels for review. Free selection provides search, categories, sections (段), lanes (巷) and alleys (弄).",
+    "遊戲前先選擇主題、區域、學習模式或街道級別，以及地圖輔助，確認摘要後才開啟地圖。街道每級新增十條完整街道，依區域內的大約長度排序，每個區域會記住目前級別，也可加入先前級別複習。自由選擇提供搜尋、街道類別，以及段、巷、弄的個別練習。"
   ],
   "m383": [
     "2. Entdecken, Lernen oder Quiz",
@@ -2331,6 +2331,241 @@
     "Stadtbezirk 10",
     "Borough 10",
     "第 10 行政分區"
+  ],
+  "flowEyebrow": [
+    "flowEyebrow",
+    "MAKE THIS ROUND YOURS",
+    "準備你的學習回合"
+  ],
+  "flowStep": [
+    "flowStep",
+    "Step {0} of {1}",
+    "第 {0} 步，共 {1} 步"
+  ],
+  "flowTopicQuestion": [
+    "flowTopicQuestion",
+    "What would you like to learn?",
+    "你想學習什麼？"
+  ],
+  "flowAreaQuestion": [
+    "flowAreaQuestion",
+    "Where would you like to practise?",
+    "你想練習哪個區域？"
+  ],
+  "flowModeQuestion": [
+    "flowModeQuestion",
+    "How would you like to practise?",
+    "你想怎麼練習？"
+  ],
+  "flowDisplayQuestion": [
+    "flowDisplayQuestion",
+    "What would help you find your way?",
+    "需要哪些地圖輔助？"
+  ],
+  "flowReviewQuestion": [
+    "flowReviewQuestion",
+    "Ready to begin?",
+    "準備好開始了嗎？"
+  ],
+  "flowTopicDescription": [
+    "flowTopicDescription",
+    "Pick one topic. We will guide you through the rest.",
+    "先選一個主題，接下來一步一步完成設定。"
+  ],
+  "flowAreaDescription": [
+    "flowAreaDescription",
+    "Choose the whole city or narrow it down to an area you want to know better.",
+    "可以選整座城市，也可以先熟悉特定區域。"
+  ],
+  "flowModeDescription": [
+    "flowModeDescription",
+    "Choose exploring, flashcards or a quiz. For streets, choose your level too.",
+    "選擇探索、學習卡或測驗；學習街道時也可以選擇級別。"
+  ],
+  "flowDisplayDescription": [
+    "flowDisplayDescription",
+    "Choose the names and landmarks you want on your map. You can adjust these while playing.",
+    "選擇地圖上的名稱和地標，遊戲中也能隨時調整。"
+  ],
+  "flowReviewDescription": [
+    "flowReviewDescription",
+    "Check your choices. The map opens only after you start.",
+    "確認你的選擇，開始後才會顯示地圖。"
+  ],
+  "flowAreasHint": [
+    "flowAreasHint",
+    "Build a mental map of the areas and their names.",
+    "先認識區域名稱與位置。"
+  ],
+  "flowStreetsHint": [
+    "flowStreetsHint",
+    "Start with ten streets and learn level by level.",
+    "每級十條街道，循序漸進。"
+  ],
+  "flowRiversHint": [
+    "flowRiversHint",
+    "Learn the rivers and the places they flow through.",
+    "認識河流及其流經的位置。"
+  ],
+  "flowAreaDetails": [
+    "flowAreaDetails",
+    "Choose individual or multiple areas",
+    "自行選擇個別或多個區域"
+  ],
+  "flowStreetDetails": [
+    "flowStreetDetails",
+    "Preview or select the streets in this round",
+    "預覽或選擇本回合的街道"
+  ],
+  "flowQuizHint": [
+    "flowQuizHint",
+    "The name you are looking for stays hidden on the map until the answer is revealed.",
+    "測驗時會隱藏題目要找的名稱，作答後再顯示答案。"
+  ],
+  "flowReadyHint": [
+    "flowReadyHint",
+    "Ready? Your map appears after you start. You can always return to change your choices.",
+    "準備好了嗎？開始後才會顯示地圖，你隨時可以返回調整。"
+  ],
+  "flowBack": [
+    "flowBack",
+    "Back",
+    "上一步"
+  ],
+  "flowNext": [
+    "flowNext",
+    "Next step →",
+    "下一步 →"
+  ],
+  "flowEdit": [
+    "flowEdit",
+    "Edit",
+    "修改"
+  ],
+  "flowEditWhat": [
+    "flowEditWhat",
+    "Edit: {0}",
+    "修改：{0}"
+  ],
+  "flowChooseArea": [
+    "flowChooseArea",
+    "Choose at least one area or river to continue.",
+    "請至少選擇一個區域或一條河流，再繼續下一步。"
+  ],
+  "flowChooseTasks": [
+    "flowChooseTasks",
+    "No places match your choices. Adjust the area, level or filters first.",
+    "目前選擇沒有符合的地點，請先調整區域、級別或篩選條件。"
+  ],
+  "flowTopicLabel": [
+    "flowTopicLabel",
+    "Topic",
+    "學習主題"
+  ],
+  "flowScopeLabel": [
+    "flowScopeLabel",
+    "Practice set",
+    "練習範圍"
+  ],
+  "flowTaskCount": [
+    "flowTaskCount",
+    "{0} places",
+    "{0} 個地點"
+  ],
+  "flowLevelSummary": [
+    "flowLevelSummary",
+    "Level {0} of {1} · {2} streets",
+    "第 {0} 級，共 {1} 級 · {2} 條街道"
+  ],
+  "flowMapAids": [
+    "flowMapAids",
+    "Map aids",
+    "地圖輔助"
+  ],
+  "flowRail": [
+    "flowRail",
+    "Rail lines",
+    "軌道交通"
+  ],
+  "flowMetro": [
+    "flowMetro",
+    "Metro lines",
+    "捷運路線"
+  ],
+  "flowAreaNames": [
+    "flowAreaNames",
+    "Area names",
+    "區域名稱"
+  ],
+  "flowRiverNames": [
+    "flowRiverNames",
+    "River names",
+    "河流名稱"
+  ],
+  "flowStreetNames": [
+    "flowStreetNames",
+    "Street names",
+    "街道名稱"
+  ],
+  "flowNoAids": [
+    "flowNoAids",
+    "Minimal map",
+    "簡潔地圖"
+  ],
+  "flowChange": [
+    "flowChange",
+    "← Change this round",
+    "← 調整本回合"
+  ],
+  "flowMapOptions": [
+    "flowMapOptions",
+    "Map options",
+    "地圖選項"
+  ],
+  "busyLanguageTitle": [
+    "busyLanguageTitle",
+    "Switching language…",
+    "正在切換語言⋯"
+  ],
+  "busyLanguageDetail": [
+    "busyLanguageDetail",
+    "Updating the map and labels. Your round and progress will stay in place.",
+    "正在更新地圖與文字，回合與學習進度會保留，請稍候。"
+  ],
+  "flowLoading": [
+    "flowLoading",
+    "Loading",
+    "正在載入"
+  ],
+  "flowStreetTopic": [
+    "flowStreetTopic",
+    "Streets",
+    "街道"
+  ],
+  "flowDistrictTopic": [
+    "flowDistrictTopic",
+    "Districts",
+    "行政區"
+  ],
+  "flowNeighborhoodTopic": [
+    "flowNeighborhoodTopic",
+    "Neighbourhoods",
+    "街區"
+  ],
+  "flowStreetNamesAfter": [
+    "flowStreetNamesAfter",
+    "Street names after the answer",
+    "作答後顯示街道名稱"
+  ],
+  "flowQuizStreetHint": [
+    "flowQuizStreetHint",
+    "In a street-level quiz, street names stay hidden until you answer. Enabled street names appear when the answer is revealed.",
+    "街道分級測驗會先隱藏所有街道名稱；若啟用名稱，作答後會再顯示。"
+  ],
+  "flowPlayingLevel": [
+    "flowPlayingLevel",
+    "Level {0}",
+    "第 {0} 級"
   ]
 };
   const sources = new Map(Object.entries(messages).map(([key,row]) => [row[0],key]));
@@ -2385,18 +2620,51 @@
     }
     apply(root);
   }
+  let busyTask = null;
+  function runBusy(action, titleKey = "m417", detailKey = "m418") {
+    if (busyTask) return busyTask;
+    const overlay = document.getElementById("chapter-loading");
+    const title = overlay.querySelector("strong");
+    const detail = overlay.querySelector("p");
+    title.dataset.i18n = titleKey; title.textContent = t(titleKey);
+    detail.dataset.i18n = detailKey; detail.textContent = t(detailKey);
+    overlay.hidden = false;
+    if (!overlay.open) overlay.showModal();
+    document.body.setAttribute("aria-busy", "true");
+    document.querySelector("main").inert = true;
+    document.getElementById("ui-language-toggle").disabled = true;
+    busyTask = (async () => {
+      // Let the browser paint the status before synchronous map rendering.
+      await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 40)));
+      try { return await action(); }
+      finally {
+        overlay.close(); overlay.hidden = true;
+        document.body.removeAttribute("aria-busy");
+        document.querySelector("main").inert = false;
+        document.getElementById("ui-language-toggle").disabled = false;
+        title.dataset.i18n = "m417"; title.textContent = t("m417");
+        detail.dataset.i18n = "m418"; detail.textContent = t("m418");
+        busyTask = null;
+      }
+    })();
+    return busyTask;
+  }
+
   function setLanguage(next) {
-    if (!["zh-Hant","en"].includes(next)) return;
-    language = next;
-    try { localStorage.setItem(storageKey,next); } catch { /* The current page remains usable. */ }
-    apply();for(const callback of listeners)callback(next);
+    if (!["zh-Hant", "en"].includes(next) || next === language) return Promise.resolve();
+    closeMenu();
+    return runBusy(() => {
+      language = next;
+      try { localStorage.setItem(storageKey,next); } catch { /* The current page remains usable. */ }
+      apply(); for (const callback of listeners) callback(next);
+    }, "busyLanguageTitle", "busyLanguageDetail");
   }
   function closeMenu() {
     const menu=document.getElementById("ui-language-menu");
     if(menu)menu.hidden=true;
     document.getElementById("ui-language-toggle")?.setAttribute("aria-expanded","false");
   }
-  window.I18n = { t, apply, capture, setLanguage, language:()=>language, locale:()=>language === "en" ? "en-GB" : "zh-TW",
+  window.I18n = { t, apply, capture, setLanguage, runBusy, language:()=>language, locale:()=>language === "en" ? "en-GB" : "zh-TW",
     subscribe:callback=>listeners.add(callback),
     regionName:region=>region.id === "taipei" ? t("taipeiRegion") : "Düsseldorf",
     describe(feature,lookup) {
@@ -2410,8 +2678,9 @@
     document.getElementById("ui-language-toggle").setAttribute("aria-expanded",String(!menu.hidden));
     if(!menu.hidden)menu.querySelector(`[data-ui-language="${language}"]`).focus();
   });
-  for(const button of document.querySelectorAll("[data-ui-language]"))button.addEventListener("click",()=>{setLanguage(button.dataset.uiLanguage);closeMenu();document.getElementById("ui-language-toggle").focus();});
+  for(const button of document.querySelectorAll("[data-ui-language]"))button.addEventListener("click",async ()=>{closeMenu();await setLanguage(button.dataset.uiLanguage);document.getElementById("ui-language-toggle").focus();});
   document.addEventListener("click",event=>{if(!event.target.closest(".language-control"))closeMenu();});
   document.addEventListener("keydown",event=>{if(event.key === "Escape"&&!document.getElementById("ui-language-menu").hidden){closeMenu();document.getElementById("ui-language-toggle").focus();}});
+  document.getElementById("chapter-loading").addEventListener("cancel", event => event.preventDefault());
   apply();
 })();

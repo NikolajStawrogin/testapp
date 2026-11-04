@@ -12,6 +12,7 @@ import unittest
 from urllib.parse import urlsplit
 
 from playwright.sync_api import sync_playwright
+from flow_helpers import GuidedFlow
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,7 +32,7 @@ class ProjectHandler(SimpleHTTPRequestHandler):
         return super().translate_path(path.removeprefix("/testapp"))
 
 
-class PagesTests(unittest.TestCase):
+class PagesTests(GuidedFlow, unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.server = ThreadingHTTPServer(("127.0.0.1", 0), partial(ProjectHandler, directory=str(ROOT)))
@@ -55,7 +56,7 @@ class PagesTests(unittest.TestCase):
         errors, responses, external = [], {}, []
         with self.browser.new_context(viewport={"width": 1440, "height": 1100}) as context:
             context.add_init_script("try { localStorage.setItem('stadt-kennen.ui-language.v1', 'en'); } catch {}")
-            page = context.new_page()
+            page = context.new_page();self.page=page
             page.on("pageerror", lambda error: errors.append(str(error)))
             page.on("response", lambda response: responses.update({response.url: response.status}))
             page.on("request", lambda request: external.append(request.url) if request.url.startswith(("http:", "https:")) and not request.url.startswith(self.url) and not request.url.endswith("/favicon.ico") else None)
@@ -63,17 +64,17 @@ class PagesTests(unittest.TestCase):
             page.wait_for_selector('body[data-ready="true"]', state="attached")
             self.assertTrue(page.locator("#home-view").is_visible())
             assets = ["i18n.js", "styles.css", "bootstrap.js", "region-ui.js", "street-map.js", "street-levels.js", "app.js", "data/levels-taipei.js", "data/districts.js", "data/metro.js", "data/rivers.js", "data/streets.js", "data/street-parents.js"]
-            assets = [asset + '?v=0.13' for asset in assets]
+            assets = [asset + '?v=0.14' for asset in assets]
             for asset in assets:
                 self.assertEqual(responses.get(self.url + asset), 200, asset)
             page.locator('[data-start="streets"]').click()
+            page.locator("#city-scope").select_option("taipei");self.go_step(2)
             page.locator("#street-learning-path").select_option("free")
-            page.locator("#city-scope").select_option("taipei")
             page.locator('[name="street-unit"][value="section"]').uncheck()
             page.locator("#street-search").fill("忠孝東路")
             page.wait_for_function("document.querySelectorAll('#street-picker input').length===1")
             page.locator('[data-mode="quiz"]').click()
-            page.locator("#start-button").click()
+            self.finish_setup()
             self.assertEqual(page.locator("#question-name").inner_text(), "忠孝東路")
             page.locator("#reveal-button").click()
             page.locator("#next-button").click()
@@ -87,7 +88,7 @@ class PagesTests(unittest.TestCase):
         errors = []
         with self.browser.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True) as context:
             context.add_init_script("try { localStorage.setItem('stadt-kennen.ui-language.v1', 'en'); } catch {}")
-            page = context.new_page()
+            page = context.new_page();self.page=page
             page.on("pageerror", lambda error: errors.append(str(error)))
             self.assertEqual(page.goto(self.url + "?region=taipei").status, 200)
             page.wait_for_selector('body[data-ready="true"]', state="attached")

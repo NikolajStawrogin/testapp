@@ -6,9 +6,9 @@
   <meta name="color-scheme" content="light">
   <meta name="description" content="認識臺北與新北的街道、行政區與河流。無需帳號，提供地圖測驗，學習進度儲存在本機。" data-i18n-content="m209">
   <title data-i18n="m210">認識臺北 · 學習街道、行政區與河流</title>
-  <link rel="stylesheet" href="styles.css?v=0.13">
-  <script src="i18n.js?v=0.13" defer></script>
-  <script src="bootstrap.js?v=0.13" defer></script>
+  <link rel="stylesheet" href="styles.css?v=0.14">
+  <script src="i18n.js?v=0.14" defer></script>
+  <script src="bootstrap.js?v=0.14" defer></script>
 </head>
 <body>
   <svg class="icon-library" aria-hidden="true"><defs>
@@ -53,7 +53,7 @@
         <h1 id="page-heading" data-i18n="m233">讓臺北更熟悉。</h1>
         <p class="intro-copy" data-i18n="m234">認識臺北與新北的街道、行政區與河流。</p>
       </div>
-      <span class="version-badge">Lernapp · 0.13</span>
+      <span class="version-badge">Lernapp · 0.14</span>
     </section>
 
     <section id="home-view" hidden class="home-view" aria-label="首頁" data-i18n-aria-label="m236">
@@ -66,7 +66,30 @@
       <div class="home-bottom"><div><h3 data-i18n="m249">短短一回合，也能有收穫。</h3><p data-i18n="m250">預設每回合十題。進度保留在此瀏覽器中，無需帳號，也沒有追蹤程式。</p></div><button class="button button-primary" data-nav="continue" data-i18n="m251">沿用上次選擇 →</button></div>
       <p class="home-data-note" id="home-data-note"></p>
     </section>
+    <section id="setup-view" class="setup-view" hidden aria-labelledby="wizard-title">
+      <div class="wizard-heading"><p class="eyebrow" data-i18n="flowEyebrow">準備你的學習回合</p><p id="wizard-progress" class="wizard-progress" aria-live="polite"></p><div id="wizard-dots" class="wizard-dots" aria-hidden="true"></div><h1 id="wizard-title" tabindex="-1"></h1><p id="wizard-description" class="muted"></p></div>
+      <div class="wizard-card panel">
+        <section data-wizard-step="0">
+          <div class="wizard-topics">
+            <button type="button" data-wizard-topic="districts" class="wizard-choice"><span aria-hidden="true">⌖</span><strong id="wizard-districts-title"></strong><small data-i18n="flowAreasHint">先認識區域名稱與位置。</small></button>
+            <button type="button" data-wizard-topic="streets" class="wizard-choice"><span aria-hidden="true">↗</span><strong data-i18n="m9">街道</strong><small data-i18n="flowStreetsHint">每級十條街道，循序漸進。</small></button>
+            <button type="button" data-wizard-topic="rivers" class="wizard-choice"><span aria-hidden="true">≈</span><strong data-i18n="m140">河流</strong><small data-i18n="flowRiversHint">認識河流及其流經的位置。</small></button>
+          </div>
+        </section>
+        <section data-wizard-step="1" hidden>
+          <div id="wizard-scope-slot"></div>
+          <details id="wizard-area-details" class="wizard-details"><summary data-i18n="flowAreaDetails">自行選擇個別或多個區域</summary><div id="wizard-areas-slot"></div></details>
+          <div id="wizard-mixed-slot"></div><div id="wizard-rivers-slot"></div>
+        </section>
+        <section data-wizard-step="2" hidden><div id="wizard-mode-slot"></div><div id="wizard-streets-slot"></div></section>
+        <section data-wizard-step="3" hidden><p id="wizard-quiz-note" class="wizard-note" data-i18n="flowQuizHint">測驗時會隱藏題目要找的名稱，作答後再顯示答案。</p><div id="wizard-display-slot"></div></section>
+        <section data-wizard-step="4" hidden><dl id="wizard-review" class="wizard-review"></dl><p class="wizard-note" data-i18n="flowReadyHint">準備好了嗎？開始後才會顯示地圖。你隨時可以返回調整。</p></section>
+        <p id="wizard-validation" class="wizard-validation" aria-live="polite" hidden></p>
+        <div id="wizard-actions" class="wizard-actions"><button id="wizard-back" type="button" class="button button-secondary" data-i18n="flowBack">上一步</button><button id="wizard-next" type="button" class="button button-primary" data-i18n="flowNext">下一步 →</button></div>
+      </div>
+    </section>
     <div class="workspace" id="practice-view" hidden>
+      <div id="game-toolbar" class="game-toolbar"><button id="game-change-setup" class="button button-quiet" data-i18n="flowChange">← 調整本回合</button><p id="game-context"></p><button id="game-map-settings" class="button button-quiet" data-i18n="flowMapOptions">地圖選項</button></div>
       <aside class="panel control-panel" aria-label="學習設定" data-i18n-aria-label="m252">
         <div id="setup-panel">
           <p class="section-label" data-i18n="m253">01 / 學習主題</p>
@@ -233,7 +256,7 @@
     <h3 data-i18n="m411">名稱</h3><p><span data-i18n="m412">繁體字名稱與英文拼寫依據已檢視的郵政目錄副本，版本為民國 109 年 6 月。與現行</span> <a href="https://www.post.gov.tw/post/internet/Download/all_list.jsp?ID=2201" target="_blank" rel="noopener noreferrer" data-i18n="m413">中華郵政原始來源</a> <span data-i18n="m414">的直接比對尚未完成，詳見 OFFIZIELLE_NAMEN.md。</span></p>
     <h3 data-i18n="m415">網站提供方式與本機學習進度</h3><p data-i18n="m416">App 檔案與地圖資料一併提供，未使用外部地圖 API、字型服務或分析追蹤程式。只有點選後才會開啟來源連結，線上版由 GitHub Pages 提供，適用 GitHub 的網站提供與隱私條款。進度保留在瀏覽器本機儲存空間，清除後可能遺失。從本機版改用網站時不會自動轉移進度，請使用匯出與匯入功能。</p>
   </dialog>
-  <div id="chapter-loading" class="chapter-loading" role="status" hidden><div><span class="loading-spinner" aria-hidden="true"></span><strong data-i18n="m417">正在準備地圖⋯</strong><p data-i18n="m418">正在整理街道與地圖資料，請稍候。</p></div></div>
+  <dialog id="chapter-loading" class="chapter-loading" role="status" hidden tabindex="-1" aria-label="正在載入" data-i18n-aria-label="flowLoading"><div><span class="loading-spinner" aria-hidden="true"></span><strong data-i18n="m417">正在準備地圖⋯</strong><p data-i18n="m418">正在整理街道與地圖資料，請稍候。</p></div></dialog>
   <div id="toast" class="toast" role="status" hidden></div>
   <noscript><p class="noscript" data-i18n="m419">請啟用 JavaScript 以使用本機學習地圖。</p></noscript>
 </body>

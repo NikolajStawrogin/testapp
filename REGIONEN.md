@@ -1,8 +1,8 @@
 # Regionen und Düsseldorf-Erweiterung
 
-## Umfang und Bedienung · 0.13
+## Umfang und Bedienung · 0.14
 
-Einstieg: Stadt wählen → Thema wählen → Entdecken, Lernkarten oder Quiz. Taipei/New Taipei bleiben eine gemeinsame Lernregion. Düsseldorf verwendet deutsche Originalnamen. Quiz und Gebietsauswahl verwenden die 50 Stadtteile alphabetisch nach Namen wie Eller oder Wersten. Enthalten sind 2.891 benannte Straßen-/Wegeeinheiten und sechs Gewässer: Rhein, Düssel, Nördliche Düssel, Südliche Düssel, Itter und Kittelbach.
+Einstieg: Stadt wählen → Thema → Gebiet → Lernweise/Level → Kartenhilfen → bestätigen → separate Spielansicht. Die Karte erscheint erst nach Bestätigung; Einstellungen stehen nicht mehr links neben der Karte. Siehe GEFUEHRTER_EINSTIEG.md. Taipei/New Taipei bleiben eine gemeinsame Lernregion. Düsseldorf verwendet deutsche Originalnamen. Quiz und Gebietsauswahl verwenden die 50 Stadtteile alphabetisch nach Namen wie Eller oder Wersten. Enthalten sind 2.891 benannte Straßen-/Wegeeinheiten und sechs Gewässer: Rhein, Düssel, Nördliche Düssel, Südliche Düssel, Itter und Kittelbach.
 
 Das Feld über der Karte bietet „Ganz Düsseldorf“ und die 50 Stadtteilnamen. Die darunterliegende Liste erlaubt mehrere Stadtteile für eine gemeinsame Runde. Nummerierte Stadtbezirke sind keine auswählbare Quiz-Ebene mehr. Ihre Geometrien und frühere Lernergebnisse bleiben als Bestandsdaten erhalten. Alte ausgewählte Stadtbezirke werden in ihre zugehörigen Stadtteile übersetzt.
 

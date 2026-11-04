@@ -37,7 +37,7 @@
       document.body.append(script);
       resolve();
     } else {
-      script.src = path + "?v=0.13";
+      script.src = path + "?v=0.14";
       script.onload = resolve;
       script.onerror = () => reject(new Error(t("fileError", path)));
       document.head.append(script);
@@ -45,6 +45,8 @@
   });
   const loading = $("chapter-loading");
   loading.hidden = false;
+  loading.showModal();
+  $("ui-language-toggle").disabled = true;
   Promise.all(region.files.map(load)).then(async () => {
     if (region.id === "duesseldorf") {
       const data = window.DUESSELDORF_DATA;
@@ -56,10 +58,12 @@
     await load("street-levels.js");
     await load("street-map.js");
     await load("app.js");
-    loading.hidden = true;
+    loading.close(); loading.hidden = true;
+    $("ui-language-toggle").disabled = false;
     document.body.dataset.ready = "true";
   }).catch(error => {
-    loading.hidden = true;
+    loading.close(); loading.hidden = true;
+    $("ui-language-toggle").disabled = false;
     $("region-error").hidden = false;
     $("region-error-message").textContent = error.message + t("m198");
     window.I18n.capture();

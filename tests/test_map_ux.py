@@ -1,8 +1,9 @@
 """User-visible selection feedback, loading, gesture work and touch target regressions."""
 import unittest
 import test_streets_browser as streets
+from flow_helpers import GuidedFlow
 
-class MapUXTests(unittest.TestCase):
+class MapUXTests(GuidedFlow, unittest.TestCase):
     setUpClass = classmethod(streets.StreetBrowserTests.setUpClass.__func__)
     tearDownClass = classmethod(streets.StreetBrowserTests.tearDownClass.__func__)
     setUp = streets.StreetBrowserTests.setUp
@@ -21,8 +22,8 @@ class MapUXTests(unittest.TestCase):
         self.assertTrue(page.locator('.metro-chip').first.is_visible())
         page.locator('#metro-legend summary').click()
         self.assertFalse(page.locator('.metro-chip').first.is_visible())
-        self.assertEqual(page.locator('.map-heading #city-scope').count(), 1)
-        self.assertGreaterEqual(page.locator('#city-scope').bounding_box()['height'], 44)
+        self.assertEqual(page.locator('#city-scope:visible').count(), 0)
+        self.assertGreaterEqual(page.locator('#game-map-settings').bounding_box()['height'], 44)
         path = page.locator('.district-shape:not(.is-muted)').first
         path.dispatch_event('click')
         # Select using the keyboard so both accessible and pointer feedback are checked.
@@ -36,13 +37,9 @@ class MapUXTests(unittest.TestCase):
 
     def test_loading_paints_before_street_preparation_and_zoom_batches_rendering(self):
         page = self.page
-        page.locator('[data-nav="home"]').click()
-        shown = page.evaluate('''() => {
-          document.querySelector('[data-start="streets"]').click();
-          return !document.getElementById('chapter-loading').hidden;
-        }''')
-        self.assertTrue(shown)
-        page.locator('#chapter-loading').wait_for(state='hidden')
+        self.street_mode();self.go_step(4)
+        shown = page.evaluate("() => {document.querySelector('#start-button').click();return !document.querySelector('#chapter-loading').hidden}")
+        self.assertTrue(shown);self.wait_idle()
         page.wait_for_timeout(200)
         result = page.evaluate('''async () => {
           let count=0;
@@ -65,8 +62,7 @@ class MapUXTests(unittest.TestCase):
         self.street_mode()
         self.search('忠孝東路')
         self.page.locator('[name="street-unit"][value="street"]').uncheck()
-        self.page.locator('[data-mode="quiz"]').click()
-        self.page.locator('#start-button').click()
+        self.finish_setup('quiz')
         target = self.target()
         self.page.locator('#reveal-button').click()
         solution = self.page.locator('.street-solution')

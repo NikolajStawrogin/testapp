@@ -1,6 +1,24 @@
 # Prüfung der Straßen- und Menüerweiterung
 
-## Aktueller Stand 0.13 · 國語 und Englisch für die gesamte Oberfläche
+## Aktueller Stand 0.14 · Geführte Vorbereitung, separate Karte und Ladezustände
+
+Stand: 4. November 2026. Vor dem Spiel werden Thema, Gebiet, Lernweise/Straßen-Level und Kartenhilfen abgefragt und in einer Zusammenfassung bestätigt. Erst dann erscheint die große Karte auf einer eigenen Spielansicht. Die linke Einstellungsspalte entfällt. Kartenoptionen bleiben im Spiel über einen Dialog erreichbar; Ergebnisse erscheinen ohne Karte. Browser-Zurück, Rückkehr zur Vorbereitung, direktes nächstes Straßen-Level, Fehlerwiederholung und gespeicherte Einstellungen bleiben verfügbar. Details stehen in GEFUEHRTER_EINSTIEG.md.
+
+Der Oberflächen- und Ortsnamenswechsel zeigt vor der aufwendigen Darstellung einen gezeichneten modalen Ladehinweis, auch über einem geöffneten Einstellungsdialog. Escape und doppelte Eingaben schließen den Status nicht. Ein kontrollierter Fehler prüft, dass Dialog, `aria-busy`, deaktivierter Sprachknopf und `inert` danach aufgeräumt werden. Frage, Antworten, Zoom und Lernstand bleiben bei einem Sprachwechsel erhalten. Straßen-Geometrien werden vor dem bestätigten Spielstart nicht aufgebaut.
+
+**Alle 76 aktuell entdeckten unterschiedlichen Prüfungen sind bestanden**, verteilt auf mehrere Läufe und gezielte Nachläufe. Der kombinierte Bezirks-/Fluss-/Straßen-/Touch-/Ablauflauf bestand mit 29 Prüfungen in 425,883 s. 29 Regions-, Level-, Sprach-, Pages- und Einzeldatei-Prüfungen bestanden in 110,146 s, 13 Datenprüfungen in 1,750 s. Hinzu kamen drei Kartenprüfungen (42,376 s), eine echte Kreuzungs-Touchprüfung (20,610 s) und die ergänzte Fehlerbereinigung des Ladezustands. Die endgültigen Nachläufe bestanden mit vier Darstellungsprüfungen in 43,216 s, drei Lade-/Mobilprüfungen in 7,096 s und vier Offline-Einzeldatei-Prüfungen in 22,274 s. Überlappungen wurden für die Zahl 76 entfernt und gegen die aktuelle Testentdeckung abgeglichen.
+
+Die bisherigen Browserprüfungen wurden auf die neue geführte Bedienung umgestellt. Gemeinsame Testhelfer in flow_helpers.py gehen über die sichtbaren Schritte, statt die frühere Seitenleiste vorauszusetzen. Enthalten sind leere Auswahlen, Zusammenfassung und Korrektur, Karte erst nach Start, Neuladen und Browser-Zurück, Straßen-Level bis zum letzten Rest, versteckte Zielnamen, falsche/richtige Antworten, Fehlerwiederholung, Export/Import und Löschen, alte Einstellungen und getrennte Regionen, Fluss-/Metrogeometrien, Beschriftungen je Stadt, Zoom um den Mauszeiger, Drag/Pinch, Finger-Vorschau, Bestätigung und Straßenwechsel an einer Kreuzung. Die separate Spielansicht wurde auf Desktop und im simulierten mobilen Touchformat visuell geprüft.
+
+Die isolierte Einzeldatei verwendet nach dem Öffnen keine weiteren Ressourcen und spielt beide Regionen einschließlich Vorbereitung, Kartenoptionen, Quiz und Sprachwechsel offline. Es gab in den bestandenen Browserprüfungen keine JavaScript-Fehler oder externen Laufzeitabrufe. Direkte file://-Navigation bleibt durch die Browserrichtlinie der Testumgebung gesperrt; Offline-Prüfungen verwenden deshalb einen lokalen Server mit ausschließlich der exportierten HTML-Datei. Es sind keine echten Telefontests.
+
+JavaScript-Syntax, Python-Kompilierung und `git diff --check` bestanden. Geodaten und Lizenznachweise wurden nicht verändert. Das Paket mit 80 Dateien enthält die Browser-Einzeldatei, die geführte Bedienung, Übersetzungen, Quellnachweise, Dokumentation und Tests. CRC-Prüfung und bytegenauer Vergleich jedes archivierten Inhalts mit seiner Quelldatei bestanden.
+
+Die folgenden Abschnitte dokumentieren frühere Versionen.
+
+---
+
+## Stand 0.13 · 國語 und Englisch für die gesamte Oberfläche
 
 Stand: 4. November 2026. Erststart in traditionellem Chinesisch (`zh-Hant`), Sprachmenü oben rechts auf jeder Seite, inklusive Stadtauswahl und Mobilansicht. Die Bezeichnung lautet 國語 beziehungsweise Mandarin. Die Auswahl wird unabhängig von den Kartennamen und regionsübergreifend gespeichert. Menüs, Quizanweisungen, Feedback, Level-Optionen, Kartenhinweise, Hilfe, Quellenhinweise, Fortschritt und Fehlermeldungen sind übersetzt. Wechsel ohne Neuladen erhält Quizfrage, Antworten, Level und Zoom. Düsseldorfer Straßennamen bleiben deutsche Originalnamen.
 

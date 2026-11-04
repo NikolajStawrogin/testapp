@@ -92,7 +92,7 @@
   const state = {
     areaLevel: initialLevel,
     stage: "setup",
-    view: !window.APP_OPEN_TOPICS && savedSettings && savedSettings.view !== "home" ? "practice" : "home",
+    view: "home",
     subject: savedSettings?.subject === "streets" ? "streets" : "districts",
     streetCategories: new Set(Array.isArray(savedSettings?.streetCategories) ? savedSettings.streetCategories.filter(value => ["major", "secondary", "local", "unclassified"].includes(value)) : german ? ["major", "secondary", "local", "unclassified"] : ["major", "secondary"]),
     streetUnits: new Set(Array.isArray(savedSettings?.streetUnits) ? savedSettings.streetUnits.filter(value => ["street", "section", "lane", "alley"].includes(value)) : ["street", "section"]),
@@ -125,6 +125,8 @@
       : [5, 10].includes(savedSettings?.roundSize) ? savedSettings.roundSize : 10,
     inspected: null,
     round: null,
+    wizardStep: 0,
+    wizardTopic: ["districts", "streets", "rivers"].includes(savedSettings?.wizardTopic) ? savedSettings.wizardTopic : savedSettings?.subject === "streets" ? "streets" : savedSettings?.includeRivers && !initialIds.length ? "rivers" : "districts",
     progress: cleanProgress(load(PROGRESS_KEY))
   };
   let streetRevision = 0;
@@ -229,11 +231,141 @@
     $("street-level-progress").textContent = info.total ? t("m12", known, info.fresh.length, info.fresh.length === 1 ? t("m8") : t("m9")) : "";
   }
 
+  function prepareWizard() {
+    $("wizard-scope-slot").append($("city-scope").closest("label"));
+    const pickerHeading = $("select-all").closest(".section-heading");
+    const tools = $("selection-note").parentElement;
+    $("wizard-areas-slot").append(pickerHeading, $("district-picker"), tools);
+    $("focus-selected").hidden = true;
+    $("wizard-mixed-slot").append($("include-rivers").closest("label"));
+    $("wizard-rivers-slot").append($("river-selection"));
+    $("wizard-mode-slot").append(document.querySelector(".mode-picker"), $("mode-description"), $("round-size-field"));
+    $("wizard-streets-slot").append($("street-selection"));
+    const preview = document.createElement("details");
+    preview.id = "wizard-street-details"; preview.className = "wizard-details";
+    const summary = document.createElement("summary"); summary.dataset.i18n = "flowStreetDetails";
+    summary.textContent = t("flowStreetDetails"); preview.append(summary);
+    $("street-picker").before(preview);
+    preview.append($("street-picker"), $("street-more"), $("street-empty"), $("street-data-note"));
+    $("wizard-display-slot").append($("display-settings"));
+    $("wizard-actions").append($("start-button"));
+    document.querySelector(".control-panel").hidden = true;
+    document.querySelector(".map-panel").prepend($("session-panel"));
+    $("game-toolbar").after($("results-panel"));
+    $("setup-panel").hidden = true;
+    window.I18n.apply($("setup-view"));
+  }
+
+  function flowTopic() {
+    return state.subject === "streets" ? "streets" : state.wizardTopic === "rivers" ? "rivers" : "districts";
+  }
+
+  function topicName() {
+    return flowTopic() === "streets" ? t("flowStreetTopic") : flowTopic() === "rivers" ? t("m140") : german ? t("flowNeighborhoodTopic") : t("flowDistrictTopic");
+  }
+
+  function flowAreaName() {
+    return flowTopic() === "rivers" ? state.scope === "all" ? window.I18n.regionName(REGION) : german ? byId.get(state.scope).nameZh : cityName(cityById.get(state.scope)) : learningAreaLabel();
+  }
+
+  function flowRoute(screen, replace = false) {
+    const route = screen === "setup" ? `#setup-${state.wizardStep + 1}` : screen === "practice" ? "#play" : "#topics";
+    try { history[replace ? "replaceState" : "pushState"]({ screen, step: state.wizardStep }, "", location.pathname + location.search + route); }
+    catch { /* Some local-file browsers restrict history changes. */ }
+  }
+
+  function focusWizard() {
+    window.scrollTo({ top: 0, behavior: "instant" });
+    $("wizard-title").focus({ preventScroll: true });
+  }
+
+  function chooseFlowTopic(topic) {
+    const changed = flowTopic() !== topic;
+    state.wizardTopic = topic;
+    state.subject = topic === "streets" ? "streets" : "districts";
+    if (topic === "rivers") { state.includeRivers = true; state.rivers = true; state.selected.clear(); }
+    else {
+      if (changed) state.includeRivers = false;
+      if (!state.selected.size) state.selected = new Set(scopeFeatures().map(feature => feature.id));
+    }
+    state.inspected = null;
+    clearStreetPreview(); saveSettings();
+  }
+
+  function openSetup(topic = null, step = 0) {
+    state.view = "setup"; state.stage = "setup"; state.round = null;
+    state.wizardStep = step;
+    if (topic) chooseFlowTopic(topic);
+    clearStreetPreview(); saveSettings(); render();
+    flowRoute("setup"); focusWizard();
+  }
+
+  function renderWizard() {
+    if (state.view !== "setup") return;
+    const step = state.wizardStep;
+    const topic = flowTopic();
+    $("wizard-progress").textContent = t("flowStep", step + 1, 5);
+    $("wizard-title").textContent = t(["flowTopicQuestion", "flowAreaQuestion", "flowModeQuestion", "flowDisplayQuestion", "flowReviewQuestion"][step]);
+    $("wizard-description").textContent = t(["flowTopicDescription", "flowAreaDescription", "flowModeDescription", "flowDisplayDescription", "flowReviewDescription"][step]);
+    $("wizard-dots").replaceChildren(...Array.from({ length: 5 }, (_,index) => {
+      const dot = document.createElement("span"); dot.classList.toggle("is-done", index <= step); return dot;
+    }));
+    for (const section of document.querySelectorAll("[data-wizard-step]")) section.hidden = Number(section.dataset.wizardStep) !== step;
+    for (const button of document.querySelectorAll("[data-wizard-topic]")) button.setAttribute("aria-pressed", String(button.dataset.wizardTopic === topic));
+    $("wizard-districts-title").textContent = german ? t("flowNeighborhoodTopic") : t("flowDistrictTopic");
+    $("wizard-area-details").hidden = topic === "rivers";
+    $("wizard-mixed-slot").hidden = topic !== "districts";
+    $("wizard-quiz-note").hidden = state.mode !== "quiz";
+    $("wizard-quiz-note").textContent = t(state.subject === "streets" && state.streetPath === "levels" ? "flowQuizStreetHint" : "flowQuizHint");
+    $("wizard-next").hidden = step === 4;
+    $("start-button").hidden = step !== 4;
+    $("wizard-street-details").open = state.streetPath === "free";
+    const areaReady = topic === "rivers" ? scopeRivers().some(river => state.selectedRivers.has(river.id)) : state.selected.size > 0;
+    const valid = step === 1 ? areaReady : step === 2 || step === 4 ? selectedFeatures().length > 0 : true;
+    $("wizard-next").disabled = !valid;
+    $("wizard-validation").hidden = valid;
+    $("wizard-validation").textContent = step === 1 ? t("flowChooseArea") : t("flowChooseTasks");
+    $("wizard-back").textContent = step === 0 ? t("m219") : t("flowBack");
+    const level = state.subject === "streets" ? streetLevelInfo() : null;
+    const aids = [state.metro && t(german ? "flowRail" : "flowMetro"), state.rivers && t("m140"),
+      (german ? cities.every(city => state.labelsByCity[city.id]) : cities.some(city => state.labelsByCity[city.id])) && t("flowAreaNames"),
+      state.riverLabels && state.rivers && t("flowRiverNames"), state.streetLabels && state.subject === "streets" && t(state.mode === "quiz" && state.streetPath === "levels" ? "flowStreetNamesAfter" : "flowStreetNames")].filter(Boolean);
+    const rows = [
+      [t("flowTopicLabel"), topicName(), 0],
+      [t("m331"), flowAreaName(), 1],
+      [t("m265"), t({ explore: "m129", cards: "m132", quiz: "m131" }[state.mode]), 2],
+      [level ? t("m276") : t("flowScopeLabel"), level ? t("flowLevelSummary", level.level, level.total, selectedFeatures().length) : t("flowTaskCount", selectedFeatures().length), 2],
+      [t("flowMapAids"), aids.join(" · ") || t("flowNoAids"), 3]
+    ];
+    if (state.mode === "quiz") rows.splice(4, 0, [t("m298"), String(roundLength(selectedFeatures().length)), 2]);
+    $("wizard-review").replaceChildren();
+    for (const [title, value, editStep] of rows) {
+      const group = document.createElement("div");
+      const dt = document.createElement("dt"); dt.textContent = title;
+      const dd = document.createElement("dd"); dd.textContent = value;
+      const edit = document.createElement("button"); edit.type = "button"; edit.className = "text-button";
+      edit.dataset.editStep = String(editStep); edit.textContent = t("flowEdit"); edit.setAttribute("aria-label", t("flowEditWhat", title));
+      edit.addEventListener("click", () => { state.wizardStep = editStep; render(); flowRoute("setup"); focusWizard(); });
+      group.append(dt, dd, edit); $("wizard-review").append(group);
+    }
+  }
+
+  function startConfiguredGame() {
+    if (state.view !== "setup" || state.wizardStep !== 4 || !selectedFeatures().length) return;
+    return withLoading(() => {
+      state.view = "practice";
+      if (state.mode === "explore") { state.stage = "setup"; state.inspected = null; render(); map.reset(); }
+      else beginRound(state.mode);
+      saveSettings(); flowRoute("practice");
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
+  }
+
   function maxMapZoom() { return state.subject === "streets" ? 96 : MAX_MAP_ZOOM; }
 
   function saveSettings() {
     save(SETTINGS_KEY, {
-      areaLevel: state.areaLevel, view: state.view, subject: state.subject, streetCategories: [...state.streetCategories], streetUnits: [...state.streetUnits],
+      areaLevel: state.areaLevel, view: state.view, subject: state.subject, wizardTopic: state.wizardTopic, streetCategories: [...state.streetCategories], streetUnits: [...state.streetUnits],
       streetPath: state.streetPath, streetLevels: state.streetLevels, levelReview: state.levelReview,
       excludedStreets: [...state.excludedStreets], onlyBilingual: state.onlyBilingual,
       streetLabels: state.streetLabels, streetSearch: state.streetSearch,
@@ -570,7 +702,7 @@
     }
 
     renderStreets() {
-      const visible = state.subject === "streets" && state.view === "practice";
+      const visible = state.subject === "streets" && state.view === "practice" && state.stage !== "results";
       $("map-content").classList.toggle("has-street-level", visible && state.streetPath === "levels");
       $("street-map-hint").hidden = !visible;
       if (!visible && !this.streets) return;
@@ -815,6 +947,7 @@
     }
   }
 
+  prepareWizard();
   const map = new DistrictMap(selectDistrict);
 
   function clearStreetPreview() {
@@ -1103,7 +1236,13 @@
   }
 
   function render() {
+    document.body.dataset.screen = state.view === "practice" ? "play" : state.view;
+    document.querySelector(".intro").hidden = state.view !== "home";
+    $("setup-view").hidden = state.view !== "setup";
     $("home-view").hidden = state.view !== "home";
+    document.querySelector(".map-panel").hidden = state.stage === "results";
+    const playingLevel = state.subject === "streets" ? streetLevelInfo() : null;
+    $("game-context").textContent = `${topicName()} · ${flowAreaName()}${playingLevel ? " · " + t("flowPlayingLevel", playingLevel.level) : ""}`;
     $("practice-view").hidden = state.view !== "practice";
     document.body.dataset.subject = state.subject;
     $("home-street-count").textContent = t("m122", Object.keys(window.STREET_LEVEL_DATA.streets).length.toLocaleString(window.I18n.locale()));
@@ -1112,7 +1251,7 @@
       if ((state.view === "home" && button.dataset.nav === "home") || (state.view === "practice" && button.dataset.nav === state.mode)) button.setAttribute("aria-current", "page");
       else button.removeAttribute("aria-current");
     }
-    $("setup-panel").hidden = state.stage !== "setup";
+    $("setup-panel").hidden = true;
     $("session-panel").hidden = state.stage !== "session";
     $("results-panel").hidden = state.stage !== "results";
     $("mobile-question").hidden = state.stage !== "session";
@@ -1165,9 +1304,11 @@
     if (state.stage === "session") renderSession();
     else if (state.stage === "results") { renderResults(); renderDetail(null, t("m136")); }
     else renderDetail(byId.get(state.inspected));
+    $("map-detail").hidden = state.view !== "practice" || state.stage === "results" || (state.stage === "session" ? !state.round.revealed : !state.inspected);
     $("street-confirmation").hidden = !state.pendingStreet;
     $("street-alternative").hidden = state.streetAlternatives.length < 2;
-    map.render();
+    renderWizard();
+    if (state.view === "practice" && state.stage !== "results") map.render();
   }
 
   function beginRound(kind, ids) {
@@ -1187,7 +1328,7 @@
     render();
     $("question-name").setAttribute("tabindex", "-1");
     focusQuestion();
-    if (level) $("practice-view").scrollIntoView({ behavior: "instant", block: "start" });
+    if (level) window.scrollTo({ top: 0, behavior: "instant" });
   }
 
   function focusQuestion() {
@@ -1257,8 +1398,8 @@
     state.stage = "setup";
     state.round = null;
     state.inspected = null;
-    map.reset();
-    render();
+    state.view = "setup"; state.wizardStep = 4;
+    saveSettings(); render(); flowRoute("setup"); focusWizard();
   }
 
   function renderProgress() {
@@ -1311,31 +1452,21 @@
       $(destination + "-dialog").showModal();
       return;
     }
-    if (destination === "home") state.view = "home";
-    else {
-      state.view = "practice";
-      if (modes.includes(destination) && destination !== state.mode) {
-        state.stage = "setup";
-        state.round = null;
-        clearStreetPreview();
-        state.mode = destination;
-      }
+    if (destination === "home") {
+      state.view = "home"; state.stage = "setup"; state.round = null;
+      clearStreetPreview(); saveSettings(); render(); flowRoute("home");
+      window.scrollTo({ top: 0, behavior: "instant" });
+    } else {
+      if (modes.includes(destination)) state.mode = destination;
+      openSetup();
     }
-    saveSettings();
-    render();
-    if (state.view === "practice") map.reset();
-    window.scrollTo({ top: 0, behavior: "instant" });
   }
 
-  async function withLoading(action) {
-    const loading = $("chapter-loading");
-    if (!loading.hidden) return;
-    loading.hidden = false;
-    document.body.setAttribute("aria-busy", "true");
-    // Yield across a paint before the expensive initial geometry preparation.
-    await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 40)));
-    try { action(); }
-    finally { loading.hidden = true; document.body.removeAttribute("aria-busy"); }
+  function withLoading(action) {
+    return window.I18n.runBusy(action).then(result => {
+      if (state.view === "practice" && state.stage === "session" && !document.querySelector("dialog[open]")) focusQuestion();
+      return result;
+    });
   }
 
   function chooseSubject(subject) {
@@ -1359,7 +1490,10 @@
   $("level-review").addEventListener("change", event => { state.levelReview = event.target.checked; clearStreetPreview(); saveSettings(); render(); });
   $("next-street-level").addEventListener("click", () => {
     const kind = state.round.kind; const next = streetLevelInfo().level + 1;
-    endRound(); setStreetLevel(next); beginRound(kind);
+    withLoading(() => {
+      state.stage = "setup"; state.round = null; state.view = "practice";
+      setStreetLevel(next); beginRound(kind);
+    });
   });
   $("area-level").addEventListener("change", event => {
     state.areaLevel = event.target.value;
@@ -1369,27 +1503,38 @@
     buildPicker(); saveSettings(); map.reset(); render();
   });
   buildPicker();
-  for (const button of document.querySelectorAll("[data-nav]")) button.addEventListener("click", () => ["explore", "cards", "quiz"].includes(button.dataset.nav) ? withLoading(() => navigate(button.dataset.nav)) : navigate(button.dataset.nav));
+  for (const button of document.querySelectorAll("[data-nav]")) button.addEventListener("click", () => navigate(button.dataset.nav));
   for (const button of document.querySelectorAll("[data-subject]")) button.addEventListener("click", () => withLoading(() => chooseSubject(button.dataset.subject)));
-  for (const button of document.querySelectorAll("[data-start]")) button.addEventListener("click", () => withLoading(() => {
-    const subject = button.dataset.start;
-    state.view = "practice";
-    state.mode = "explore";
-    if (subject === "rivers") { state.includeRivers = true; state.rivers = true; state.selected.clear(); }
-    else if (subject === "districts") {
-      state.includeRivers = false;
-      if (!state.selected.size) state.selected = new Set(scopeFeatures().map(feature => feature.id));
-    } else if (!state.selected.size) state.selected = new Set(scopeFeatures().map(feature => feature.id));
-    chooseSubject(subject === "streets" ? "streets" : "districts");
-    window.scrollTo({ top: 0, behavior: "instant" });
-  }));
+  for (const button of document.querySelectorAll("[data-start]")) button.addEventListener("click", () => openSetup(button.dataset.start, 1));
+  for (const button of document.querySelectorAll("[data-wizard-topic]")) button.addEventListener("click", () => { chooseFlowTopic(button.dataset.wizardTopic); render(); });
+  $("wizard-next").addEventListener("click", () => {
+    if ($("wizard-next").disabled || state.wizardStep >= 4) return;
+    state.wizardStep++; render(); flowRoute("setup"); focusWizard();
+  });
+  $("wizard-back").addEventListener("click", () => {
+    if (!state.wizardStep) { navigate("home"); return; }
+    state.wizardStep--; render(); flowRoute("setup", true); focusWizard();
+  });
+  $("game-change-setup").addEventListener("click", () => openSetup(null, 4));
+  $("game-map-settings").addEventListener("click", () => navigate("settings"));
+  window.addEventListener("popstate", event => {
+    if (event.state?.screen === "setup") {
+      state.view = "setup"; state.stage = "setup"; state.round = null;
+      state.wizardStep = Math.max(0, Math.min(4, event.state.step || 0));
+      clearStreetPreview(); render(); focusWizard();
+    } else if (event.state?.screen === "practice") {
+      // An ended round cannot be recreated by Forward; confirm its setup again.
+      state.view = "setup"; state.stage = "setup"; state.round = null; state.wizardStep = 4;
+      render(); focusWizard();
+    } else { state.view = "home"; state.stage = "setup"; state.round = null; render(); }
+  });
   document.querySelector(".brand").addEventListener("click", event => { event.preventDefault(); navigate("home"); });
   $("menu-toggle").addEventListener("click", () => {
     const open = $("main-menu").classList.toggle("is-open");
     $("menu-toggle").setAttribute("aria-expanded", String(open));
   });
   document.addEventListener("keydown", event => { if (event.key === "Escape") closeMenu(); });
-  $("settings-dialog").addEventListener("close", () => $("inline-settings-slot").append($("display-settings")));
+  $("settings-dialog").addEventListener("close", () => $("wizard-display-slot").append($("display-settings")));
   $("help-sources").addEventListener("click", () => { $("help-dialog").close(); $("sources-dialog").showModal(); });
   for (const [name, key] of [["street-category", "streetCategories"], ["street-unit", "streetUnits"]]) {
     for (const input of document.querySelectorAll(`[name="${name}"]`)) input.addEventListener("change", () => {
@@ -1482,7 +1627,7 @@
   });
   $("city-scope").addEventListener("change", event => {
     state.scope = event.target.value;
-    state.selected = new Set(scopeFeatures().map(feature => feature.id));
+    state.selected = flowTopic() === "rivers" ? new Set() : new Set(scopeFeatures().map(feature => feature.id));
     state.inspected = null;
     buildPicker();
     saveSettings();
@@ -1499,9 +1644,8 @@
     render();
   });
   $("language").addEventListener("change", event => {
-    state.language = event.target.value;
-    saveSettings();
-    render();
+    const value = event.target.value;
+    withLoading(() => { state.language = value; saveSettings(); render(); });
   });
   if (german) $("show-neighborhood-labels").addEventListener("change", event => {
     for (const city of cities) state.labelsByCity[city.id] = event.target.checked;
@@ -1529,10 +1673,7 @@
     render();
   });
   $("round-size").addEventListener("change", event => { state.roundSize = event.target.value === "all" ? "all" : Number(event.target.value); saveSettings(); renderSetup(); });
-  $("start-button").addEventListener("click", () => {
-    if (state.mode === "explore") { state.inspected = null; map.reset(); render(); }
-    else beginRound(state.mode);
-  });
+  $("start-button").addEventListener("click", startConfiguredGame);
   $("reveal-button").addEventListener("click", () => answerQuestion(null));
   $("mobile-reveal").addEventListener("click", () => answerQuestion(null));
   $("mobile-next").addEventListener("click", nextQuestion);
@@ -1562,4 +1703,5 @@
   });
   map.reset();
   render();
+  flowRoute("home", true);
 })();

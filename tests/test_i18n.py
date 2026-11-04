@@ -4,6 +4,7 @@ from pathlib import Path
 import re
 import unittest
 import test_browser as fixtures
+from flow_helpers import GuidedFlow
 
 ROOT=fixtures.ROOT
 class TranslationDataTests(unittest.TestCase):
@@ -20,7 +21,7 @@ class TranslationDataTests(unittest.TestCase):
         self.assertEqual(catalog['mandarin'][1:],['Mandarin','國語'])
         self.assertFalse(any(re.search(r'\bChinese\b',row[1])for row in catalog.values()))
 
-class InterfaceLanguageTests(unittest.TestCase):
+class InterfaceLanguageTests(GuidedFlow, unittest.TestCase):
     setUpClass=classmethod(fixtures.BrowserTests.setUpClass.__func__)
     tearDownClass=classmethod(fixtures.BrowserTests.tearDownClass.__func__)
     def setUp(self):
@@ -35,9 +36,9 @@ class InterfaceLanguageTests(unittest.TestCase):
         if region:self.page.wait_for_selector('body[data-ready="true"]',state='attached')
     def switch(self,language):
         self.page.locator('#ui-language-toggle').click();self.page.locator(f'[data-ui-language="{language}"]').click()
-        self.assertEqual(self.page.locator('html').get_attribute('lang'),language)
+        self.wait_idle();self.assertEqual(self.page.locator('html').get_attribute('lang'),language)
     def chapter(self,topic):
-        self.page.locator(f'[data-start="{topic}"]').click();self.page.locator('#chapter-loading').wait_for(state='hidden')
+        self.configure_topic(topic)
     def test_first_visit_traditional_mandarin_and_language_menu_keyboard(self):
         self.open();self.assertEqual(self.page.locator('html').get_attribute('lang'),'zh-Hant')
         self.assertEqual(self.page.locator('#page-heading').inner_text(),'你想認識哪座城市？')
@@ -57,7 +58,7 @@ class InterfaceLanguageTests(unittest.TestCase):
         self.page.locator('[data-region="duesseldorf"]').click();self.page.wait_for_selector('body[data-ready="true"]',state='attached')
         self.assertEqual(self.page.locator('html').get_attribute('lang'),'en');self.assertIn('Learn streets',self.page.locator('[data-start="streets"]').inner_text())
         self.page.reload();self.page.wait_for_selector('body[data-ready="true"]',state='attached');self.assertEqual(self.page.locator('html').get_attribute('lang'),'en')
-        self.switch('zh-Hant');self.page.locator('.region-change').click();self.page.locator('[data-region="taipei"]').click()
+        self.switch('zh-Hant');self.open_menu();self.page.locator('.region-change').click();self.page.locator('[data-region="taipei"]').click()
         self.page.wait_for_selector('body[data-ready="true"]',state='attached')
         self.assertEqual(self.page.locator('html').get_attribute('lang'),'zh-Hant');self.assertIn('認識街道',self.page.locator('[data-start="streets"]').inner_text())
         self.assertEqual(self.page.locator('#language').input_value(),'en')
@@ -65,7 +66,7 @@ class InterfaceLanguageTests(unittest.TestCase):
     def test_switch_mid_quiz_keeps_answer_question_and_name_settings(self):
         self.open('taipei');self.chapter('districts');self.page.locator('#city-scope').select_option('taipei')
         self.page.locator('#select-all').click();self.page.locator('#district-picker input[value="zhongzheng"]').check()
-        self.page.locator('[data-mode="quiz"]').click();self.page.locator('#start-button').click()
+        self.finish_setup('quiz')
         name=self.page.locator('#question-name').inner_text();language=self.page.locator('#language').input_value()
         self.switch('en');self.assertEqual(self.page.locator('#question-name').inner_text(),name)
         self.assertIn('Find this district',self.page.locator('#question-instruction').inner_text())
@@ -79,7 +80,7 @@ class InterfaceLanguageTests(unittest.TestCase):
         self.context.close();self.context=self.browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
         self.page=self.context.new_page();self.page.on('pageerror',lambda error:self.errors.append(str(error)))
         self.open('duesseldorf');self.chapter('streets');self.page.locator('#city-scope').select_option('dd-eller')
-        self.page.locator('#level-next').tap();self.page.locator('[data-mode="cards"]').tap();self.page.locator('#start-button').tap()
+        self.go_step(2);self.page.locator('#level-next').tap();self.finish_setup('cards')
         name=self.page.locator('#question-name').inner_text();self.page.locator('#mobile-reveal').tap()
         zoom=self.page.locator('#zoom-level').inner_text();self.switch('en')
         self.assertEqual(self.page.locator('#question-name').inner_text(),name);self.assertIn('Level 2',self.page.locator('#question-city').inner_text())
@@ -97,7 +98,7 @@ class InterfaceLanguageTests(unittest.TestCase):
     def test_help_sources_settings_and_storage_unavailable(self):
         self.open('duesseldorf');self.switch('en')
         for dialog,nav,phrase in [('help','help','ten new whole streets'),('settings','settings','Place-name language'),('sources','help','')]:
-            self.page.locator(f'[data-nav="{nav}"]').click()
+            self.open_menu();self.page.locator(f'[data-nav="{nav}"]').click()
             if dialog=='sources':self.page.locator('#help-sources').click()
             if phrase:self.assertIn(phrase,self.page.locator('#'+dialog+'-dialog').inner_text())
             self.assertFalse(re.search(r'\b(Straßen|Stadtteile|Quelle|Lernstand|Die|werden)\b',self.page.locator('#'+dialog+'-dialog').inner_text()))

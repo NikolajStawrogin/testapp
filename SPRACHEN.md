@@ -1,8 +1,10 @@
-# Oberflächensprachen · 0.13
+# Oberflächensprachen · 0.14
 
 Die gesamte Bedienoberfläche ist in Englisch und traditionellem Chinesisch verfügbar. Auf einem ersten Besuch ohne gespeicherte Oberflächensprache startet die App auf traditionellem Chinesisch (`zh-Hant`), unabhängig von der Browsersprache. Im Sprachmenü heißt diese Sprache **國語**, in der englischen Oberfläche **Mandarin**. Es gibt keine vereinfachte Schriftvariante.
 
 Oben rechts ist auf jeder Seite ein Globus mit Sprachkürzel sichtbar, auch vor der Stadtauswahl und auf dem Handy. Öffnen und Sprache wählen; die Änderung gilt sofort. Die Auswahl wird unter `stadt-kennen.ui-language.v1` im lokalen Browserspeicher gespeichert, gemeinsam für beide Lernregionen. Spätere Besuche und Stadtwechsel behalten sie. Falls der Browser keinen Speicher erlaubt, bleibt die Umschaltung für die aktuelle Seite nutzbar; beim nächsten Öffnen gilt wieder der Erststart.
+
+Vor der aufwendigen Aktualisierung erscheint ein modaler Ladehinweis, auch über geöffneten Kartenoptionen. Die Anzeige wird vor der Kartenarbeit gezeichnet und nach Abschluss wieder geschlossen.
 
 Menüs, Level-Auswahl, Quizanweisungen und Rückmeldungen, Kartenbedienung, Hilfe, Quellenhinweise, Lernstand und Fehlermeldungen werden übersetzt. Umschalten benötigt kein Neuladen und beendet keine Quizrunde. Ziel, abgegebene Antworten, Gebiet, Level und Zoom bleiben erhalten. Die Sprache selbst wird weder als Antwort gewertet noch in den Lernstand geschrieben.
 

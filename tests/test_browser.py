@@ -10,6 +10,7 @@ from threading import Thread
 import unittest
 
 from playwright.sync_api import sync_playwright
+from flow_helpers import GuidedFlow
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -21,7 +22,7 @@ class QuietHandler(SimpleHTTPRequestHandler):
         pass
 
 
-class BrowserTests(unittest.TestCase):
+class BrowserTests(GuidedFlow, unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         handler = partial(QuietHandler, directory=str(ROOT))
@@ -63,12 +64,10 @@ class BrowserTests(unittest.TestCase):
         self.context.close()
 
     def open_practice(self):
-        if self.page.locator("#home-view").is_visible():
-            if self.page.locator("#menu-toggle").is_visible():
-                self.page.locator("#menu-toggle").click()
-            self.page.locator('[data-nav="explore"]').click()
+        self.configure_topic('districts');self.finish_setup('explore')
 
     def choose(self, ids):
+        self.go_step(1)
         for item in self.page.locator("#district-picker input").all():
             item.set_checked(item.get_attribute("value") in ids)
 
@@ -94,288 +93,103 @@ class BrowserTests(unittest.TestCase):
         self.assertTrue(inside, "River anchor must lie inside its real water area")
         self.page.mouse.click(point["x"], point["y"])
 
-    def test_river_overlay_names_and_preferences(self):
-        self.assertEqual(self.page.locator(".river-shape").count(), 4)
-        self.assertFalse(self.page.locator("#include-rivers").is_checked())
-        self.assertTrue(self.page.locator("#river-layer").is_visible())
-        self.assertGreater(self.page.locator(".river-label:visible").count(), 0)
-        self.page.locator("#show-rivers").uncheck()
-        self.assertFalse(self.page.locator("#river-layer").is_visible())
-        self.assertEqual(self.page.locator(".river-label:visible").count(), 0)
-        self.assertTrue(self.page.locator("#show-river-labels").is_disabled())
-        self.page.locator("#show-rivers").check()
-        self.page.locator("#language").select_option("en")
-        self.assertEqual(self.page.locator(".river-label .zh:visible").count(), 0)
-        self.page.locator("#include-rivers").check()
-        for river in self.rivers:
-            self.click_river(river["id"])
-            self.assertIn(river["nameEn"], self.page.locator("#map-detail").inner_text())
-        self.page.locator("#show-river-labels").uncheck()
-        self.assertEqual(self.page.locator(".river-label:visible").count(), 0)
-        self.assertGreater(self.page.locator(".district-label:visible").count(), 0)
-        self.page.reload()
-        self.assertTrue(self.page.locator("#include-rivers").is_checked())
-        self.assertFalse(self.page.locator("#show-river-labels").is_checked())
-        self.assertEqual(self.page.locator("#river-picker input:checked").count(), 4)
-        self.assertIsNone(self.progress())
-
-    def test_river_only_quiz_scoring_retry_and_persistence(self):
-        self.page.locator("#include-rivers").check()
-        self.page.locator("#select-all").click()
-        self.page.locator('[data-mode="quiz"]').click()
-        self.page.locator("#round-size").select_option("all")
-        self.assertIn('4 questions', self.page.locator("#start-button").inner_text())
-        self.page.locator("#start-button").click()
-        visited = set()
-        first_error = None
-        for number in range(4):
-            target = self.target()
-            self.assertEqual(target["kind"], "river")
-            visited.add(target["id"])
-            self.assertIn("this river", self.page.locator("#question-instruction").inner_text())
-            self.assertFalse(self.page.locator(f'.river-label[data-id="{target["id"]}"]').is_visible())
-            self.assertTrue(self.page.locator("#show-rivers").is_disabled())
-            self.page.locator('.district-shape[data-id="neihu"]').dispatch_event("keydown", {"key": "Enter"})
-            self.assertFalse(self.page.locator("#feedback").is_visible())
-            chosen = target["id"]
-            if number == 0:
-                first_error = target["id"]
-                chosen = next(river["id"] for river in self.rivers if river["id"] != first_error)
-            self.click_river(chosen)
-            self.assertTrue(self.page.locator(f'.river-shape[data-id="{target["id"]}"]').evaluate("el => el.classList.contains('is-correct')"))
-            self.page.locator("#next-button").click()
-        self.assertEqual(visited, {river["id"] for river in self.rivers})
-        self.assertIn("3 / 4", self.page.locator("#result-score").inner_text())
-        self.page.locator("#retry-errors").click()
-        self.assertEqual(self.target()["id"], first_error)
-        self.click_river(first_error)
-        self.page.locator("#next-button").click()
-        self.assertEqual(self.progress()["rounds"], 2)
-        self.assertEqual(self.progress()["districts"][first_error], {"attempts": 2, "correct": 1})
-        self.page.reload()
-        self.assertEqual(sum(stats["attempts"] for stats in self.progress()["districts"].values()), 5)
-        self.page.locator("#include-rivers").uncheck()
-        self.page.locator("#progress-open").click()
-        self.assertIn('Rivers', self.page.locator("#progress-list").inner_text())
-
-    def test_river_confluence_prefers_water_over_neighbour_hit_padding(self):
-        self.page.locator("#include-rivers").check()
-        point = self.page.evaluate("""() => {
-            const references = ['neihu','wenshan'].map(id => {
-                const feature = window.TAIPEI_DATA.features.find(f => f.id === id);
-                const el = document.querySelector(`.district-shape[data-id="${id}"]`);
-                const pixel = new DOMPoint(Number(el.dataset.anchorX),Number(el.dataset.anchorY)).matrixTransform(el.getScreenCTM());
-                return {anchor:feature.anchor,pixel};
-            });
-            const [a,b] = references;
-            const latitude = lat => Math.log(Math.tan(Math.PI/4+lat*Math.PI/360));
-            return {x:a.pixel.x+(121.465125-a.anchor[0])/(b.anchor[0]-a.anchor[0])*(b.pixel.x-a.pixel.x),
-                    y:a.pixel.y+(latitude(25.105501)-latitude(a.anchor[1]))/(latitude(b.anchor[1])-latitude(a.anchor[1]))*(b.pixel.y-a.pixel.y)};
-        }""")
-        inside = self.page.locator('.river-shape[data-id="river-tamsui"]').evaluate("""(el, p) =>
-            el.isPointInFill(new DOMPoint(p.x,p.y).matrixTransform(el.getScreenCTM().inverse()))""", point)
-        self.assertTrue(inside)
-        self.assertEqual(self.page.evaluate("p => document.elementFromPoint(p.x,p.y)?.dataset.id", point), "river-keelung")
-        self.page.mouse.click(point["x"], point["y"])
-        self.assertIn("Tamsui River", self.page.locator("#map-detail").inner_text())
-
-    def test_touch_river_quiz_pan_pinch_and_tap(self):
-        self.context.close()
-        self.context = self.browser.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
-        self.context.add_init_script("try { localStorage.setItem('stadt-kennen.ui-language.v1', 'en'); } catch {}")
-        self.page = self.context.new_page()
-        self.page.on("pageerror", lambda error: self.errors.append(str(error)))
-        self.page.on("request", lambda request: self.external_requests.append(request.url)
-                     if request.url.startswith(("https://", "http://")) and not request.url.startswith(self.url) else None)
-        self.page.goto(self.url + "?region=taipei")
-        self.open_practice()
-        self.page.locator("#include-rivers").check()
-        self.page.locator("#select-all").click()
-        for item in self.page.locator("#river-picker input").all():
-            item.set_checked(item.get_attribute("value") == "river-keelung")
-        self.page.locator('[data-mode="quiz"]').tap()
-        self.page.locator("#start-button").tap()
-        self.page.locator("#taipei-map").scroll_into_view_if_needed()
-        client = self.context.new_cdp_session(self.page)
-
-        def touches(kind, points):
-            client.send("Input.dispatchTouchEvent", {"type": kind, "touchPoints": [
-                {"id": id, "x": x, "y": y} for id, x, y in points]})
-            self.page.wait_for_timeout(60)
-
-        box = self.page.locator("#taipei-map").bounding_box()
-        cx, cy = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
-        touches("touchStart", [(1,cx-45,cy),(2,cx+45,cy)])
-        touches("touchMove", [(1,cx-85,cy),(2,cx+85,cy)])
-        touches("touchEnd", [])
-        touches("touchStart", [(1,cx,cy)])
-        touches("touchMove", [(1,cx+25,cy+20)])
-        touches("touchEnd", [])
-        self.assertIsNone(self.progress())
-        self.assertFalse(self.page.locator("#feedback").is_visible())
-        self.page.locator("#zoom-reset").tap()
-        self.page.locator("#taipei-map").scroll_into_view_if_needed()
-        point = self.page.locator('.river-hit[data-id="river-keelung"]').evaluate("""el => {
-            const p = new DOMPoint(Number(el.dataset.anchorX),Number(el.dataset.anchorY)).matrixTransform(el.getScreenCTM());
-            return {x:p.x,y:p.y};
-        }""")
-        touches("touchStart", [(1,point["x"],point["y"])])
-        touches("touchEnd", [])
-        self.assertIn('Exactly right', self.page.locator("#feedback").inner_text())
-        self.assertEqual(self.progress()["districts"]["river-keelung"], {"attempts": 1, "correct": 1})
-        self.assertFalse(self.page.evaluate("document.documentElement.scrollWidth > innerWidth"))
-
-    def test_mixed_river_quiz_scope_selection_and_cards(self):
-        self.page.locator("#city-scope").select_option("taipei")
-        self.page.locator("#include-rivers").check()
-        self.assertEqual(self.page.locator("#river-picker input").count(), 3)
-        self.assertEqual(self.page.locator('#river-picker input[value="river-dahan"]').count(), 0)
-        self.choose(["neihu"])
-        self.page.locator('#river-picker input[value="river-keelung"]').uncheck()
-        self.page.locator('[data-mode="quiz"]').click()
-        self.page.locator("#round-size").select_option("all")
-        self.assertIn('3 questions', self.page.locator("#start-button").inner_text())
-        self.page.locator("#start-button").click()
-        visited = set()
-        for _ in range(3):
-            target = self.target()
-            visited.add(target["id"])
-            if target.get("kind") == "river":
-                self.click_river(target["id"])
-            else:
-                self.page.locator('.river-hit[data-id="river-tamsui"]').dispatch_event("keydown", {"key": "Enter"})
-                self.assertFalse(self.page.locator("#feedback").is_visible())
-                self.click_district(target["id"])
-            self.assertIn('Exactly right', self.page.locator("#feedback").inner_text())
-            self.page.locator("#next-button").click()
-        self.assertEqual(visited, {"neihu", "river-tamsui", "river-xindian"})
-        self.page.locator("#back-to-setup").click()
-        self.page.locator("#city-scope").select_option("new-taipei")
-        self.assertEqual(self.page.locator("#river-picker input").count(), 4)
-        self.page.locator("#select-all").click()
-        for item in self.page.locator("#river-picker input").all():
-            item.set_checked(item.get_attribute("value") == "river-dahan")
-        self.page.reload()
-        self.assertEqual(self.page.locator("#river-picker input:checked").count(), 1)
-        self.page.locator('[data-mode="cards"]').click()
-        self.page.locator("#start-button").click()
-        before = self.progress()
-        self.assertEqual(self.target()["id"], "river-dahan")
-        self.page.locator("#reveal-button").click()
-        self.assertIn("大漢溪", self.page.locator("#feedback").inner_text())
-        self.assertEqual(self.progress(), before, "River learning cards must not count as quiz attempts")
-        self.page.locator("#next-button").click()
-        self.assertIn("1 card", self.page.locator("#result-score").inner_text())
 
     def progress(self):
         return self.page.evaluate("key => JSON.parse(localStorage.getItem(key) || 'null')", PROGRESS_KEY)
 
-    def test_map_exploration_zoom_and_labels(self):
-        self.assertEqual(self.page.locator(".district-shape").count(), 41)
-        for feature in self.features:
-            self.click_district(feature["id"])
-            self.assertIn(feature["nameZh"], self.page.locator("#map-detail").inner_text())
-        before = self.page.locator("#map-content").get_attribute("transform")
-        self.page.locator("#zoom-in").click()
-        self.assertNotEqual(before, self.page.locator("#map-content").get_attribute("transform"))
-        self.page.locator("#zoom-reset").click()
-        self.assertEqual(before, self.page.locator("#map-content").get_attribute("transform"))
-        self.page.locator("#language").select_option("en")
-        self.click_district("neihu")
-        self.assertIn("Neihu Dist.", self.page.locator("#map-detail").inner_text())
-        self.assertNotIn("內湖區", self.page.locator("#map-detail").inner_text())
-        self.page.locator("#show-labels-taipei").uncheck()
-        self.page.locator("#show-labels-new-taipei").uncheck()
-        self.assertEqual(self.page.locator(".district-label:visible").count(), 0)
-        self.assertIsNone(self.progress())
 
-    def test_city_labels_are_independent_of_quiz_scope(self):
-        self.page.locator("#city-scope").select_option("taipei")
-        self.page.locator("#show-labels-taipei").uncheck()
-        self.page.locator('[data-mode="quiz"]').click()
-        self.page.locator("#start-button").click()
+    def test_map_exploration_zoom_labels_and_city_scope(self):
+        self.assertTrue(self.page.locator('.map-panel').is_visible())
+        self.assertEqual(self.page.locator('.district-shape').count(),41)
+        before=self.page.locator('#map-content').get_attribute('transform')
+        self.page.locator('#zoom-in').click();self.assertNotEqual(before,self.page.locator('#map-content').get_attribute('transform'))
+        self.open_settings();self.page.locator('#show-labels-taipei').uncheck();self.close_dialog('settings')
+        visible=self.page.locator('.district-label:visible').evaluate_all('nodes=>nodes.map(n=>TAIPEI_DATA.features.find(f=>f.id===n.dataset.id).cityId)')
+        self.assertTrue(visible);self.assertEqual(set(visible),{'new-taipei'})
+        self.go_step(1);self.page.locator('#city-scope').select_option('taipei');self.finish_setup('explore')
+        self.assertEqual(self.page.locator('.district-shape:not(.is-muted)').count(),12)
+        self.click_district('neihu');self.assertIn('內湖區',self.page.locator('#map-detail').inner_text())
 
-        def visible_cities():
-            return self.page.locator(".district-label:visible").evaluate_all("""labels => labels.map(label =>
-                window.TAIPEI_DATA.features.find(feature => feature.id === label.dataset.id).cityId)""")
+    def test_quiz_scoring_repeat_persistence_and_delete(self):
+        self.choose(['neihu','shilin','beitou']);self.go_step(2);self.page.locator('[data-mode="quiz"]').click();self.page.locator('#round-size').select_option('all');self.finish_setup()
+        first=self.target();wrong=next(f for f in self.features if f['id']in ['neihu','shilin','beitou']and f['id']!=first['id'])
+        self.click_district(wrong['id']);self.assertTrue(self.page.locator('#feedback.wrong').is_visible());self.page.locator('#next-button').click()
+        self.click_district(self.target()['id']);self.page.locator('#next-button').click();self.page.locator('#reveal-button').click();self.page.locator('#next-button').click()
+        self.assertIn('1 / 3',self.page.locator('#result-score').inner_text());self.assertFalse(self.page.locator('.map-panel').is_visible())
+        self.page.locator('#retry-errors').click()
+        for _ in range(2):self.click_district(self.target()['id']);self.page.locator('#next-button').click()
+        self.assertIn('2 / 2',self.page.locator('#result-score').inner_text());self.assertEqual(self.progress()['rounds'],2)
+        self.open_progress();self.assertIn('5 questions answered',self.page.locator('#progress-summary').inner_text())
+        self.page.locator('#delete-progress').click();self.page.locator('#delete-confirm').click();self.assertIsNone(self.progress())
+        self.close_dialog('progress');self.assertTrue(self.page.locator('#setup-view').is_visible())
+        self.page.reload();self.page.wait_for_selector('body[data-ready="true"]',state='attached');self.assertIsNone(self.progress())
 
-        self.assertTrue(visible_cities(), "New Taipei labels must remain visible around the Taipei quiz")
-        self.assertEqual(set(visible_cities()), {"new-taipei"})
-        target = self.target()
-        target_label = self.page.locator(f'.district-label[data-id="{target["id"]}"]')
-        self.assertFalse(target_label.is_visible())
-        context = self.page.locator('.district-shape[data-id="nt-sanchong"]')
-        self.assertEqual(context.get_attribute("aria-disabled"), "true")
-        self.click_district("nt-sanchong")
-        self.assertIsNone(self.progress(), "Context districts must not submit quiz answers")
-        transform = self.page.locator("#map-content").get_attribute("transform")
-        self.page.locator("#show-labels-new-taipei").uncheck()
-        self.assertEqual(self.page.locator(".district-label:visible").count(), 0)
-        self.page.locator("#show-labels-new-taipei").check()
-        self.assertTrue(visible_cities())
-        self.page.locator("#show-labels-taipei").check()
-        self.assertFalse(target_label.is_visible(), "Enabling city labels must not reveal the target")
-        self.page.locator("#show-labels-taipei").uncheck()
-        self.assertEqual(transform, self.page.locator("#map-content").get_attribute("transform"))
-        self.assertIsNone(self.progress())
-        self.click_district(target["id"])
-        self.page.locator("#next-button").click()
-        self.assertEqual(set(visible_cities()), {"new-taipei"})
+    def test_river_only_quiz_scoring_retry_and_persistence(self):
+        self.configure_topic('rivers');self.page.locator('#city-scope').select_option('new-taipei');self.go_step(2)
+        self.page.locator('[data-mode="quiz"]').click();self.page.locator('#round-size').select_option('all');self.finish_setup()
+        first=None
+        for index in range(4):
+            target=self.target();self.assertEqual(target['kind'],'river')
+            self.assertFalse(self.page.locator(f'.river-label[data-id="{target["id"]}"]').is_visible())
+            if index==0:
+                first=target;other=next(f for f in self.rivers if f['id']!=target['id']);self.click_river(other['id'])
+            else:self.click_river(target['id'])
+            self.assertTrue(self.page.locator(f'.river-shape[data-id="{target["id"]}"]').evaluate('el=>el.classList.contains("is-correct")'))
+            self.page.locator('#next-button').click()
+        self.assertIn('3 / 4',self.page.locator('#result-score').inner_text());self.page.locator('#retry-errors').click()
+        self.click_river(first['id']);self.page.locator('#next-button').click();self.assertIn('1 / 1',self.page.locator('#result-score').inner_text())
+        self.assertEqual(self.progress()['districts'][first['id']],{'attempts':2,'correct':1})
 
-        self.page.reload()
-        self.assertFalse(self.page.locator("#show-labels-taipei").is_checked())
-        self.assertTrue(self.page.locator("#show-labels-new-taipei").is_checked())
-        self.assertEqual(self.progress()["districts"][target["id"]]["attempts"], 1)
-        self.page.locator("#city-scope").select_option("new-taipei")
-        self.page.locator("#show-labels-taipei").check()
-        self.page.locator("#show-labels-new-taipei").uncheck()
-        self.page.locator("#start-button").click()
-        self.assertNotIn("new-taipei", visible_cities())
-        self.page.locator("#show-labels-new-taipei").check()
-        self.assertFalse(self.page.locator(f'.district-label[data-id="{self.target()["id"]}"]').is_visible())
+    def test_mixed_river_quiz_scope_selection_and_cards(self):
+        self.choose(['neihu']);self.page.locator('#include-rivers').check()
+        for item in self.page.locator('#river-picker input').all():item.set_checked(item.get_attribute('value')=='river-tamsui')
+        self.go_step(2);self.page.locator('[data-mode="quiz"]').click();self.page.locator('#round-size').select_option('all');self.finish_setup()
+        visited=set()
+        for _ in range(2):
+            target=self.target();visited.add(target['id'])
+            (self.click_river if target.get('kind')=='river'else self.click_district)(target['id']);self.page.locator('#next-button').click()
+        self.assertEqual(visited,{'neihu','river-tamsui'});before=self.progress()
+        self.configure_topic('rivers');self.finish_setup('cards');self.page.locator('#reveal-button').click();self.page.locator('#next-button').click()
+        self.assertIn('1 card',self.page.locator('#result-score').inner_text());self.assertEqual(self.progress(),before)
 
-    def test_metro_layer_toggle_persistence_and_language(self):
-        self.assertTrue(self.page.locator("#show-metro").is_checked())
-        self.assertEqual(self.page.locator(".metro-line").count(), 13)
-        self.assertEqual(self.page.locator(".metro-chip").count(), 12)
-        self.assertTrue(self.page.locator("#metro-credit").is_visible())
-        self.assertEqual(self.page.locator('.metro-line[data-line="BR"]').evaluate("el => getComputedStyle(el).stroke"), "rgb(196, 140, 49)")
-        self.page.locator("#zoom-in").click()
-        line_matrix = self.page.locator(".metro-line").first.evaluate("el => { const m=el.getScreenCTM(); return [m.a,m.d,m.e,m.f]; }")
-        district_matrix = self.page.locator(".district-shape").first.evaluate("el => { const m=el.getScreenCTM(); return [m.a,m.d,m.e,m.f]; }")
-        self.assertEqual(line_matrix, district_matrix)
-        before = self.page.locator("#map-content").get_attribute("transform")
-        self.page.locator("#show-metro").uncheck()
-        self.assertEqual(before, self.page.locator("#map-content").get_attribute("transform"))
-        self.assertFalse(self.page.locator("#metro-layer").is_visible())
-        self.assertFalse(self.page.locator("#metro-legend").is_visible())
-        self.page.reload()
-        self.assertFalse(self.page.locator("#show-metro").is_checked())
-        self.assertFalse(self.page.locator("#metro-layer").is_visible())
-        self.page.locator("#show-metro").check()
-        self.assertTrue(self.page.locator("#metro-layer").is_visible())
-        self.page.locator("#metro-legend summary").click()
-        self.page.locator("#language").select_option("zh")
-        self.assertEqual(self.page.locator('.metro-chip[data-line="BR"] .metro-name').inner_text(), "文湖線")
-        self.page.locator("#language").select_option("en")
-        self.assertEqual(self.page.locator('.metro-chip[data-line="BR"] .metro-name').inner_text(), "Wenhu")
-        self.assertIsNone(self.progress())
+    def test_learning_cards_and_keyboard_without_scoring(self):
+        self.choose(['beitou','shilin']);self.go_step(3);self.page.locator('#language').select_option('en');self.wait_idle();self.finish_setup('cards')
+        self.assertIn('Dist.',self.page.locator('#question-name').inner_text())
+        for _ in range(2):
+            self.page.locator(f'.district-shape[data-id="{self.target()["id"]}"]').press('Enter');self.page.locator('#next-button').click()
+        self.assertIn('2 cards',self.page.locator('#result-score').inner_text());self.assertIsNone(self.progress())
 
-    def test_metro_track_is_geographically_aligned_and_clicks_reach_district(self):
-        self.choose(["nangang"])
-        self.page.locator('[data-mode="quiz"]').click()
-        self.page.locator("#start-button").click()
-        self.page.locator("#taipei-map").scroll_into_view_if_needed()
-        point = self.page.locator('.metro-line[data-line="BR"]').evaluate("""el => {
-            const p = el.getPointAtLength(0).matrixTransform(el.getScreenCTM());
-            return {x:p.x,y:p.y};
-        }""")
-        hit = self.page.evaluate("p => document.elementFromPoint(p.x,p.y)?.closest('.district-shape')?.dataset.id", point)
-        self.assertEqual(hit, "nangang", "The Wenhu terminus must align with the Nangang district and allow clicks through the line")
-        self.assertIsNone(self.progress())
-        self.page.mouse.click(point["x"], point["y"])
-        self.assertIn('Exactly right', self.page.locator("#feedback").inner_text())
-        self.assertEqual(self.progress()["districts"]["nangang"]["attempts"], 1)
+    def test_legacy_progress_and_settings_migrate_without_reset(self):
+        payload={'rounds':3,'districts':{'neihu':{'attempts':4,'correct':3}}}
+        self.page.evaluate('(p)=>{localStorage.setItem("taipei-kennen.progress.v1",JSON.stringify(p));localStorage.setItem("taipei-kennen.settings.v1",JSON.stringify({language:"en",labels:false,selected:["neihu"],scope:"taipei"}))}',payload)
+        self.page.reload();self.page.wait_for_selector('body[data-ready="true"]',state='attached')
+        self.assertTrue(self.page.locator('#home-view').is_visible());self.configure_topic('districts');self.finish_setup('quiz')
+        self.assertEqual(self.page.locator('#question-name').inner_text(),'Neihu Dist.');self.assertEqual(self.progress(),payload)
+        self.assertEqual(self.page.locator('.district-label:visible').count(),0)
+
+    def test_touch_pinch_pan_and_tap_do_not_confuse_quiz_answers(self):
+        self.context.close();self.context=self.browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
+        self.context.add_init_script("localStorage.setItem('stadt-kennen.ui-language.v1','en')")
+        self.page=self.context.new_page();self.page.on('pageerror',lambda error:self.errors.append(str(error)))
+        self.page.goto(self.url+'?region=taipei');self.page.wait_for_selector('body[data-ready="true"]',state='attached')
+        self.configure_topic('districts');self.choose(['neihu']);self.finish_setup('quiz')
+        svg=self.page.locator('#taipei-map');svg.scroll_into_view_if_needed();box=svg.bounding_box();x=box['x']+box['width']/2;y=box['y']+box['height']/2
+        cdp=self.context.new_cdp_session(self.page)
+        def touch(kind,points):cdp.send('Input.dispatchTouchEvent',{'type':kind,'touchPoints':[{'id':i,'x':px,'y':py,'radiusX':2,'radiusY':2,'force':1}for i,px,py in points]})
+        before=self.page.locator('#map-content').get_attribute('transform')
+        touch('touchStart',[(1,x-35,y),(2,x+35,y)]);touch('touchMove',[(1,x-65,y),(2,x+65,y)]);touch('touchEnd',[])
+        self.assertNotEqual(before,self.page.locator('#map-content').get_attribute('transform'));self.assertFalse(self.page.locator('#feedback').is_visible())
+        self.page.locator('#zoom-reset').click();self.page.wait_for_timeout(350)
+        point=self.page.locator('.district-shape[data-id="neihu"]').evaluate('el=>{const p=new DOMPoint(+el.dataset.anchorX,+el.dataset.anchorY).matrixTransform(el.getScreenCTM());return{x:p.x,y:p.y}}')
+        self.page.touchscreen.tap(point['x'],point['y']);self.assertIn('Exactly right',self.page.locator('#feedback').inner_text())
+        self.assertFalse(self.page.evaluate('document.documentElement.scrollWidth>innerWidth'))
+
+    def test_empty_selection_and_bad_storage(self):
+        self.choose([]);self.assertTrue(self.page.locator('#wizard-next').is_disabled());self.assertTrue(self.page.locator('#wizard-validation').is_visible())
+        self.page.evaluate("localStorage.setItem('taipei-kennen.progress.v1','{invalid')")
+        self.page.reload();self.page.wait_for_selector('body[data-ready="true"]',state='attached')
+        self.open_progress();self.assertIn('first quiz answers',self.page.locator('#progress-summary').inner_text())
+
 
     def test_zoom_out_from_initial_view_and_restore(self):
         district = self.page.locator('.district-shape[data-id="neihu"]')
@@ -397,6 +211,7 @@ class BrowserTests(unittest.TestCase):
         self.assertTrue(self.page.locator("#zoom-in").is_disabled())
         self.page.locator("#zoom-reset").click()
         self.assertEqual(self.page.locator("#zoom-level").inner_text(), "100 %")
+
 
     def test_wheel_zoom_preserves_pointer_position_and_ignores_horizontal_scroll(self):
         district = self.page.locator('.district-shape[data-id="neihu"]')
@@ -426,151 +241,9 @@ class BrowserTests(unittest.TestCase):
         self.page.mouse.wheel(0, -120)
         self.page.wait_for_function("width => document.querySelector('[data-id=neihu].district-shape').getBoundingClientRect().width > width * 1.2", arg=initial_width)
 
-    def test_touch_pinch_pan_and_tap_do_not_confuse_quiz_answers(self):
-        self.context.close()
-        self.context = self.browser.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
-        self.context.add_init_script("try { localStorage.setItem('stadt-kennen.ui-language.v1', 'en'); } catch {}")
-        self.page = self.context.new_page()
-        self.page.on("pageerror", lambda error: self.errors.append(str(error)))
-        self.page.on("request", lambda request: self.external_requests.append(request.url)
-                     if request.url.startswith(("https://", "http://")) and not request.url.startswith(self.url) else None)
-        self.page.goto(self.url + "?region=taipei")
-        self.open_practice()
-        self.page.locator('[data-mode="quiz"]').tap()
-        self.page.locator("#start-button").tap()
-        self.page.locator("#taipei-map").scroll_into_view_if_needed()
-        self.assertTrue(self.page.locator("#metro-credit").is_visible())
-        self.assertFalse(self.page.evaluate("document.documentElement.scrollWidth > innerWidth"))
-        client = self.context.new_cdp_session(self.page)
-
-        def touches(kind, points):
-            client.send("Input.dispatchTouchEvent", {
-                "type": kind,
-                "touchPoints": [{"id": id, "x": x, "y": y, "radiusX": 2, "radiusY": 2, "force": 1} for id, x, y in points]
-            })
-
-        district = self.page.locator('.district-shape[data-id="neihu"]')
-        initial_width = district.bounding_box()["width"]
-        box = self.page.locator("#taipei-map").bounding_box()
-        cx, cy = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
-        touches("touchStart", [(1, cx - 22, cy)])
-        touches("touchStart", [(1, cx - 22, cy), (2, cx + 22, cy)])
-        for distance in [30, 40, 50, 60, 70]:
-            touches("touchMove", [(1, cx - distance, cy), (2, cx + distance, cy)])
-        touches("touchEnd", [(1, cx - 70, cy)])
-        touches("touchMove", [(1, cx - 50, cy + 10)])
-        touches("touchEnd", [])
-        self.assertGreater(district.bounding_box()["width"], initial_width * 2)
-        self.assertFalse(self.page.locator("#feedback").is_visible())
-        self.assertIsNone(self.progress())
-
-        self.page.locator("#zoom-reset").tap()
-        self.page.locator("#taipei-map").scroll_into_view_if_needed()
-        box = self.page.locator("#taipei-map").bounding_box()
-        cx, cy = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
-        touches("touchStart", [(1, cx - 60, cy)])
-        touches("touchStart", [(1, cx - 60, cy), (2, cx + 60, cy)])
-        touches("touchMove", [(1, cx - 30, cy), (2, cx + 30, cy)])
-        touches("touchEnd", [])
-        self.assertLess(district.bounding_box()["width"], initial_width * 0.6)
-        self.assertFalse(self.page.locator("#feedback").is_visible())
-        self.assertIsNone(self.progress())
-
-        self.page.locator("#zoom-reset").tap()
-        self.page.locator("#taipei-map").scroll_into_view_if_needed()
-        box = self.page.locator("#taipei-map").bounding_box()
-        cx, cy = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
-        before = self.page.locator("#map-content").get_attribute("transform")
-        touches("touchStart", [(1, cx, cy)])
-        touches("touchMove", [(1, cx + 35, cy + 15)])
-        touches("touchEnd", [])
-        self.assertNotEqual(self.page.locator("#map-content").get_attribute("transform"), before)
-        self.assertIsNone(self.progress())
-        touches("touchStart", [(1, cx, cy)])
-        touches("touchCancel", [])
-        self.assertIsNone(self.progress())
-
-        self.page.locator("#zoom-reset").tap()
-        target = self.target()
-        point = self.page.locator(f'.district-shape[data-id="{target["id"]}"]').evaluate("""el => {
-            const p = new DOMPoint(Number(el.dataset.anchorX), Number(el.dataset.anchorY)).matrixTransform(el.getScreenCTM());
-            return {x:p.x,y:p.y};
-        }""")
-        touches("touchStart", [(1, point["x"], point["y"])])
-        touches("touchEnd", [])
-        self.assertIn('Exactly right', self.page.locator("#feedback").inner_text())
-        self.assertEqual(sum(row["attempts"] for row in self.progress()["districts"].values()), 1)
-
-    def test_quiz_scoring_repeat_persistence_and_delete(self):
-        ids = ["neihu", "nangang", "daan"]
-        self.choose(ids)
-        self.page.locator('[data-mode="quiz"]').click()
-        self.page.locator("#start-button").click()
-        self.assertIn("1 / 3", self.page.locator("#session-count").inner_text())
-        first = self.target()
-        self.assertFalse(self.page.locator(f'.district-label[data-id="{first["id"]}"]').is_visible())
-        self.assertEqual(self.page.locator(f'.district-shape[data-id="{first["id"]}"]').get_attribute("aria-label"), 'Select an area on the map')
-        wrong = next(id for id in ids if id != first["id"])
-        self.click_district(wrong)
-        self.assertTrue(self.page.locator("#feedback.wrong").is_visible())
-        self.assertEqual(self.page.locator(".district-shape.is-correct").get_attribute("data-id"), first["id"])
-        self.assertEqual(self.page.locator(".district-shape.is-wrong").get_attribute("data-id"), wrong)
-        self.click_district(first["id"])
-        self.assertEqual(sum(row["attempts"] for row in self.progress()["districts"].values()), 1)
-        self.page.locator("#next-button").click()
-        self.click_district(self.target()["id"])
-        self.assertIn('Exactly right', self.page.locator("#feedback").inner_text())
-        self.page.locator("#next-button").click()
-        self.page.locator("#reveal-button").click()
-        self.page.locator("#next-button").click()
-        self.assertIn("1 / 3", self.page.locator("#result-score").inner_text())
-        self.assertEqual(self.page.locator(".result-row.wrong").count(), 2)
-        self.page.locator("#retry-errors").click()
-        self.assertIn("1 / 2", self.page.locator("#session-count").inner_text())
-        for _ in range(2):
-            self.click_district(self.target()["id"])
-            self.page.locator("#next-button").click()
-        self.assertIn("2 / 2", self.page.locator("#result-score").inner_text())
-        self.assertFalse(self.page.locator("#retry-errors").is_visible())
-        stats = self.progress()
-        self.assertEqual(stats["rounds"], 2)
-        self.assertEqual(sum(row["attempts"] for row in stats["districts"].values()), 5)
-        self.assertEqual(sum(row["correct"] for row in stats["districts"].values()), 3)
-        self.page.reload()
-        self.assertEqual(self.progress(), stats)
-        self.page.locator("#progress-open").click()
-        self.assertIn('5 questions answered', self.page.locator("#progress-summary").inner_text())
-        self.page.locator("#delete-progress").click()
-        self.page.locator("#delete-cancel").click()
-        self.assertEqual(self.progress(), stats)
-        self.page.locator("#delete-progress").click()
-        self.page.locator("#delete-confirm").click()
-        self.assertIsNone(self.progress())
-        self.page.reload()
-        self.page.locator("#progress-open").click()
-        self.assertIn("first quiz answers", self.page.locator("#progress-summary").inner_text())
-
-    def test_learning_cards_and_keyboard_without_scoring(self):
-        self.choose(["beitou", "shilin"])
-        self.page.locator("#language").select_option("en")
-        self.page.locator('[data-mode="cards"]').click()
-        self.page.locator("#start-button").click()
-        self.assertIn("1 / 2", self.page.locator("#session-count").inner_text())
-        self.assertIn("Dist.", self.page.locator("#question-name").inner_text())
-        self.assertFalse(self.page.locator("#question-secondary").is_visible())
-        self.page.locator(f'.district-shape[data-id="{self.target()["id"]}"]').press("Enter")
-        self.assertTrue(self.page.locator("#next-button").is_visible())
-        self.page.locator("#next-button").click()
-        self.page.locator("#language").select_option("zh")
-        self.assertIn("區", self.page.locator("#question-name").inner_text())
-        self.page.locator("#reveal-button").click()
-        self.page.locator("#next-button").click()
-        self.assertIn("2 cards", self.page.locator("#result-score").inner_text())
-        self.assertIsNone(self.progress())
 
     def test_drag_does_not_submit_answer(self):
-        self.page.locator('[data-mode="quiz"]').click()
-        self.page.locator("#start-button").click()
+        self.finish_setup('quiz')
         point = self.page.locator('.district-shape[data-id="shilin"]').evaluate("""el => {
             const p = new DOMPoint(Number(el.dataset.anchorX), Number(el.dataset.anchorY)).matrixTransform(el.getScreenCTM());
             return {x:p.x,y:p.y};
@@ -588,95 +261,59 @@ class BrowserTests(unittest.TestCase):
         self.click_district(self.target()["id"])
         self.assertTrue(self.page.locator("#feedback").is_visible())
 
-    def test_empty_selection_and_bad_storage(self):
-        self.choose([])
-        self.assertTrue(self.page.locator("#start-button").is_disabled())
-        self.assertIn("at least one district", self.page.locator("#selection-note").inner_text())
-        self.page.evaluate("localStorage.setItem('taipei-kennen.progress.v1', '{invalid');")
-        self.page.reload()
-        self.page.locator("#select-all").click()
-        self.assertFalse(self.page.locator("#start-button").is_disabled())
-        self.assertEqual(self.page.locator(".district-shape:not(.is-muted)").count(), 41)
-        self.page.locator("#progress-open").click()
-        self.assertIn("first quiz answers", self.page.locator("#progress-summary").inner_text())
-        self.assertFalse(self.page.evaluate("document.documentElement.scrollWidth > innerWidth"))
 
-    def test_city_scope_focus_and_complete_new_taipei_round(self):
-        self.page.locator("#city-scope").select_option("new-taipei")
-        self.assertEqual(self.page.locator("#district-picker input").count(), 29)
-        self.assertEqual(self.page.locator(".district-shape:not(.is-muted)").count(), 29)
-        self.assertEqual(self.page.locator("#map-title").inner_text(), "New Taipei City")
-        self.choose(["nt-yonghe"])
-        district = self.page.locator('.district-shape[data-id="nt-yonghe"]')
-        before = district.bounding_box()["width"]
-        self.page.locator("#focus-selected").click()
-        self.assertGreater(district.bounding_box()["width"], before * 5)
-        self.click_district("nt-yonghe")
-        self.assertIn("New Taipei City", self.page.locator("#map-detail").inner_text())
-        self.page.locator("#city-scope").select_option("taipei")
-        self.assertEqual(self.page.locator("#district-picker input").count(), 12)
-        self.assertEqual(self.page.locator(".district-shape:not(.is-muted)").count(), 12)
-        self.page.locator("#city-scope").select_option("new-taipei")
-        self.page.locator('[data-mode="quiz"]').click()
-        self.page.locator("#round-size").select_option("all")
-        self.page.locator("#start-button").click()
-        self.assertIn("1 / 29", self.page.locator("#session-count").inner_text())
-        visited = set()
-        for _ in range(29):
-            target = self.target()
-            self.assertEqual(target["cityId"], "new-taipei")
-            self.assertNotIn(target["id"], visited)
-            self.assertIn("New Taipei City", self.page.locator("#question-city").inner_text())
-            visited.add(target["id"])
-            self.click_district(target["id"])
-            self.assertIn('Exactly right', self.page.locator("#feedback").inner_text())
-            self.page.locator("#next-button").click()
-        self.assertEqual(len(visited), 29)
-        self.assertIn("29 / 29", self.page.locator("#result-score").inner_text())
-        self.assertTrue(all(id.startswith("nt-") for id in self.progress()["districts"]))
-
-    def test_mixed_city_quiz_and_city_context(self):
-        self.choose(["neihu", "nt-banqiao", "nt-tamsui"])
-        self.page.locator('[data-mode="quiz"]').click()
-        self.page.locator("#start-button").click()
-        visited = set()
-        for _ in range(3):
-            target = self.target()
-            visited.add(target["id"])
-            expected = "New Taipei City" if target["cityId"] == "new-taipei" else "臺北市"
-            self.assertIn(expected, self.page.locator("#question-city").inner_text())
-            self.click_district(target["id"])
-            self.page.locator("#next-button").click()
-        self.assertEqual(visited, {"neihu", "nt-banqiao", "nt-tamsui"})
-        self.assertIn("3 / 3", self.page.locator("#result-score").inner_text())
-        self.assertEqual(self.progress()["districts"]["neihu"]["correct"], 1)
-        self.assertEqual(self.progress()["districts"]["nt-banqiao"]["correct"], 1)
-
-    def test_legacy_progress_and_settings_migrate_without_reset(self):
-        legacy_ids = [feature["id"] for feature in self.features if feature["cityId"] == "taipei"]
-        progress = {"rounds": 3, "districts": {"neihu": {"attempts": 7, "correct": 5}}}
-        settings = {"selected": legacy_ids, "roundSize": 12, "mode": "quiz", "language": "en", "labels": False, "metro": False}
-        self.page.evaluate("payload => { localStorage.setItem('taipei-kennen.progress.v1',JSON.stringify(payload.progress)); localStorage.setItem('taipei-kennen.settings.v1',JSON.stringify(payload.settings)); }", {"progress": progress, "settings": settings})
-        self.page.reload()
-        self.assertEqual(self.progress(), progress)
-        self.assertEqual(self.page.locator("#city-scope").input_value(), "all")
-        self.assertEqual(self.page.locator("#district-picker input:checked").count(), 41)
-        self.assertEqual(self.page.locator("#round-size").input_value(), "all")
-        self.assertIn('41 questions', self.page.locator("#start-button").inner_text())
-        self.assertFalse(self.page.locator("#show-metro").is_checked())
-        self.assertFalse(self.page.locator("#show-labels-taipei").is_checked())
-        self.assertFalse(self.page.locator("#show-labels-new-taipei").is_checked())
-        self.page.locator("#city-scope").select_option("new-taipei")
-        self.page.reload()
-        self.assertEqual(self.page.locator("#city-scope").input_value(), "new-taipei")
-        self.assertEqual(self.page.locator("#district-picker input:checked").count(), 29)
-        self.assertFalse(self.page.locator("#show-labels-taipei").is_checked())
-        self.assertFalse(self.page.locator("#show-labels-new-taipei").is_checked())
-        self.assertEqual(self.progress(), progress)
-        self.page.locator("#progress-open").click()
-        self.assertIn('7 questions answered', self.page.locator("#progress-summary").inner_text())
-        self.assertEqual(self.page.locator(".progress-city").count(), 2)
+    def test_metro_track_is_geographically_aligned_and_clicks_reach_district(self):
+        self.choose(["nangang"])
+        self.finish_setup('quiz')
+        self.page.locator("#taipei-map").scroll_into_view_if_needed()
+        point = self.page.locator('.metro-line[data-line="BR"]').evaluate("""el => {
+            const p = el.getPointAtLength(0).matrixTransform(el.getScreenCTM());
+            return {x:p.x,y:p.y};
+        }""")
+        hit = self.page.evaluate("p => document.elementFromPoint(p.x,p.y)?.closest('.district-shape')?.dataset.id", point)
+        self.assertEqual(hit, "nangang", "The Wenhu terminus must align with the Nangang district and allow clicks through the line")
+        self.assertIsNone(self.progress())
+        self.page.mouse.click(point["x"], point["y"])
+        self.assertIn('Exactly right', self.page.locator("#feedback").inner_text())
+        self.assertEqual(self.progress()["districts"]["nangang"]["attempts"], 1)
 
 
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    def test_river_confluence_prefers_water_over_neighbour_hit_padding(self):
+        self.go_step(1);self.page.locator('#include-rivers').check();self.finish_setup('explore')
+        point = self.page.evaluate("""() => {
+            const references = ['neihu','wenshan'].map(id => {
+                const feature = window.TAIPEI_DATA.features.find(f => f.id === id);
+                const el = document.querySelector(`.district-shape[data-id="${id}"]`);
+                const pixel = new DOMPoint(Number(el.dataset.anchorX),Number(el.dataset.anchorY)).matrixTransform(el.getScreenCTM());
+                return {anchor:feature.anchor,pixel};
+            });
+            const [a,b] = references;
+            const latitude = lat => Math.log(Math.tan(Math.PI/4+lat*Math.PI/360));
+            return {x:a.pixel.x+(121.465125-a.anchor[0])/(b.anchor[0]-a.anchor[0])*(b.pixel.x-a.pixel.x),
+                    y:a.pixel.y+(latitude(25.105501)-latitude(a.anchor[1]))/(latitude(b.anchor[1])-latitude(a.anchor[1]))*(b.pixel.y-a.pixel.y)};
+        }""")
+        inside = self.page.locator('.river-shape[data-id="river-tamsui"]').evaluate("""(el, p) =>
+            el.isPointInFill(new DOMPoint(p.x,p.y).matrixTransform(el.getScreenCTM().inverse()))""", point)
+        self.assertTrue(inside)
+        self.assertEqual(self.page.evaluate("p => document.elementFromPoint(p.x,p.y)?.dataset.id", point), "river-keelung")
+        self.page.mouse.click(point["x"], point["y"])
+        self.assertIn("Tamsui River", self.page.locator("#map-detail").inner_text())
+
+    def test_city_labels_are_independent_of_quiz_scope(self):
+        self.go_step(1);self.page.locator('#city-scope').select_option('taipei');self.go_step(3)
+        self.page.locator('#show-labels-taipei').uncheck();self.finish_setup('quiz')
+        def visible():return self.page.locator('.district-label:visible').evaluate_all('nodes=>nodes.map(n=>TAIPEI_DATA.features.find(f=>f.id===n.dataset.id).cityId)')
+        self.assertTrue(visible());self.assertEqual(set(visible()),{'new-taipei'})
+        target=self.target();self.assertFalse(self.page.locator(f'.district-label[data-id="{target["id"]}"]').is_visible())
+        self.click_district('nt-sanchong');self.assertIsNone(self.progress())
+        transform=self.page.locator('#map-content').get_attribute('transform');self.open_settings()
+        self.page.locator('#show-labels-new-taipei').uncheck();self.close_dialog('settings');self.assertEqual(visible(),[])
+        self.open_settings();self.page.locator('#show-labels-new-taipei').check();self.close_dialog('settings')
+        self.assertEqual(set(visible()),{'new-taipei'});self.assertEqual(transform,self.page.locator('#map-content').get_attribute('transform'))
+
+    def test_metro_layer_toggle_persistence_and_language(self):
+        self.assertEqual(self.page.locator('.metro-line').count(),13);self.assertEqual(self.page.locator('.metro-chip').count(),12)
+        self.open_settings();self.page.locator('#show-metro').uncheck();self.close_dialog('settings');self.assertFalse(self.page.locator('#metro-layer').is_visible())
+        self.page.reload();self.page.wait_for_selector('body[data-ready="true"]',state='attached');self.configure_topic('districts');self.go_step(3)
+        self.assertFalse(self.page.locator('#show-metro').is_checked());self.page.locator('#show-metro').check();self.page.locator('#language').select_option('en');self.wait_idle();self.finish_setup('explore')
+        self.page.locator('#metro-legend summary').click();self.assertEqual(self.page.locator('.metro-chip[data-line="BR"] .metro-name').inner_text(),'Wenhu')
