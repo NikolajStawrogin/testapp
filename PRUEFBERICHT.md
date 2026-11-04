@@ -1,6 +1,22 @@
 # Prüfung der Straßen- und Menüerweiterung
 
-## Aktueller Stand 0.12 · Straßen-Level mit je zehn neuen Straßen
+## Aktueller Stand 0.13 · 國語 und Englisch für die gesamte Oberfläche
+
+Stand: 4. November 2026. Erststart in traditionellem Chinesisch (`zh-Hant`), Sprachmenü oben rechts auf jeder Seite, inklusive Stadtauswahl und Mobilansicht. Die Bezeichnung lautet 國語 beziehungsweise Mandarin. Die Auswahl wird unabhängig von den Kartennamen und regionsübergreifend gespeichert. Menüs, Quizanweisungen, Feedback, Level-Optionen, Kartenhinweise, Hilfe, Quellenhinweise, Fortschritt und Fehlermeldungen sind übersetzt. Wechsel ohne Neuladen erhält Quizfrage, Antworten, Level und Zoom. Düsseldorfer Straßennamen bleiben deutsche Originalnamen.
+
+**65 unterschiedliche Prüfungen sind einschließlich gezielter Nachläufe bestanden.** Der kombinierte Sprach-/Level-/Regions-/Pages-/Offline-Lauf bestand mit 31 Prüfungen in 107,374 s. Der breite Bestandslauf mit 32 Prüfungen benötigte 478,990 s; sechs noch deutsche beziehungsweise anders großgeschriebene Texterwartungen schlugen zunächst fehl. Nach deren Anpassung bestanden die fünf betreffenden Bezirks-/Flussprüfungen gemeinsam mit allen sieben Sprach- und vier Einzeldatei-Prüfungen (16 Prüfungen, 157,614 s). Der sechste Fall zur Hilfe sowie der ergänzte Erhalt alter englischer Kartennamen bestanden im Nachlauf (zwei Prüfungen, 27,165 s). Die genannten Läufe überlappen; die Zahl 65 zählt jede Prüfung nur einmal. Unveränderte weitere Daten-Testmodule wurden nicht erneut vollständig ausgeführt.
+
+Die sieben neuen Sprachprüfungen decken chinesischen Erststart trotz deutscher Browsersprache, 國語/Mandarin, Tastaturbedienung des Sprachmenüs, Neuladen und Stadtwechsel, vorhandene Lernstände und Ortsnamen-Einstellungen, Sprachwechsel in einer beantworteten Quizfrage, mobile Straßen-Lernkarten, gleichbleibenden Zoom und Level, lokalisierte Quellenhinweise sowie unlesbare Sicherungen und blockierten Browserspeicher ab. Katalogschlüssel und Platzhalter beider Sprachen werden auf Vollständigkeit geprüft. Die Quellenzeile der mobilen Karte wurde nach visueller Kontrolle nachgebessert und in beiden Sprachen geprüft.
+
+Die isolierte Browser-Einzeldatei enthält beide Sprachen. Nach dem Öffnen wurde die Browser-Verbindung offline geschaltet; Straßen-Level und Sprachwechsel liefen ohne weitere Ressourcenabrufe. Die gespeicherte Sprache blieb nach erneutem Öffnen erhalten. Direkte `file://`-Navigation ist in der Testumgebung durch die Browserrichtlinie gesperrt; dieser Teil wurde über einen lokalen Server mit ausschließlich der exportierten HTML-Datei geprüft. Es handelt sich um Chromium-Desktop- und simulierte Touch-Prüfungen, keine Tests auf einem echten Telefon. JavaScript-Fehler oder externe Laufzeitabrufe wurden in den bestandenen Browserprüfungen nicht festgestellt.
+
+JavaScript-Syntax und `git diff --check` bestanden. Die App benötigt keine neue Laufzeitabhängigkeit oder Übersetzungs-API. Das Downloadpaket enthält 77 Dateien einschließlich Einzeldatei, lokalem Sprachkatalog, Dokumentation und Tests. CRC-Prüfung und bytegenauer Vergleich aller archivierten Inhalte mit ihren Quelldateien bestanden. Weitere Details stehen in SPRACHEN.md.
+
+Die folgenden Abschnitte dokumentieren frühere Versionen.
+
+---
+
+## Stand 0.12 · Straßen-Level mit je zehn neuen Straßen
 
 Stand: 4. November 2026. Die Level gelten für alle 50 Düsseldorfer Stadtteile, ganz Düsseldorf, alle 41 Bezirke in Taipei/New Taipei, die beiden ganzen Städte und eigene Gebietskombinationen. Zehn neue ganze Straßen je Level, optional frühere Level mitüben, frei wählbare Level, direkte Fortsetzung nach der Runde und gespeicherte Positionen pro Gebiet. Bestehende Quizantworten bleiben erhalten. Level-Positionen sind in Sicherung und bestätigtem Löschen enthalten. Freie Suche und Einzelauswahl bleiben als eigener Lernweg erhalten.
 

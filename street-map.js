@@ -1,6 +1,7 @@
 /* Local vector streets: viewport rendering, full-unit hover and geographic picking. */
 (() => {
   "use strict";
+  const t = window.I18n.t;
   const NS = "http://www.w3.org/2000/svg";
   const node = (tag, attributes = {}) => {
     const element = document.createElementNS(NS, tag);
@@ -113,12 +114,12 @@
         path.setAttribute("class", `street-shape street-${feature.category}${options.pool.has(feature.id) ? "" : " is-context"}${feature.id === options.correctId ? " is-correct" : ""}${feature.id === options.wrongId ? " is-wrong" : ""}`);
         path.setAttribute("tabindex", active ? "0" : "-1");
         path.setAttribute("aria-disabled", String(!active));
-        path.setAttribute("aria-label", options.inSession && !options.revealed ? "Straße auf der Karte auswählen" : feature.nameEn ? `${feature.nameZh} · ${feature.nameEn}` : feature.nameZh);
+        path.setAttribute("aria-label", options.inSession && !options.revealed ? t("m203") : feature.nameEn ? `${feature.nameZh} · ${feature.nameEn}` : feature.nameZh);
       }
       this.renderLabels(view);
       this.setHighlight(options.highlightId);
-      document.getElementById("street-map-hint").textContent = options.focusPool ? `${options.pool.size} Straßen dieses Levels sind hervorgehoben. Zoome hinein und präge dir ihre Lage ein.` : !detail ? "Hineinzoomen zeigt kleine Straßen und Gassen."
-        : visible.length > 1600 ? "Zoome weiter hinein, um alle Straßen dieses Ausschnitts zu sehen." : "Straße berühren oder mit der Maus hervorheben.";
+      document.getElementById("street-map-hint").textContent = options.focusPool ? t("m204", options.pool.size) : !detail ? t("m205")
+        : visible.length > 1600 ? t("m206") : t("m207");
     }
 
     renderLabels(view) {

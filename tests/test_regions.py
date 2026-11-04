@@ -8,6 +8,7 @@ class RegionBrowserTests(unittest.TestCase):
     tearDownClass=classmethod(fixtures.BrowserTests.tearDownClass.__func__)
     def setUp(self):
         self.context=self.browser.new_context(viewport={'width':1440,'height':1050})
+        self.context.add_init_script("try { localStorage.setItem('stadt-kennen.ui-language.v1', 'en'); } catch {}")
         self.page=self.context.new_page();self.errors=[];self.requests=[]
         self.page.on('pageerror',lambda e:self.errors.append(str(e)))
         self.page.on('request',lambda r:self.requests.append(r.url))
@@ -41,7 +42,7 @@ class RegionBrowserTests(unittest.TestCase):
         labels=self.page.locator('#city-scope option').all_text_contents()
         self.assertEqual(len(labels),51)
         self.assertIn('Eller',labels);self.assertIn('Wersten',labels)
-        self.assertFalse(any('Stadtbezirk' in label for label in labels))
+        self.assertFalse(any('borough' in label for label in labels))
         self.assertFalse(self.page.locator('#area-level-field').is_visible())
         self.assertEqual(self.page.locator('.district-group-title').count(),0)
         self.page.locator('#city-scope').select_option('dd-eller')
@@ -49,7 +50,7 @@ class RegionBrowserTests(unittest.TestCase):
         self.assertEqual(self.page.locator('#map-title').inner_text(),'Eller')
         self.page.locator('[data-mode="quiz"]').click();self.page.locator('#start-button').click()
         self.assertEqual(self.page.locator('#question-name').inner_text(),'Eller')
-        self.district_tap('dd-eller');self.assertIn('Genau richtig',self.page.locator('#feedback').inner_text())
+        self.district_tap('dd-eller');self.assertIn('Exactly right',self.page.locator('#feedback').inner_text())
         self.page.locator('#next-button').click()
         self.assertIn('1 / 1',self.page.locator('#result-score').inner_text())
         self.page.reload();self.page.wait_for_selector('body[data-ready="true"]',state='attached')
@@ -105,16 +106,17 @@ class RegionBrowserTests(unittest.TestCase):
         self.open('duesseldorf');self.page.locator('[data-nav="progress"]').click()
         payload={'app':'taipei-kennen','formatVersion':1,'progress':{'rounds':5,'districts':{'daan':{'attempts':1,'correct':1}}}}
         self.page.locator('#import-progress').set_input_files({'name':'taipei.json','mimeType':'application/json','buffer':json.dumps(payload).encode()})
-        self.assertIn('anderen Stadt',self.page.locator('#toast').inner_text())
+        self.assertIn('another city',self.page.locator('#toast').inner_text())
         self.assertFalse(self.page.locator('#import-confirmation').is_visible())
     def test_mobile_german_layout_touch_selection_and_pending_data_status(self):
         self.context.close();self.context=self.browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
+        self.context.add_init_script("try { localStorage.setItem('stadt-kennen.ui-language.v1', 'en'); } catch {}")
         self.page=self.context.new_page();self.page.on('pageerror',lambda e:self.errors.append(str(e)))
         self.page.on('request',lambda r:self.requests.append(r.url))
         self.open('duesseldorf');complete=self.page.evaluate('window.DUESSELDORF_DATA.complete')
         if not complete:
             self.assertTrue(self.page.locator('[data-start="rivers"]').is_disabled())
-            self.assertIn('noch nicht verfügbar',self.page.locator('#home-data-note').inner_text())
+            self.assertIn('not available yet',self.page.locator('#home-data-note').inner_text())
         self.chapter('districts');self.page.locator('#city-scope').select_option('dd-altstadt')
         self.page.locator('#taipei-map').scroll_into_view_if_needed()
         point=self.page.locator('.district-shape[data-id="dd-altstadt"]').evaluate('''el=>{
@@ -141,7 +143,7 @@ class RegionBrowserTests(unittest.TestCase):
             chosen=next(r for r in rivers if r['id']!=target['id']) if index==0 else target
             if index==0:first=target
             point=self.river_point(chosen['id']);self.page.mouse.click(point['x'],point['y'])
-            self.assertIn('Noch nicht ganz' if index==0 else 'Genau richtig',self.page.locator('#feedback').inner_text())
+            self.assertIn('Not quite yet' if index==0 else 'Exactly right',self.page.locator('#feedback').inner_text())
             self.assertIn(target['nameZh'],self.page.locator('#map-detail').inner_text())
             self.assertIn('is-correct',self.page.locator(f'.river-shape[data-id="{target["id"]}"]').get_attribute('class'))
             self.page.locator('#next-button').click()
@@ -156,7 +158,7 @@ class RegionBrowserTests(unittest.TestCase):
         self.page.locator('[data-transport-kind="suburban"]').uncheck()
         self.assertEqual(self.page.locator('.metro-line[data-kind="suburban"]:visible').count(),0)
         self.assertEqual(self.page.locator('.metro-line[data-kind="metro"]:visible').count(),12)
-        self.page.locator('#metro-legend summary').click();self.assertIn('Schematische',self.page.locator('.metro-legend-note').inner_text())
+        self.page.locator('#metro-legend summary').click();self.assertIn('Schematic',self.page.locator('.metro-legend-note').inner_text())
         self.assertEqual(self.page.locator('.metro-chip').count(),20)
         self.page.locator('[data-mode="quiz"]').click();self.page.locator('#start-button').click()
         self.page.locator('[data-transport-kind="tram"]').uncheck();self.assertFalse(self.page.locator('#feedback').is_visible())
@@ -178,11 +180,12 @@ class RegionBrowserTests(unittest.TestCase):
         self.assertEqual(self.page.evaluate('JSON.parse(localStorage.getItem("duesseldorf-kennen.progress.v1")).rounds'),3)
     def test_mobile_river_touch_and_map_layers(self):
         self.context.close();self.context=self.browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
+        self.context.add_init_script("try { localStorage.setItem('stadt-kennen.ui-language.v1', 'en'); } catch {}")
         self.page=self.context.new_page();self.page.on('pageerror',lambda e:self.errors.append(str(e)))
         self.open('duesseldorf');self.chapter('rivers');self.page.locator('[data-mode="quiz"]').tap();self.page.locator('#start-button').tap()
         name=self.page.locator('#mobile-question-name').inner_text()
         target=self.page.evaluate('(name)=>window.DUESSELDORF_DATA.rivers.features.find(r=>r.nameZh===name)',name)
         p=self.river_point(target['id']);self.page.touchscreen.tap(p['x'],p['y'])
-        self.assertIn('Genau richtig',self.page.locator('#feedback').inner_text())
+        self.assertIn('Exactly right',self.page.locator('#feedback').inner_text())
         self.assertTrue(self.page.locator('#map-detail').is_visible());self.assertFalse(self.page.evaluate('document.documentElement.scrollWidth>innerWidth'))
         self.page.screenshot(path='/workspace/duesseldorf-rivers-mobile.png',full_page=True)

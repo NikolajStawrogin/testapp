@@ -1,6 +1,6 @@
 # Regionen und Düsseldorf-Erweiterung
 
-## Umfang und Bedienung · 0.12
+## Umfang und Bedienung · 0.13
 
 Einstieg: Stadt wählen → Thema wählen → Entdecken, Lernkarten oder Quiz. Taipei/New Taipei bleiben eine gemeinsame Lernregion. Düsseldorf verwendet deutsche Originalnamen. Quiz und Gebietsauswahl verwenden die 50 Stadtteile alphabetisch nach Namen wie Eller oder Wersten. Enthalten sind 2.891 benannte Straßen-/Wegeeinheiten und sechs Gewässer: Rhein, Düssel, Nördliche Düssel, Südliche Düssel, Itter und Kittelbach.
 
@@ -11,6 +11,10 @@ Die Flüsse lassen sich einzeln mitüben, gemeinsam mit Gebieten oder als reine 
 Als Orientierung stehen 26 Linien aus dem archivierten VRR-Bestand bereit: zwölf U-Bahn-/Stadtbahnlinien, sechs S-Bahnlinien, sieben Straßenbahnlinien und SkyTrain. Die vier Bahnarten sind einzeln schaltbar; die Auswahl wird gespeichert. Die Legende startet geschlossen. Bahnlinien sind **schematische Verbindungen zwischen belegten Haltestellen**, keine exakten Gleiskurven. Farben kennzeichnen Verkehrsarten; S-Bahn und SkyTrain haben zusätzliche Strichmuster. Es handelt sich um einen Datenstand, keinen aktuellen Fahrplan und keine Zusage vollständiger aktueller Betriebsdaten.
 
 Die Browser-App bleibt lokal lauffähig, ohne Konto, API-Schlüssel oder kostenpflichtigen Dienst. Alle Geodaten liegen lokal. Die zunächst blockierten Originalabrufe sind für diese Version keine Voraussetzung mehr: Die fehlenden Ebenen wurden aus separat veröffentlichten, fest versionierten Datenarchiven aufgebaut. Es ist keine weitere Freigabe durch den Nutzer nötig.
+
+## Oberflächensprachen
+
+Beide Regionen und die Stadtauswahl verwenden dieselbe Umschaltung zwischen 國語 (traditionelle Zeichen) und Englisch. Erststart ist 國語, die gespeicherte Auswahl gilt regionsübergreifend. Kartennamen bleiben separat einstellbar. Siehe [SPRACHEN.md](SPRACHEN.md).
 
 ## Straßen-Level
 

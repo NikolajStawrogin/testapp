@@ -1,180 +1,185 @@
 <!doctype html>
-<html lang="de">
+<html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <meta name="description" content="Lerne Straßen, Bezirke und Flüsse in Taipei und New Taipei. Ohne Konto, mit Kartenquiz und lokal gespeichertem Lernfortschritt.">
-  <title>Taipei kennen · Straßen, Bezirke und Flüsse lernen</title>
-  <link rel="stylesheet" href="styles.css?v=0.12">
-  <script src="bootstrap.js?v=0.12" defer></script>
+  <meta name="description" content="認識臺北與新北的街道、行政區與河流。無需帳號，提供地圖測驗，學習進度儲存在本機。" data-i18n-content="m209">
+  <title data-i18n="m210">認識臺北 · 學習街道、行政區與河流</title>
+  <link rel="stylesheet" href="styles.css?v=0.13">
+  <script src="i18n.js?v=0.13" defer></script>
+  <script src="bootstrap.js?v=0.13" defer></script>
 </head>
 <body>
   <svg class="icon-library" aria-hidden="true"><defs>
-    <symbol id="i-map" viewBox="0 0 24 24"><path d="m9 18-6 3V6l6-3 6 3 6-3v15l-6 3-6-3ZM9 3v15m6-12v15"/></symbol>
-    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
-    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
-    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 19V9m7 10V4m7 15v-7"/></symbol>
-    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
-    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 10 5-10 5L2 8l10-5ZM2 12l10 5 10-5M2 16l10 5 10-5"/></symbol>
+    <symbol id="i-map" viewbox="0 0 24 24"><path d="m9 18-6 3V6l6-3 6 3 6-3v15l-6 3-6-3ZM9 3v15m6-12v15"></path></symbol>
+    <symbol id="i-arrow" viewbox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"></path></symbol>
+    <symbol id="i-close" viewbox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"></path></symbol>
+    <symbol id="i-chart" viewbox="0 0 24 24"><path d="M5 19V9m7 10V4m7 15v-7"></path></symbol>
+    <symbol id="i-check" viewbox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></symbol>
+    <symbol id="i-layers" viewbox="0 0 24 24"><path d="m12 3 10 5-10 5L2 8l10-5ZM2 12l10 5 10-5M2 16l10 5 10-5"></path></symbol>
   </defs></svg>
 
   <header class="site-header">
-    <a class="brand" href="index.html" aria-label="Taipei kennen, Startseite">
+    <a class="brand" href="index.html" aria-label="認識臺北，首頁" data-i18n-aria-label="m211">
       <span class="brand-mark" lang="zh-Hant">北</span>
-      <span>Taipei <span class="brand-light">kennen.</span></span>
-    </a>
-    <div class="header-right">
-      <span class="local-badge"><span></span> Fortschritt lokal</span>
-      <button id="menu-toggle" class="button button-quiet menu-toggle" aria-expanded="false" aria-controls="main-menu">Menü <span aria-hidden="true">☰</span></button>
-      <button class="button button-quiet" id="progress-open"><svg class="icon"><use href="#i-chart"/></svg>Dein Fortschritt</button>
+      <span data-i18n="brandTaipei">認識臺北</span></a>
+    <div class="header-actions"><div class="header-right">
+      <span class="local-badge"><span></span> <span data-i18n="m213">進度儲存在本機</span></span>
+      <button id="menu-toggle" class="button button-quiet menu-toggle" aria-expanded="false" aria-controls="main-menu"><span data-i18n="m214">選單</span> <span aria-hidden="true">☰</span></button>
+      <button class="button button-quiet" id="progress-open"><svg class="icon"><use href="#i-chart"></use></svg><span data-i18n="m215">學習進度</span></button>
+    </div>
+      <div class="language-control">
+        <button id="ui-language-toggle" class="language-toggle" type="button" aria-expanded="false" aria-controls="ui-language-menu" aria-label="介面語言"><svg class="icon" viewbox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c5 5 5 13 0 18M12 3c-5 5-5 13 0 18"></path></svg><span id="ui-language-current" data-i18n="mandarin">國語</span><span aria-hidden="true">▾</span></button>
+        <div id="ui-language-menu" class="language-menu" role="group" aria-label="介面語言" hidden><button type="button" data-ui-language="zh-Hant" lang="zh-Hant" data-i18n="mandarin">國語</button><button type="button" data-ui-language="en" lang="en" data-i18n="english">英文</button></div>
+      </div>
     </div>
   </header>
-  <nav id="main-menu" class="main-menu" aria-label="Hauptmenü">
-    <a class="region-change" href="?" aria-label="Andere Stadt auswählen">Stadt wechseln</a><button data-nav="home">Themen</button><button data-nav="explore">Entdecken</button><button data-nav="cards">Lernen</button><button data-nav="quiz">Quiz</button><button data-nav="progress">Fortschritt</button><button data-nav="settings">Einstellungen</button><button data-nav="help">Hilfe</button>
+  <nav id="main-menu" class="main-menu" aria-label="主選單" data-i18n-aria-label="m216">
+    <a class="region-change" href="?" aria-label="選擇其他城市" data-i18n-aria-label="m218" data-i18n="m217">切換城市</a><button data-nav="home" data-i18n="m219">主題</button><button data-nav="explore" data-i18n="m129">探索</button><button data-nav="cards" data-i18n="m220">學習</button><button data-nav="quiz" data-i18n="m131">測驗</button><button data-nav="progress" data-i18n="m221">進度</button><button data-nav="settings" data-i18n="m222">設定</button><button data-nav="help" data-i18n="m223">說明</button>
   </nav>
 
   <main class="page">
-    <section id="region-view" class="home-view" aria-label="Stadt auswählen">
+    <section id="region-view" class="home-view" aria-label="選擇城市" data-i18n-aria-label="m224">
       <div class="home-cards region-cards">
-        <a class="home-card" href="?region=taipei#topics" data-region="taipei"><span class="home-card-icon" aria-hidden="true">北</span><strong>Taipei & New Taipei</strong><span>41 Bezirke · Straßen · Flüsse</span><small>Traditionelles Chinesisch und Englisch →</small></a>
-        <a class="home-card" href="?region=duesseldorf#topics" data-region="duesseldorf"><span class="home-card-icon" aria-hidden="true">D</span><strong>Düsseldorf</strong><span>50 Stadtteile · Straßen · Flüsse</span><small>Mit U-Bahn, S-Bahn und Straßenbahn zur Orientierung →</small></a>
+        <a class="home-card" href="?region=taipei#topics" data-region="taipei"><span class="home-card-icon" aria-hidden="true">北</span><strong data-i18n="taipeiRegion">臺北與新北</strong><span data-i18n="m225">41 個行政區 · 街道 · 河流</span><small data-i18n="m226">國語與英文 →</small></a>
+        <a class="home-card" href="?region=duesseldorf#topics" data-region="duesseldorf"><span class="home-card-icon" aria-hidden="true">D</span><strong>Düsseldorf</strong><span data-i18n="m227">50 個街區 · 街道 · 河流</span><small data-i18n="m228">搭配地鐵、市郊鐵路與路面電車辨識方位 →</small></a>
       </div>
-      <p class="home-data-note">Ohne Anmeldung, ohne laufende Kosten. Einstellungen und Lernstände bleiben je Stadt getrennt in deinem Browser.</p>
+      <p class="home-data-note" data-i18n="m229">無需註冊，無持續費用。設定與進度依城市分開保留在瀏覽器中。</p>
     </section>
-    <section id="region-error" class="panel" role="alert" hidden><h2>Die Stadt konnte nicht geöffnet werden.</h2><p id="region-error-message"></p><a href="?">Zur Stadtauswahl</a></section>
+    <section id="region-error" class="panel" role="alert" hidden><h2 data-i18n="m230">無法開啟此城市。</h2><p id="region-error-message"></p><a href="?" data-i18n="m231">返回城市選擇</a></section>
     <section class="intro" aria-labelledby="page-heading">
-      <div><p class="eyebrow"><span lang="zh-Hant">臺北市 · 新北市</span> · DEINE REGION BESSER KENNEN</p>
-        <h1 id="page-heading">Taipei wird vertrauter.</h1>
-        <p class="intro-copy">Straßen, Bezirke und Flüsse in Taipei und New Taipei kennenlernen.</p>
+      <div><p class="eyebrow"><span lang="zh-Hant">臺北市 · 新北市</span> <span data-i18n="m232">· 認識你的生活圈</span></p>
+        <h1 id="page-heading" data-i18n="m233">讓臺北更熟悉。</h1>
+        <p class="intro-copy" data-i18n="m234">認識臺北與新北的街道、行政區與河流。</p>
       </div>
-      <span class="version-badge">Lernapp · 0.12</span>
+      <span class="version-badge">Lernapp · 0.13</span>
     </section>
 
-    <section id="home-view" hidden class="home-view" aria-label="Startseite">
-      <div class="home-welcome"><p class="eyebrow">DEIN ORTSSINN WÄCHST MIT JEDER RUNDE</p><h2>Was möchtest du heute kennenlernen?</h2><p>Beginne mit einem Bezirk oder erkunde die Straßen deiner Umgebung. Du bestimmst Gebiet, Umfang und Tempo.</p></div>
+    <section id="home-view" hidden class="home-view" aria-label="首頁" data-i18n-aria-label="m236">
+      <div class="home-welcome"><p class="eyebrow" data-i18n="m237">每一回合，都讓方向感更進步</p><h2 data-i18n="m238">今天想認識什麼？</h2><p data-i18n="m239">從一個行政區開始，或探索附近的街道。學習區域、範圍與步調由你決定。</p></div>
       <div class="home-cards">
-        <button class="home-card" data-start="districts"><span class="home-card-icon" aria-hidden="true">區</span><strong>Bezirke kennenlernen</strong><span>41 Bezirke · beide Städte im Überblick</span><small>Entdecken, lernen und auf der Karte finden →</small></button>
-        <button class="home-card" data-start="streets"><span class="home-card-icon" aria-hidden="true">路</span><strong>Straßen kennenlernen</strong><span id="home-street-count">Straßen, Sections, Lanes und Alleys</span><small>Beginne mit 10 Straßen und steigere dich Level für Level →</small></button>
-        <button class="home-card" data-start="rivers"><span class="home-card-icon" aria-hidden="true">川</span><strong>Flüsse kennenlernen</strong><span>Tamsui, Keelung, Xindian und Dahan</span><small>Die natürlichen Linien der Stadt verstehen →</small></button>
+        <button class="home-card" data-start="districts"><span class="home-card-icon" aria-hidden="true">區</span><strong data-i18n="m240">認識行政區</strong><span data-i18n="m241">41 個行政區 · 兩市全覽</span><small data-i18n="m242">探索、學習，在地圖上找出位置 →</small></button>
+        <button class="home-card" data-start="streets"><span class="home-card-icon" aria-hidden="true">路</span><strong data-i18n="m243">認識街道</strong><span id="home-street-count" data-i18n="m244">街道、段、巷與弄</span><small data-i18n="m245">從 10 條街道開始，逐級學習 →</small></button>
+        <button class="home-card" data-start="rivers"><span class="home-card-icon" aria-hidden="true">川</span><strong data-i18n="m246">認識河流</strong><span data-i18n="m247">淡水河、基隆河、新店溪與大漢溪</span><small data-i18n="m248">認識城市的天然地標 →</small></button>
       </div>
-      <div class="home-bottom"><div><h3>Eine kleine Runde reicht.</h3><p>Standardmäßig zehn Aufgaben. Dein Fortschritt bleibt in diesem Browser — ohne Anmeldung und ohne Tracker.</p></div><button class="button button-primary" data-nav="continue">Mit letzter Auswahl fortfahren →</button></div>
+      <div class="home-bottom"><div><h3 data-i18n="m249">短短一回合，也能有收穫。</h3><p data-i18n="m250">預設每回合十題。進度保留在此瀏覽器中，無需帳號，也沒有追蹤程式。</p></div><button class="button button-primary" data-nav="continue" data-i18n="m251">沿用上次選擇 →</button></div>
       <p class="home-data-note" id="home-data-note"></p>
     </section>
     <div class="workspace" id="practice-view" hidden>
-      <aside class="panel control-panel" aria-label="Lerneinstellungen">
+      <aside class="panel control-panel" aria-label="學習設定" data-i18n-aria-label="m252">
         <div id="setup-panel">
-          <p class="section-label">01 / LERNGEGENSTAND</p>
-          <div class="subject-tabs" role="group" aria-label="Lerngegenstand wählen"><button data-subject="districts" aria-pressed="true">Bezirke & Flüsse</button><button data-subject="streets" aria-pressed="false">Straßen</button></div>
+          <p class="section-label" data-i18n="m253">01 / 學習主題</p>
+          <div class="subject-tabs" role="group" aria-label="選擇學習主題" data-i18n-aria-label="m254"><button data-subject="districts" aria-pressed="true" data-i18n="m255">行政區與河流</button><button data-subject="streets" aria-pressed="false" data-i18n="m9">街道</button></div>
           <div class="subject-picker">
-            <div class="subject active"><svg class="icon"><use href="#i-map"/></svg><div><strong>Verwaltungsbezirke</strong><small>12 in Taipei · 29 in New Taipei</small></div><span class="subject-dot"></span></div>
-            <label class="subject river-subject"><input type="checkbox" id="include-rivers"><div><strong>Flüsse mitüben</strong><small>Optional · mit Bezirken oder nur Flüsse</small></div></label>
-            <p id="street-subject-hint" class="mode-description" hidden>Starte am besten mit einem Bezirk. Straßenklassen und Namensabschnitte lassen sich getrennt wählen.</p>
+            <div class="subject active"><svg class="icon"><use href="#i-map"></use></svg><div><strong data-i18n="m256">行政區</strong><small data-i18n="m257">臺北 12 區 · 新北 29 區</small></div><span class="subject-dot"></span></div>
+            <label class="subject river-subject"><input type="checkbox" id="include-rivers"><div><strong data-i18n="m258">加入河流練習</strong><small data-i18n="m259">選用 · 可搭配行政區或只練習河流</small></div></label>
+            <p id="street-subject-hint" class="mode-description" hidden data-i18n="m260">建議先從一個行政區開始，可分別選擇街道類別與名稱單位。</p>
           </div>
-          <label id="area-level-field" class="field" hidden>Gebietsebene<select id="area-level"><option value="neighborhood">50 Stadtteile</option><option value="borough">10 Stadtbezirke</option></select></label>
-          <p class="section-label mode-label">02 / SO MÖCHTEST DU LERNEN</p>
-          <div class="mode-picker" role="group" aria-label="Lernmodus">
-            <button class="mode-button active" data-mode="explore" aria-pressed="true">Entdecken</button>
-            <button class="mode-button" data-mode="cards" aria-pressed="false">Lernkarten</button>
-            <button class="mode-button" data-mode="quiz" aria-pressed="false">Quiz</button>
+          <label id="area-level-field" class="field" hidden><span data-i18n="m261">區域層級</span><select id="area-level"><option value="neighborhood" data-i18n="m262">50 個街區</option><option value="borough" data-i18n="m263">10 個行政分區</option></select></label>
+          <p class="section-label mode-label" data-i18n="m264">02 / 學習方式</p>
+          <div class="mode-picker" role="group" aria-label="學習模式" data-i18n-aria-label="m265">
+            <button class="mode-button active" data-mode="explore" aria-pressed="true" data-i18n="m129">探索</button>
+            <button class="mode-button" data-mode="cards" aria-pressed="false" data-i18n="m132">學習卡</button>
+            <button class="mode-button" data-mode="quiz" aria-pressed="false" data-i18n="m131">測驗</button>
           </div>
-          <p id="mode-description" class="mode-description">Erkunde die Karte und klicke auf einen Bezirk.</p>
+          <p id="mode-description" class="mode-description" data-i18n="m266">探索地圖，點選行政區。</p>
 
 
-          <div class="section-heading"><p class="section-label">03 / DEINE BEZIRKE</p><button id="select-all" class="text-button">Auswahl aufheben</button></div>
-          <div id="district-picker" class="district-sections" aria-label="Bezirke auswählen"></div>
-          <div class="selection-tools"><p id="selection-note" class="selection-note">Alle 41 Bezirke ausgewählt</p><button id="focus-selected" class="text-button">Auswahl zeigen</button></div>
-          <section id="street-selection" hidden aria-label="Straßen auswählen">
+          <div class="section-heading"><p class="section-label" data-i18n="m267">03 / 學習行政區</p><button id="select-all" class="text-button" data-i18n="m40">清除選取</button></div>
+          <div id="district-picker" class="district-sections" aria-label="選擇行政區" data-i18n-aria-label="m268"></div>
+          <div class="selection-tools"><p id="selection-note" class="selection-note" data-i18n="m269">已選取全部 41 個行政區</p><button id="focus-selected" class="text-button" data-i18n="m270">顯示選取範圍</button></div>
+          <section id="street-selection" hidden aria-label="選擇街道" data-i18n-aria-label="m271">
             <div class="street-learning-path">
-              <label class="field">Straßen lernen<select id="street-learning-path"><option value="levels">Level · jeweils 10 neue Straßen</option><option value="free">Freie Auswahl</option></select></label>
+              <label class="field"><span data-i18n="m272">街道學習方式</span><select id="street-learning-path"><option value="levels" data-i18n="m273">分級學習 · 每級新增 10 條街道</option><option value="free" data-i18n="m274">自由選擇</option></select></label>
               <div id="street-level-controls">
-                <div class="level-navigation"><button id="level-previous" class="button button-quiet" aria-label="Vorheriges Straßen-Level">←</button><label class="field">Dein Level<select id="street-level" aria-label="Straßen-Level"></select></label><button id="level-next" class="button button-quiet" aria-label="Nächstes Straßen-Level">→</button></div>
+                <div class="level-navigation"><button id="level-previous" class="button button-quiet" aria-label="上一個街道級別" data-i18n-aria-label="m275">←</button><label class="field"><span data-i18n="m276">目前級別</span><select id="street-level" aria-label="街道級別" data-i18n-aria-label="m277"></select></label><button id="level-next" class="button button-quiet" aria-label="下一個街道級別" data-i18n-aria-label="m278">→</button></div>
                 <p id="street-level-summary" class="level-summary" aria-live="polite"></p>
                 <p id="street-level-progress" class="selection-note"></p>
-                <label class="checkbox-row"><input type="checkbox" id="level-review"><span>Frühere Level mitüben</span></label>
-                <p class="selection-note">Ganze Straßen, grob nach Länge im gewählten Gebiet sortiert. Jedes Level ergänzt bis zu 10 neue Straßen.</p>
+                <label class="checkbox-row"><input type="checkbox" id="level-review"><span data-i18n="m279">加入先前級別複習</span></label>
+                <p class="selection-note" data-i18n="m280">以完整街道為單位，依區域內的大約長度排序，每級最多新增 10 條街道。</p>
               </div>
             </div>
-            <fieldset id="street-category-filter" class="street-filter"><legend>Straßenklasse</legend><label><input type="checkbox" name="street-category" value="major" checked> Hauptstraßen</label><label><input type="checkbox" name="street-category" value="secondary" checked> Verbindungsstraßen</label><label><input type="checkbox" name="street-category" value="local"> Nebenstraßen</label></fieldset>
-            <fieldset id="street-unit-filter" class="street-filter"><legend>Namenseinheiten</legend><label><input type="checkbox" name="street-unit" value="street" checked> Ganze Straßen</label><label><input type="checkbox" name="street-unit" value="section" checked> Sections · 段</label><label><input type="checkbox" name="street-unit" value="lane" checked> Lanes · 巷</label><label><input type="checkbox" name="street-unit" value="alley" checked> Alleys · 弄</label></fieldset>
-            <label id="street-bilingual-field" class="checkbox-row"><input type="checkbox" id="only-bilingual" checked><span>Nur Straßen mit belegtem englischem Namen</span></label>
-            <label id="street-search-field" class="field street-search-field">Straße suchen<input id="street-search" type="search" placeholder="中文 oder English" autocomplete="off"></label>
-            <div class="section-heading"><p class="section-label" id="street-selection-count"></p><button id="street-select-all" class="text-button">Auswahl aufheben</button></div>
-            <div id="street-picker" class="street-picker" aria-label="Einzelne Straßen auswählen"></div>
-            <button id="street-more" class="text-button" hidden>Weitere Straßen anzeigen</button>
-            <p id="street-empty" class="selection-note" hidden>Keine passenden Straßen. Erweitere Gebiet, Filter oder Suchbegriff.</p>
+            <fieldset id="street-category-filter" class="street-filter"><legend data-i18n="m281">街道類別</legend><label><input type="checkbox" name="street-category" value="major" checked> <span data-i18n="m282">主要道路</span></label><label><input type="checkbox" name="street-category" value="secondary" checked> <span data-i18n="m283">連接道路</span></label><label><input type="checkbox" name="street-category" value="local"> <span data-i18n="m284">次要道路</span></label></fieldset>
+            <fieldset id="street-unit-filter" class="street-filter"><legend data-i18n="m285">名稱單位</legend><label><input type="checkbox" name="street-unit" value="street" checked> <span data-i18n="m286">完整街道</span></label><label><input type="checkbox" name="street-unit" value="section" checked> <span data-i18n="m287">段</span></label><label><input type="checkbox" name="street-unit" value="lane" checked> <span data-i18n="m288">巷</span></label><label><input type="checkbox" name="street-unit" value="alley" checked> <span data-i18n="m289">弄</span></label></fieldset>
+            <label id="street-bilingual-field" class="checkbox-row"><input type="checkbox" id="only-bilingual" checked><span data-i18n="m290">僅選有可查證英文名稱的街道</span></label>
+            <label id="street-search-field" class="field street-search-field"><span data-i18n="m291">搜尋街道</span><input id="street-search" type="search" placeholder="國語或英文" autocomplete="off" data-i18n-placeholder="m292"></label>
+            <div class="section-heading"><p class="section-label" id="street-selection-count"></p><button id="street-select-all" class="text-button" data-i18n="m40">清除選取</button></div>
+            <div id="street-picker" class="street-picker" aria-label="選擇個別街道" data-i18n-aria-label="m293"></div>
+            <button id="street-more" class="text-button" hidden data-i18n="m294">顯示更多街道</button>
+            <p id="street-empty" class="selection-note" hidden data-i18n="m295">沒有符合的街道，請擴大區域、調整篩選條件或搜尋字詞。</p>
             <p id="street-data-note" class="selection-note"></p>
           </section>
           <div id="river-selection" hidden>
-            <p class="section-label">DEINE FLÜSSE</p>
-            <div id="river-picker" class="district-picker" aria-label="Flüsse auswählen"></div>
+            <p class="section-label" data-i18n="m296">學習河流</p>
+            <div id="river-picker" class="district-picker" aria-label="選擇河流" data-i18n-aria-label="m297"></div>
             <p class="selection-note" id="river-selection-note"></p>
           </div>
-          <label class="field" id="round-size-field" hidden>Aufgaben pro Runde<select id="round-size"><option value="5">5 Aufgaben</option><option value="10" selected>10 Aufgaben</option><option value="all">Alle gewählten Bezirke</option></select></label>
-          <button class="button button-primary start-button" id="start-button"><span>Karte erkunden</span><svg class="icon"><use href="#i-arrow"/></svg></button>
+          <label class="field" id="round-size-field" hidden><span data-i18n="m298">每回合題數</span><select id="round-size"><option value="5" data-i18n="m299">5 題</option><option value="10" selected data-i18n="m300">10 題</option><option value="all" data-i18n="m301">全部已選行政區</option></select></label>
+          <button class="button button-primary start-button" id="start-button"><span data-i18n="m64">探索地圖</span><svg class="icon"><use href="#i-arrow"></use></svg></button>
         </div>
 
-        <section id="session-panel" hidden aria-label="Aktuelle Lernrunde">
-          <div class="session-topline"><span id="session-kind" class="section-label">QUIZ</span><button class="text-button" id="session-end">Runde beenden</button></div>
-          <div class="session-progress"><span id="session-count">Aufgabe 1 / 10</span><span id="session-score"></span></div>
+        <section id="session-panel" hidden aria-label="目前學習回合" data-i18n-aria-label="m302">
+          <div class="session-topline"><span id="session-kind" class="section-label" data-i18n="m303">測驗</span><button class="text-button" id="session-end" data-i18n="m304">結束回合</button></div>
+          <div class="session-progress"><span id="session-count" data-i18n="m305">第 1 / 10 題</span><span id="session-score"></span></div>
           <div class="progress-track"><div id="session-progress-bar"></div></div>
           <p id="question-city" class="question-city"></p>
-          <p id="question-instruction" class="question-instruction">Finde diesen Bezirk auf der Karte:</p>
+          <p id="question-instruction" class="question-instruction" data-i18n="m306">在地圖上找出這個行政區：</p>
           <h2 id="question-name" class="question-name"></h2>
           <p id="question-secondary" class="question-secondary"></p>
-          <p class="question-hint" id="question-hint">Klicke auf die passende Fläche.</p>
+          <p class="question-hint" id="question-hint" data-i18n="m307">點選對應區域。</p>
           <div id="feedback" class="feedback" hidden aria-live="polite"></div>
-          <button id="reveal-button" class="button button-secondary wide">Ich weiß es noch nicht</button>
-          <button id="next-button" class="button button-primary wide" hidden>Weiter<svg class="icon"><use href="#i-arrow"/></svg></button>
+          <button id="reveal-button" class="button button-secondary wide" data-i18n="m88">我還不知道</button>
+          <button id="next-button" class="button button-primary wide" hidden><span data-i18n="m91">下一題</span><svg class="icon"><use href="#i-arrow"></use></svg></button>
         </section>
 
         <section id="results-panel" hidden aria-labelledby="results-title">
-          <p class="section-label">DEINE RUNDE IST GESCHAFFT</p>
+          <p class="section-label" data-i18n="m308">回合完成</p>
           <div class="result-score" id="result-score"></div>
-          <h2 id="results-title">Das war eine gute Übung.</h2>
+          <h2 id="results-title" data-i18n="m309">這次練習很有收穫。</h2>
           <p id="result-summary" class="muted"></p>
-          <button id="next-street-level" class="button button-primary wide" hidden>Nächstes Level starten →</button>
+          <button id="next-street-level" class="button button-primary wide" hidden data-i18n="m310">開始下一級 →</button>
           <div id="result-list" class="result-list"></div>
-          <button id="retry-errors" class="button button-primary wide">Fehler wiederholen</button>
-          <button id="back-to-setup" class="button button-secondary wide">Zur Auswahl</button>
+          <button id="retry-errors" class="button button-primary wide" data-i18n="m311">複習錯題</button>
+          <button id="back-to-setup" class="button button-secondary wide" data-i18n="m312">返回選擇</button>
         </section>
 
         <div id="inline-settings-slot"><div class="display-settings" id="display-settings">
-          <p class="section-label">KARTENANZEIGE</p>
-          <label class="field">Namen anzeigen<select id="language"><option value="both">Chinesisch + Englisch</option><option value="zh">Nur Chinesisch</option><option value="en">Nur Englisch</option></select></label>
+          <p class="section-label" data-i18n="m313">地圖顯示</p>
+          <label class="field"><span data-i18n="m314">地名顯示語言</span><select id="language"><option value="both" data-i18n="m315">國語＋英文</option><option value="zh" data-i18n="m316">僅國語</option><option value="en" data-i18n="m317">僅英文</option></select></label>
           <fieldset class="label-settings">
-            <legend>Bezirksnamen auf der Karte</legend>
-            <label class="checkbox-row"><input type="checkbox" id="show-labels-taipei" checked><span>Taipei City</span></label>
-            <label class="checkbox-row"><input type="checkbox" id="show-labels-new-taipei" checked><span>New Taipei City</span></label>
-            <p class="label-settings-note">Auch außerhalb deiner Auswahl als Orientierung sichtbar. Der gesuchte Name bleibt bis zur Auflösung verborgen.</p>
+            <legend data-i18n="m318">地圖上的行政區名稱</legend>
+            <label class="checkbox-row"><input type="checkbox" id="show-labels-taipei" checked><span data-i18n="allTaipei">臺北市</span></label>
+            <label class="checkbox-row"><input type="checkbox" id="show-labels-new-taipei" checked><span data-i18n="allNewTaipei">新北市</span></label>
+            <p class="label-settings-note" data-i18n="m319">可保留所選區域以外的名稱，方便辨識方位；題目要找的名稱會隱藏至公布答案。</p>
           </fieldset>
-          <label class="checkbox-row"><input type="checkbox" id="show-metro" checked><span>Metro-Linien anzeigen</span></label>
-          <fieldset id="transport-kind-settings" class="transport-kind-settings" hidden><legend>Bahnarten</legend>
-            <label class="checkbox-row"><input type="checkbox" data-transport-kind="metro" checked><span>U-Bahn / Stadtbahn</span></label>
-            <label class="checkbox-row"><input type="checkbox" data-transport-kind="suburban" checked><span>S-Bahn</span></label>
-            <label class="checkbox-row"><input type="checkbox" data-transport-kind="tram" checked><span>Straßenbahn</span></label>
-            <label class="checkbox-row"><input type="checkbox" data-transport-kind="other" checked><span>SkyTrain</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="show-metro" checked><span data-i18n="m320">顯示捷運路線</span></label>
+          <fieldset id="transport-kind-settings" class="transport-kind-settings" hidden><legend data-i18n="m321">軌道交通類別</legend>
+            <label class="checkbox-row"><input type="checkbox" data-transport-kind="metro" checked><span data-i18n="m322">地鐵／輕軌</span></label>
+            <label class="checkbox-row"><input type="checkbox" data-transport-kind="suburban" checked><span data-i18n="m323">市郊鐵路</span></label>
+            <label class="checkbox-row"><input type="checkbox" data-transport-kind="tram" checked><span data-i18n="m324">路面電車</span></label>
+            <label class="checkbox-row"><input type="checkbox" data-transport-kind="other" checked><span data-i18n="m325">SkyTrain</span></label>
           </fieldset>
-          <label class="checkbox-row"><input type="checkbox" id="show-rivers" checked><span>Flüsse anzeigen</span></label>
-          <label class="checkbox-row"><input type="checkbox" id="show-river-labels" checked><span>Flussnamen anzeigen</span></label>
-          <label class="checkbox-row"><input type="checkbox" id="show-street-labels" checked><span>Straßennamen anzeigen</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="show-rivers" checked><span data-i18n="m326">顯示河流</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="show-river-labels" checked><span data-i18n="m327">顯示河流名稱</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="show-street-labels" checked><span data-i18n="m328">顯示街道名稱</span></label>
         </div></div>
       </aside>
 
-      <section class="panel map-panel" aria-label="Interaktive Karte von Taipei City und New Taipei City">
-        <div id="mobile-question" class="mobile-question" hidden aria-label="Aktuelle Aufgabe über der Karte">
+      <section class="panel map-panel" aria-label="臺北市與新北市互動地圖" data-i18n-aria-label="m329">
+        <div id="mobile-question" class="mobile-question" hidden aria-label="地圖上方的目前題目" data-i18n-aria-label="m330">
           <div class="mobile-question-top"><span id="mobile-question-count"></span><span id="mobile-question-city"></span></div>
           <p id="mobile-question-instruction"></p>
-          <div class="mobile-question-body"><div><strong id="mobile-question-name" tabindex="-1"></strong><span id="mobile-question-secondary"></span><span id="mobile-question-feedback"></span></div><button id="mobile-reveal" class="button button-secondary">Weiß ich noch nicht</button><button id="mobile-next" class="button button-primary" hidden>Weiter</button></div>
+          <div class="mobile-question-body"><div><strong id="mobile-question-name" tabindex="-1"></strong><span id="mobile-question-secondary"></span><span id="mobile-question-feedback"></span></div><button id="mobile-reveal" class="button button-secondary" data-i18n="m105">我還不知道</button><button id="mobile-next" class="button button-primary" hidden data-i18n="m91">下一題</button></div>
         </div>
-        <div class="map-heading"><div><label class="field scope-field">Gebiet<select id="city-scope"><option value="all">Beide Städte · 41 Bezirke</option><option value="taipei">臺北市 · Taipei City</option><option value="new-taipei">新北市 · New Taipei City</option></select></label><h2><span id="map-title">Taipei & New Taipei</span> <span id="map-city-zh" lang="zh-Hant">臺北市 · 新北市</span></h2><p id="map-scope-note" class="map-scope-note">12 + 29 Bezirke · beide Städte</p></div><span id="map-state" class="map-state">Entdecken</span></div>
+        <div class="map-heading"><div><label class="field scope-field"><span data-i18n="m331">學習區域</span><select id="city-scope"><option value="all" data-i18n="m332">兩市 · 41 個行政區</option><option value="taipei" data-i18n="m333">臺北市</option><option value="new-taipei" data-i18n="m334">新北市</option></select></label><h2><span id="map-title" data-i18n="taipeiRegion">臺北與新北</span> <span id="map-city-zh" lang="zh-Hant">臺北市 · 新北市</span></h2><p id="map-scope-note" class="map-scope-note" data-i18n="m134">12 + 29 個行政區 · 兩市</p></div><span id="map-state" class="map-state" data-i18n="m129">探索</span></div>
         <div class="map-stage" id="map-stage">
-          <svg id="taipei-map" viewBox="0 0 1000 780" role="group" aria-label="Zoombare Karte der 41 Bezirke in Taipei und New Taipei. Mit Maus, Tastatur oder Touch auswählen.">
+          <svg id="taipei-map" viewbox="0 0 1000 780" role="group" aria-label="臺北與新北 41 個行政區的可縮放地圖，可用滑鼠、鍵盤或觸控選取。" data-i18n-aria-label="m335">
             <defs>
-              <pattern id="map-grid" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="0.7" fill="#d5dcd6"/></pattern>
-              <clipPath id="metro-city-clip" clipPathUnits="userSpaceOnUse"></clipPath>
+              <pattern id="map-grid" width="32" height="32" patternunits="userSpaceOnUse"><circle cx="1" cy="1" r="0.7" fill="#d5dcd6"></circle></pattern>
+              <clippath id="metro-city-clip" clippathunits="userSpaceOnUse"></clippath>
             </defs>
-            <rect width="1000" height="780" fill="url(#map-grid)"/>
+            <rect width="1000" height="780" fill="url(#map-grid)"></rect>
             <g id="map-content">
               <g id="district-shapes"></g>
               <g id="river-layer" class="river-layer"></g>
@@ -185,51 +190,51 @@
               <g id="street-labels" aria-hidden="true"></g>
             </g>
           </svg>
-        <div class="map-detail" id="map-detail" aria-live="polite"><div class="detail-icon"><svg class="icon"><use href="#i-map"/></svg></div><div><strong>Ein Gefühl für Taipei bekommen</strong><p>Klicke auf einen Bezirk, um seinen Namen und seine Lage kennenzulernen.</p></div></div>
-          <div class="north-indicator" aria-hidden="true"><span>N</span><span>↑</span></div>
-          <div class="map-controls" aria-label="Kartenzoom">
-            <div class="zoom-heading"><label for="zoom-range">Zoom</label><output id="zoom-level" for="zoom-range">100 %</output></div>
-            <input id="zoom-range" type="range" min="50" max="1200" step="1" value="100" aria-label="Kartenzoom in Prozent">
+        <div class="map-detail" id="map-detail" aria-live="polite"><div class="detail-icon"><svg class="icon"><use href="#i-map"></use></svg></div><div><strong data-i18n="m336">認識臺北</strong><p data-i18n="m337">點選行政區，認識名稱與位置。</p></div></div>
+          <div class="north-indicator" aria-hidden="true"><span data-i18n="m338">北</span><span>↑</span></div>
+          <div class="map-controls" aria-label="地圖縮放" data-i18n-aria-label="m339">
+            <div class="zoom-heading"><label for="zoom-range" data-i18n="m340">縮放</label><output id="zoom-level" for="zoom-range">100 %</output></div>
+            <input id="zoom-range" type="range" min="50" max="1200" step="1" value="100" aria-label="地圖縮放百分比" data-i18n-aria-label="m341">
             <div class="zoom-buttons">
-              <button id="zoom-in" type="button" aria-label="Karte vergrößern" title="Vergrößern (+)">+</button>
-              <button id="zoom-out" type="button" aria-label="Karte verkleinern" title="Verkleinern (−)">−</button>
-              <button id="zoom-reset" type="button" aria-label="Kartenausschnitt zurücksetzen" title="Auf 100 % zurücksetzen">↺</button>
+              <button id="zoom-in" type="button" aria-label="放大地圖" title="放大（＋）" data-i18n-aria-label="m342" data-i18n-title="m343">+</button>
+              <button id="zoom-out" type="button" aria-label="縮小地圖" title="縮小（－）" data-i18n-aria-label="m344" data-i18n-title="m345">−</button>
+              <button id="zoom-reset" type="button" aria-label="重設地圖範圍" title="重設為 100％" data-i18n-aria-label="m346" data-i18n-title="m347">↺</button>
             </div>
           </div>
-          <div class="map-instruction" id="map-instruction">Scrollen zum Zoomen · Ziehen zum Verschieben</div>
+          <div class="map-instruction" id="map-instruction" data-i18n="m348">滾輪縮放 · 拖曳平移</div>
         </div>
         <div id="street-map-hint" class="street-map-hint" hidden></div>
-        <div id="street-confirmation" class="street-confirmation" hidden aria-live="polite"><div><strong>Diese Straße auswählen?</strong><p>Die hervorgehobene Straße ist deine Auswahl.</p></div><button id="street-confirm" class="button button-primary">Auswahl bestätigen</button><button id="street-alternative" class="button button-quiet">Andere Straße</button></div>
-        <details class="metro-legend" id="metro-legend" aria-label="Legende der Metro-Linien"><summary class="metro-legend-title">Metro & Stadtbahn · Legende</summary><div id="metro-legend-items" class="metro-legend-items"></div><span class="metro-legend-note">Abschnitte in Taipei City und New Taipei City</span></details>
+        <div id="street-confirmation" class="street-confirmation" hidden aria-live="polite"><div><strong data-i18n="m349">選擇這條街道？</strong><p data-i18n="m350">反白街道是你目前的選擇。</p></div><button id="street-confirm" class="button button-primary" data-i18n="m351">確認選擇</button><button id="street-alternative" class="button button-quiet" data-i18n="m352">其他街道</button></div>
+        <details class="metro-legend" id="metro-legend" aria-label="捷運路線圖例" data-i18n-aria-label="m353"><summary class="metro-legend-title" data-i18n="m354">捷運與輕軌 · 圖例</summary><div id="metro-legend-items" class="metro-legend-items"></div><span class="metro-legend-note" data-i18n="m355">臺北市與新北市範圍內的路段</span></details>
 
-        <div class="map-footer"><span>Bezirke: g0v · CC0 <span id="river-credit">· Flüsse: <a href="https://gic.wra.gov.tw/Gis/gic/API/Google/Index.aspx" target="_blank" rel="noopener noreferrer">Water Resources Agency</a></span> <span id="metro-credit">· Metro: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a> · ODbL</span> <span id="street-credit" hidden>· Straßen: © OpenStreetMap contributors · ODbL</span></span><button id="sources-open" class="text-button">Quellen & Datenstand</button></div>
+        <div class="map-footer"><span><span data-i18n="m356">行政區：g0v · CC0</span> <span id="river-credit"><span data-i18n="m357">· 河流：</span> <a href="https://gic.wra.gov.tw/Gis/gic/API/Google/Index.aspx" target="_blank" rel="noopener noreferrer" data-i18n="m358">經濟部水利署</a></span> <span id="metro-credit"><span data-i18n="m359">· 捷運：</span> <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" data-i18n="m360">© OpenStreetMap 貢獻者</a> <span data-i18n="m361">· ODbL</span></span> <span id="street-credit" hidden data-i18n="m362">· 街道：© OpenStreetMap 貢獻者 · ODbL</span></span><button id="sources-open" class="text-button" data-i18n="m363">來源與資料日期</button></div>
       </section>
     </div>
-    <p class="page-note">Ohne Anmeldung. Ohne Tracker. Dein Lernfortschritt bleibt in diesem Browser.</p>
+    <p class="page-note" data-i18n="m364">無需帳號，沒有追蹤程式。學習進度保留在此瀏覽器中。</p>
   </main>
 
   <dialog id="progress-dialog" class="dialog">
-    <div class="dialog-heading"><div><p class="eyebrow">SCHRITT FÜR SCHRITT</p><h2>Dein Fortschritt</h2></div><button class="icon-button dialog-close" aria-label="Fortschritt schließen"><svg class="icon"><use href="#i-close"/></svg></button></div>
+    <div class="dialog-heading"><div><p class="eyebrow" data-i18n="m365">循序漸進</p><h2 data-i18n="m215">學習進度</h2></div><button class="icon-button dialog-close" aria-label="關閉學習進度" data-i18n-aria-label="m366"><svg class="icon"><use href="#i-close"></use></svg></button></div>
     <p id="progress-summary" class="muted"></p>
-    <div class="progress-tools"><button id="export-progress" class="button button-secondary">Lernstand exportieren</button><label class="button button-secondary" for="import-progress">Lernstand importieren</label><input id="import-progress" type="file" accept="application/json,.json" hidden></div>
-    <div id="import-confirmation" class="import-confirmation" hidden><p id="import-summary"></p><p>Die Sicherung ersetzt den aktuellen Lernstand in diesem Browser. Eine laufende Runde wird dabei beendet.</p><div class="button-row"><button id="confirm-import" class="button button-primary">Sicherung übernehmen</button><button id="cancel-import" class="button button-secondary">Abbrechen</button></div></div>
+    <div class="progress-tools"><button id="export-progress" class="button button-secondary" data-i18n="m367">匯出學習進度</button><label class="button button-secondary" for="import-progress" data-i18n="m368">匯入學習進度</label><input id="import-progress" type="file" accept="application/json,.json" hidden></div>
+    <div id="import-confirmation" class="import-confirmation" hidden><p id="import-summary"></p><p data-i18n="m369">備份將取代此瀏覽器中的目前進度，進行中的回合會結束。</p><div class="button-row"><button id="confirm-import" class="button button-primary" data-i18n="m370">匯入備份</button><button id="cancel-import" class="button button-secondary" data-i18n="m371">取消</button></div></div>
     <div id="progress-list" class="progress-list"></div>
-    <div class="delete-area"><button id="delete-progress" class="text-button danger">Lernfortschritt löschen</button><div id="delete-confirmation" hidden><p>Alle gespeicherten Antworten, Runden und Straßen-Level-Positionen auf diesem Rechner löschen?</p><div class="button-row"><button id="delete-confirm" class="button button-danger">Ja, löschen</button><button id="delete-cancel" class="button button-secondary">Behalten</button></div></div></div>
+    <div class="delete-area"><button id="delete-progress" class="text-button danger" data-i18n="m372">刪除學習進度</button><div id="delete-confirmation" hidden><p data-i18n="m373">要刪除此裝置上目前城市的所有作答紀錄、回合與街道級別位置嗎？</p><div class="button-row"><button id="delete-confirm" class="button button-danger" data-i18n="m374">確定刪除</button><button id="delete-cancel" class="button button-secondary" data-i18n="m375">保留</button></div></div></div>
   </dialog>
-  <dialog id="settings-dialog" class="dialog settings-dialog"><div class="dialog-heading"><h2>Einstellungen</h2><button class="icon-button dialog-close" aria-label="Einstellungen schließen">×</button></div><p class="muted">Sprache und Orientierungshilfen gelten auch in Lernkarten und Quiz. Der gesuchte Name bleibt bis zur Auflösung verborgen.</p><div id="settings-dialog-content"></div><p class="muted">Deine Einstellungen werden in diesem Browser gespeichert. Deinen Lernstand kannst du unter „Fortschritt“ sichern oder löschen.</p></dialog>
-  <dialog id="help-dialog" class="dialog help-dialog"><div class="dialog-heading"><h2>So lernst du Taipei kennen</h2><button class="icon-button dialog-close" aria-label="Hilfe schließen">×</button></div><h3>1. Wähle dein Lernziel</h3><p>Bezirke und Flüsse geben dir einen Überblick. Straßen lernst du standardmäßig in Leveln: jeweils zehn neue ganze Straßen, grob nach Länge im gewählten Gebiet sortiert. Deine Level-Position wird je Gebiet gespeichert. „Frühere Level mitüben“ ergänzt die bisherigen Straßen; nach einer Runde kannst du direkt zum nächsten Level wechseln. Unter „Freie Auswahl“ findest du Suche, Straßengrößen und Namenseinheiten. Sections (段), Lanes (巷) und Alleys (弄) sind dort eigene Aufgaben.</p><h3>2. Entdecken, Lernen oder Quiz</h3><p>Beim Entdecken zeigen Kartenklicks Namen und Lage. Lernkarten zeigen dir auf Wunsch die Lösung, ohne Wertung. Im Quiz klickst du auf den gesuchten Verlauf; danach siehst du Lösung und Auswertung. Fehler kannst du anschließend wiederholen.</p><h3>3. Karte bedienen</h3><p>Mausrad oder Plus/Minus zoomen, Ziehen verschiebt. Auf dem Handy: zwei Finger zum Zoomen, ein Finger zum Verschieben. Bei Straßenfragen hebt die Maus den gesamten Verlauf hervor. Auf dem Handy tippst du eine Straße an und bestätigst anschließend die hervorgehobene Auswahl. An Kreuzungen kannst du „Andere Straße“ wählen.</p><h3>4. Orientierung selbst bestimmen</h3><p>Unter Einstellungen schaltest du Bezirksnamen je Stadt, Flussnamen, Straßennamen sowie Metro- und Flussebene unabhängig ein und aus. Der gesuchte Name bleibt verborgen.</p><h3>5. Deinen Lernstand behalten</h3><p>Fortschritt wird lokal gespeichert. Sichere ihn bei Bedarf über „Lernstand exportieren“. Der Import übernimmt eine zuvor exportierte Sicherung in diesen Browser. Browserdaten löschen oder zu einer anderen Adresse wechseln kann deinen bisherigen Stand unzugänglich machen.</p><h3>Datenstand und Straßenbilder</h3><p>Die Straßengeometrien basieren außerhalb des Zentrums auf einem älteren OSM-Bestand. Die aktuelle amtliche Vollständigkeit ist nicht bestätigt. Fehlende englische Namen werden nicht erfunden. Straßenbilder bleiben eine spätere Erweiterung.</p><button id="help-sources" class="button button-secondary">Datenquellen ansehen</button></dialog>
+  <dialog id="settings-dialog" class="dialog settings-dialog"><div class="dialog-heading"><h2 data-i18n="m222">設定</h2><button class="icon-button dialog-close" aria-label="關閉設定" data-i18n-aria-label="m376">×</button></div><p class="muted" data-i18n="m377">地名顯示語言與方位輔助也適用於學習卡和測驗。題目要找的名稱會隱藏至公布答案。</p><div id="settings-dialog-content"></div><p class="muted" data-i18n="m378">設定會儲存在此瀏覽器中，可在「進度」備份或刪除學習紀錄。</p></dialog>
+  <dialog id="help-dialog" class="dialog help-dialog"><div class="dialog-heading"><h2 data-i18n="m379">如何認識臺北</h2><button class="icon-button dialog-close" aria-label="關閉說明" data-i18n-aria-label="m380">×</button></div><h3 data-i18n="m381">1. 選擇學習目標</h3><p data-i18n="m382">行政區與河流能幫助你建立整體概念。街道採分級學習，每級新增十條完整街道，依區域內的大約長度排序。每個區域會記住目前級別，可加入先前級別複習，回合結束後也可繼續下一級。「自由選擇」提供搜尋、街道類別與名稱單位，段、巷、弄在此模式中可分別練習。</p><h3 data-i18n="m383">2. 探索、學習或測驗</h3><p data-i18n="m384">探索模式可點選地點查看名稱與位置；學習卡可顯示答案，不計分。測驗時選出題目要求的路線或區域，再查看答案與結果，之後也可複習錯題。</p><h3 data-i18n="m385">3. 操作地圖</h3><p data-i18n="m386">用滾輪或加減按鈕縮放，拖曳平移。手機可雙指縮放、單指拖曳。滑鼠移到街道上會反白完整路線；觸控時先輕觸街道，再確認反白的選擇。路口可用「其他街道」切換附近街道。</p><h3 data-i18n="m387">4. 選擇方位輔助</h3><p data-i18n="m388">在設定中可分別切換兩市的行政區名稱、河流與街道名稱，以及捷運和河流圖層。題目要找的名稱會隱藏至公布答案。</p><h3 data-i18n="m389">5. 保留學習進度</h3><p data-i18n="m390">進度儲存在本機，可用「匯出學習進度」備份，再用「匯入學習進度」在此瀏覽器還原。清除瀏覽器資料或改用其他網址，可能無法存取原本進度。</p><h3 data-i18n="m391">資料日期與街景圖片</h3><p data-i18n="m392">市中心以外的街道幾何採用較舊的 OSM 資料，目前尚未確認是否符合最新官方完整資料。缺少的英文名稱不會自行編造，街景圖片預留為未來功能。</p><button id="help-sources" class="button button-secondary" data-i18n="m393">查看資料來源</button></dialog>
   <dialog id="sources-dialog" class="dialog sources-dialog">
-    <div class="dialog-heading"><h2>Quellen & Datenstand</h2><button class="icon-button dialog-close" aria-label="Quellen schließen"><svg class="icon"><use href="#i-close"/></svg></button></div>
-    <p>Die Lernkarte enthält alle 41 Bezirke von Taipei City (12) und New Taipei City (29), vier große Flüsse und 22.240 wählbare Straßeneinheiten. Straßenbilder sind als spätere Erweiterung vorgesehen.</p>
-    <h3>Straßen und Gassen</h3><p>© OpenStreetMap contributors, <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener noreferrer">ODbL 1.0</a>. Der flächendeckende Bestand beider Städte stammt aus einem <a href="https://github.com/typebrook/mapstew/tree/c3d387948e48adc38440062b33a19e1aca1b8b36" target="_blank" rel="noopener noreferrer">fest versionierten OSM-Auszug von Dezember 2021</a>. Für einen Innenstadt-Ausschnitt wird ein <a href="https://github.com/jpchen/taipei-3d-render/blob/96af2cbce0b40dd6120d2719ec7ee3b6027d94f3/assets/map-source.json" target="_blank" rel="noopener noreferrer">neuerer OSM-Auszug von September 2026</a> verwendet. Alle 41 Bezirke besitzen Einträge; eine aktuelle amtliche Vollständigkeit ist nicht bestätigt. Ganze Straßen werden zusätzlich aus zusammengehörigen Sections gebildet; Sections, Lanes und Alleys bleiben eigene Aufgaben. Englische Namen werden aus der dokumentierten Postreferenz übernommen, bei nummerierten Gassen aus belegten Straßennamen und numerischen Adresszusätzen zusammengesetzt oder aus OSM übernommen. 1.363 wählbare Einheiten haben keinen belegten englischen Namen und sind standardmäßig von der Aufgabenauswahl ausgeschlossen. Die aktuelle amtliche Verifikation der englischen Namen steht aus. Herkunft und Abdeckungszahlen sind in data/STREETS-SOURCE.md und data/street-coverage.json dokumentiert.</p>
-    <h3>Bezirksflächen</h3><p>Vereinfachte Geometrien aus <a href="https://github.com/g0v/twgeojson/tree/85212c5cff73b706730e624024120b134c15f861" target="_blank" rel="noopener noreferrer">g0v/twgeojson</a>, unter CC0 bereitgestellt. Ein Abgleich mit den aktuellen amtlichen Bezirksgrenzen steht aus.</p>
-    <h3>Flüsse</h3><p>淡水河 · Tamsui River, 基隆河 · Keelung River, 新店溪 · Xindian River und 大漢溪 · Dahan River. Vereinfachte Flussflächen der taiwanischen Water Resources Agency (RIVERPOLY), aus einem <a href="https://github.com/hankc0215/ARIA/blob/89dbc71b78a3c1b9cb6896f4b3d59576942685e3/interactive_risk_map_light.html" target="_blank" rel="noopener noreferrer">veröffentlichten GIS-Datenauszug</a>. Gezeigt werden nur Teile innerhalb beider Städte; die Flüsse setzen sich außerhalb fort. Der aktuelle Primärbestand und die englischen Namensschreibweisen wurden nicht erneut amtlich abgeglichen. Die Flächen sind eine Lernhilfe und keine aktuelle Vermessungs- oder Wasserstandskarte. Herkunft und Bearbeitung sind in data/RIVERS-SOURCE.md dokumentiert.</p>
-    <h3>Metro-Linien</h3><p>Geografische Linienverläufe aus OpenStreetMap, Datenstände Juni bis September 2026, über den <a href="https://github.com/davidyen1124/mrt-app/blob/32a31120995022944ef4c59cf0484ce15b22bccc/data/taipei_lines.geo.json" target="_blank" rel="noopener noreferrer">dokumentierten OSM-Datenauszug</a>. Zusätzliche Linien stammen aus den <a href="https://github.com/rareone0602/taipei-mrt-minecraft/tree/aaaa1d71ce30ebb4371c13ed83f6e199a2e8cfcd/data/lines" target="_blank" rel="noopener noreferrer">OSM-Routendaten für New Taipei</a>. Gezeigt werden Abschnitte innerhalb von Taipei City und New Taipei City, einschließlich Kreislinie, Flughafen-MRT, Danhai-, Ankeng- und Sanying-Linie sowie der Abzweige. Die Linien lassen sich jederzeit als Lernhilfe abschalten.</p><p>© OpenStreetMap contributors, <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener noreferrer">ODbL 1.0</a>. Originaldaten und Lizenzhinweis liegen im Ordner <code>data</code>.</p>
-    <h3>Namen</h3><p>Traditionelle chinesische Namen und englische Schreibweisen nach der untersuchten Kopie des Postverzeichnisses, Ausgabe 109/06. Der direkte Abgleich mit der heutigen <a href="https://www.post.gov.tw/post/internet/Download/all_list.jsp?ID=2201" target="_blank" rel="noopener noreferrer">Originalquelle von Chunghwa Post</a> steht aus. Einzelheiten sind in OFFIZIELLE_NAMEN.md dokumentiert.</p>
-    <h3>Bereitstellung und lokaler Lernstand</h3><p>App-Dateien und Kartendaten werden gemeinsam bereitgestellt. Es werden keine externen Karten-APIs, Schriftendienste oder Analysetracker eingebunden. Quellenlinks werden erst beim Anklicken geöffnet. Bei der Online-Version liefert GitHub Pages die Dateien aus; dabei gelten GitHubs Hosting- und Datenschutzbedingungen. Dein Lernfortschritt bleibt im lokalen Browserspeicher. Beim Löschen dieses Speichers kann er verloren gehen. Ein Wechsel von der lokalen App zur Website übernimmt den Lernstand nicht automatisch; dafür stehen Export und Import bereit.</p>
+    <div class="dialog-heading"><h2 data-i18n="m363">來源與資料日期</h2><button class="icon-button dialog-close" aria-label="關閉資料來源" data-i18n-aria-label="m394"><svg class="icon"><use href="#i-close"></use></svg></button></div>
+    <p data-i18n="m395">地圖包含臺北市 12 區、新北市 29 區，共 41 個行政區、四條主要河流及 22,240 個可選街道單位。街景圖片預留為未來功能。</p>
+    <h3 data-i18n="m396">街道與巷弄</h3><p><span data-i18n="m397">© OpenStreetMap 貢獻者，</span> <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener noreferrer" data-i18n="m398">ODbL 1.0</a><span data-i18n="sourceStreetBase">。兩市完整涵蓋資料取自</span> <a href="https://github.com/typebrook/mapstew/tree/c3d387948e48adc38440062b33a19e1aca1b8b36" target="_blank" rel="noopener noreferrer" data-i18n="m399">2021 年 12 月的固定版本 OSM 資料</a><span data-i18n="sourceStreetCentre">。市中心區域採用</span> <a href="https://github.com/jpchen/taipei-3d-render/blob/96af2cbce0b40dd6120d2719ec7ee3b6027d94f3/assets/map-source.json" target="_blank" rel="noopener noreferrer" data-i18n="m400">2026 年 9 月較新的 OSM 資料</a> <span data-i18n="m401">。全部 41 區皆有資料，但尚未確認目前官方完整性。完整街道也會由相關路段合併建立，段、巷、弄仍可分別練習。英文名稱取自已記錄的郵政參考資料、可查證的母道路名稱搭配數字地址，或 OSM。1,363 個可選單位缺少可查證的英文名稱，在自由選擇模式中預設不納入。尚待現行官方查核，來源與涵蓋範圍記錄於 data/STREETS-SOURCE.md 和 data/street-coverage.json。</span></p>
+    <h3 data-i18n="m402">行政區範圍</h3><p><span data-i18n="m403">簡化的幾何資料取自</span> <a href="https://github.com/g0v/twgeojson/tree/85212c5cff73b706730e624024120b134c15f861" target="_blank" rel="noopener noreferrer">g0v/twgeojson</a><span data-i18n="m404">，以 CC0 提供。尚待與現行官方行政區界線比對。</span></p>
+    <h3 data-i18n="m140">河流</h3><p><span data-i18n="m405">淡水河、基隆河、新店溪與大漢溪。簡化河流範圍取自經濟部水利署 RIVERPOLY，透過</span> <a href="https://github.com/hankc0215/ARIA/blob/89dbc71b78a3c1b9cb6896f4b3d59576942685e3/interactive_risk_map_light.html" target="_blank" rel="noopener noreferrer" data-i18n="m406">公開的 GIS 資料節錄</a><span data-i18n="sourceRiverLimits">。僅顯示兩市範圍內的河流，河流仍向外延伸。尚未再次將現行原始資料與英文拼寫和官方來源比對。圖面僅供學習，並非最新測量或水位地圖。來源與處理方式詳見 data/RIVERS-SOURCE.md。</span></p>
+    <h3 data-i18n="m407">捷運路線</h3><p><span data-i18n="m408">OpenStreetMap 地理路線資料，日期為 2026 年 6 月至 9 月，透過</span> <a href="https://github.com/davidyen1124/mrt-app/blob/32a31120995022944ef4c59cf0484ce15b22bccc/data/taipei_lines.geo.json" target="_blank" rel="noopener noreferrer" data-i18n="m409">已記錄來源的 OSM 節錄</a><span data-i18n="sourceExtraRail">。其他路線取自</span> <a href="https://github.com/rareone0602/taipei-mrt-minecraft/tree/aaaa1d71ce30ebb4371c13ed83f6e199a2e8cfcd/data/lines" target="_blank" rel="noopener noreferrer" data-i18n="m410">新北市 OSM 路線資料</a><span data-i18n="sourceRailLimits">。顯示臺北市與新北市範圍內的路段，包含環狀線、機場捷運、淡海輕軌、安坑輕軌、三鶯線與支線，可隨時關閉路線顯示。</span></p><p><span data-i18n="m397">© OpenStreetMap 貢獻者，</span> <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener noreferrer" data-i18n="m398">ODbL 1.0</a><span data-i18n="sourceOriginals">。原始資料與授權說明位於此資料夾：</span> <code>data</code>.</p>
+    <h3 data-i18n="m411">名稱</h3><p><span data-i18n="m412">繁體字名稱與英文拼寫依據已檢視的郵政目錄副本，版本為民國 109 年 6 月。與現行</span> <a href="https://www.post.gov.tw/post/internet/Download/all_list.jsp?ID=2201" target="_blank" rel="noopener noreferrer" data-i18n="m413">中華郵政原始來源</a> <span data-i18n="m414">的直接比對尚未完成，詳見 OFFIZIELLE_NAMEN.md。</span></p>
+    <h3 data-i18n="m415">網站提供方式與本機學習進度</h3><p data-i18n="m416">App 檔案與地圖資料一併提供，未使用外部地圖 API、字型服務或分析追蹤程式。只有點選後才會開啟來源連結，線上版由 GitHub Pages 提供，適用 GitHub 的網站提供與隱私條款。進度保留在瀏覽器本機儲存空間，清除後可能遺失。從本機版改用網站時不會自動轉移進度，請使用匯出與匯入功能。</p>
   </dialog>
-  <div id="chapter-loading" class="chapter-loading" role="status" hidden><div><span class="loading-spinner" aria-hidden="true"></span><strong>Karte wird vorbereitet …</strong><p>Straßen und Kartendaten werden aufbereitet. Einen Moment bitte.</p></div></div>
+  <div id="chapter-loading" class="chapter-loading" role="status" hidden><div><span class="loading-spinner" aria-hidden="true"></span><strong data-i18n="m417">正在準備地圖⋯</strong><p data-i18n="m418">正在整理街道與地圖資料，請稍候。</p></div></div>
   <div id="toast" class="toast" role="status" hidden></div>
-  <noscript><p class="noscript">Bitte JavaScript aktivieren, um die lokale Lernkarte zu verwenden.</p></noscript>
+  <noscript><p class="noscript" data-i18n="m419">請啟用 JavaScript 以使用本機學習地圖。</p></noscript>
 </body>
 </html>

@@ -43,6 +43,7 @@ class BrowserTests(unittest.TestCase):
 
     def setUp(self):
         self.context = self.browser.new_context(viewport={"width": 1440, "height": 1100})
+        self.context.add_init_script("try { localStorage.setItem('stadt-kennen.ui-language.v1', 'en'); } catch {}")
         self.page = self.context.new_page()
         self.errors = []
         self.external_requests = []
@@ -123,7 +124,7 @@ class BrowserTests(unittest.TestCase):
         self.page.locator("#select-all").click()
         self.page.locator('[data-mode="quiz"]').click()
         self.page.locator("#round-size").select_option("all")
-        self.assertIn("4 Aufgaben", self.page.locator("#start-button").inner_text())
+        self.assertIn('4 questions', self.page.locator("#start-button").inner_text())
         self.page.locator("#start-button").click()
         visited = set()
         first_error = None
@@ -131,7 +132,7 @@ class BrowserTests(unittest.TestCase):
             target = self.target()
             self.assertEqual(target["kind"], "river")
             visited.add(target["id"])
-            self.assertIn("diesen Fluss", self.page.locator("#question-instruction").inner_text())
+            self.assertIn("this river", self.page.locator("#question-instruction").inner_text())
             self.assertFalse(self.page.locator(f'.river-label[data-id="{target["id"]}"]').is_visible())
             self.assertTrue(self.page.locator("#show-rivers").is_disabled())
             self.page.locator('.district-shape[data-id="neihu"]').dispatch_event("keydown", {"key": "Enter"})
@@ -155,7 +156,7 @@ class BrowserTests(unittest.TestCase):
         self.assertEqual(sum(stats["attempts"] for stats in self.progress()["districts"].values()), 5)
         self.page.locator("#include-rivers").uncheck()
         self.page.locator("#progress-open").click()
-        self.assertIn("Flüsse", self.page.locator("#progress-list").inner_text())
+        self.assertIn('Rivers', self.page.locator("#progress-list").inner_text())
 
     def test_river_confluence_prefers_water_over_neighbour_hit_padding(self):
         self.page.locator("#include-rivers").check()
@@ -181,6 +182,7 @@ class BrowserTests(unittest.TestCase):
     def test_touch_river_quiz_pan_pinch_and_tap(self):
         self.context.close()
         self.context = self.browser.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
+        self.context.add_init_script("try { localStorage.setItem('stadt-kennen.ui-language.v1', 'en'); } catch {}")
         self.page = self.context.new_page()
         self.page.on("pageerror", lambda error: self.errors.append(str(error)))
         self.page.on("request", lambda request: self.external_requests.append(request.url)
@@ -219,7 +221,7 @@ class BrowserTests(unittest.TestCase):
         }""")
         touches("touchStart", [(1,point["x"],point["y"])])
         touches("touchEnd", [])
-        self.assertIn("Genau richtig", self.page.locator("#feedback").inner_text())
+        self.assertIn('Exactly right', self.page.locator("#feedback").inner_text())
         self.assertEqual(self.progress()["districts"]["river-keelung"], {"attempts": 1, "correct": 1})
         self.assertFalse(self.page.evaluate("document.documentElement.scrollWidth > innerWidth"))
 
@@ -232,7 +234,7 @@ class BrowserTests(unittest.TestCase):
         self.page.locator('#river-picker input[value="river-keelung"]').uncheck()
         self.page.locator('[data-mode="quiz"]').click()
         self.page.locator("#round-size").select_option("all")
-        self.assertIn("3 Aufgaben", self.page.locator("#start-button").inner_text())
+        self.assertIn('3 questions', self.page.locator("#start-button").inner_text())
         self.page.locator("#start-button").click()
         visited = set()
         for _ in range(3):
@@ -244,7 +246,7 @@ class BrowserTests(unittest.TestCase):
                 self.page.locator('.river-hit[data-id="river-tamsui"]').dispatch_event("keydown", {"key": "Enter"})
                 self.assertFalse(self.page.locator("#feedback").is_visible())
                 self.click_district(target["id"])
-            self.assertIn("Genau richtig", self.page.locator("#feedback").inner_text())
+            self.assertIn('Exactly right', self.page.locator("#feedback").inner_text())
             self.page.locator("#next-button").click()
         self.assertEqual(visited, {"neihu", "river-tamsui", "river-xindian"})
         self.page.locator("#back-to-setup").click()
@@ -263,7 +265,7 @@ class BrowserTests(unittest.TestCase):
         self.assertIn("大漢溪", self.page.locator("#feedback").inner_text())
         self.assertEqual(self.progress(), before, "River learning cards must not count as quiz attempts")
         self.page.locator("#next-button").click()
-        self.assertIn("1 Karten", self.page.locator("#result-score").inner_text())
+        self.assertIn("1 card", self.page.locator("#result-score").inner_text())
 
     def progress(self):
         return self.page.evaluate("key => JSON.parse(localStorage.getItem(key) || 'null')", PROGRESS_KEY)
@@ -372,7 +374,7 @@ class BrowserTests(unittest.TestCase):
         self.assertEqual(hit, "nangang", "The Wenhu terminus must align with the Nangang district and allow clicks through the line")
         self.assertIsNone(self.progress())
         self.page.mouse.click(point["x"], point["y"])
-        self.assertIn("Genau richtig", self.page.locator("#feedback").inner_text())
+        self.assertIn('Exactly right', self.page.locator("#feedback").inner_text())
         self.assertEqual(self.progress()["districts"]["nangang"]["attempts"], 1)
 
     def test_zoom_out_from_initial_view_and_restore(self):
@@ -427,6 +429,7 @@ class BrowserTests(unittest.TestCase):
     def test_touch_pinch_pan_and_tap_do_not_confuse_quiz_answers(self):
         self.context.close()
         self.context = self.browser.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
+        self.context.add_init_script("try { localStorage.setItem('stadt-kennen.ui-language.v1', 'en'); } catch {}")
         self.page = self.context.new_page()
         self.page.on("pageerror", lambda error: self.errors.append(str(error)))
         self.page.on("request", lambda request: self.external_requests.append(request.url)
@@ -495,7 +498,7 @@ class BrowserTests(unittest.TestCase):
         }""")
         touches("touchStart", [(1, point["x"], point["y"])])
         touches("touchEnd", [])
-        self.assertIn("Genau richtig", self.page.locator("#feedback").inner_text())
+        self.assertIn('Exactly right', self.page.locator("#feedback").inner_text())
         self.assertEqual(sum(row["attempts"] for row in self.progress()["districts"].values()), 1)
 
     def test_quiz_scoring_repeat_persistence_and_delete(self):
@@ -506,7 +509,7 @@ class BrowserTests(unittest.TestCase):
         self.assertIn("1 / 3", self.page.locator("#session-count").inner_text())
         first = self.target()
         self.assertFalse(self.page.locator(f'.district-label[data-id="{first["id"]}"]').is_visible())
-        self.assertEqual(self.page.locator(f'.district-shape[data-id="{first["id"]}"]').get_attribute("aria-label"), "Bezirk auf der Karte auswählen")
+        self.assertEqual(self.page.locator(f'.district-shape[data-id="{first["id"]}"]').get_attribute("aria-label"), 'Select an area on the map')
         wrong = next(id for id in ids if id != first["id"])
         self.click_district(wrong)
         self.assertTrue(self.page.locator("#feedback.wrong").is_visible())
@@ -516,7 +519,7 @@ class BrowserTests(unittest.TestCase):
         self.assertEqual(sum(row["attempts"] for row in self.progress()["districts"].values()), 1)
         self.page.locator("#next-button").click()
         self.click_district(self.target()["id"])
-        self.assertIn("Genau richtig", self.page.locator("#feedback").inner_text())
+        self.assertIn('Exactly right', self.page.locator("#feedback").inner_text())
         self.page.locator("#next-button").click()
         self.page.locator("#reveal-button").click()
         self.page.locator("#next-button").click()
@@ -536,7 +539,7 @@ class BrowserTests(unittest.TestCase):
         self.page.reload()
         self.assertEqual(self.progress(), stats)
         self.page.locator("#progress-open").click()
-        self.assertIn("5 beantwortete Aufgaben", self.page.locator("#progress-summary").inner_text())
+        self.assertIn('5 questions answered', self.page.locator("#progress-summary").inner_text())
         self.page.locator("#delete-progress").click()
         self.page.locator("#delete-cancel").click()
         self.assertEqual(self.progress(), stats)
@@ -545,7 +548,7 @@ class BrowserTests(unittest.TestCase):
         self.assertIsNone(self.progress())
         self.page.reload()
         self.page.locator("#progress-open").click()
-        self.assertIn("ersten Quizantworten", self.page.locator("#progress-summary").inner_text())
+        self.assertIn("first quiz answers", self.page.locator("#progress-summary").inner_text())
 
     def test_learning_cards_and_keyboard_without_scoring(self):
         self.choose(["beitou", "shilin"])
@@ -562,7 +565,7 @@ class BrowserTests(unittest.TestCase):
         self.assertIn("區", self.page.locator("#question-name").inner_text())
         self.page.locator("#reveal-button").click()
         self.page.locator("#next-button").click()
-        self.assertIn("2 Karten", self.page.locator("#result-score").inner_text())
+        self.assertIn("2 cards", self.page.locator("#result-score").inner_text())
         self.assertIsNone(self.progress())
 
     def test_drag_does_not_submit_answer(self):
@@ -588,14 +591,14 @@ class BrowserTests(unittest.TestCase):
     def test_empty_selection_and_bad_storage(self):
         self.choose([])
         self.assertTrue(self.page.locator("#start-button").is_disabled())
-        self.assertIn("mindestens einen Bezirk", self.page.locator("#selection-note").inner_text())
+        self.assertIn("at least one district", self.page.locator("#selection-note").inner_text())
         self.page.evaluate("localStorage.setItem('taipei-kennen.progress.v1', '{invalid');")
         self.page.reload()
         self.page.locator("#select-all").click()
         self.assertFalse(self.page.locator("#start-button").is_disabled())
         self.assertEqual(self.page.locator(".district-shape:not(.is-muted)").count(), 41)
         self.page.locator("#progress-open").click()
-        self.assertIn("ersten Quizantworten", self.page.locator("#progress-summary").inner_text())
+        self.assertIn("first quiz answers", self.page.locator("#progress-summary").inner_text())
         self.assertFalse(self.page.evaluate("document.documentElement.scrollWidth > innerWidth"))
 
     def test_city_scope_focus_and_complete_new_taipei_round(self):
@@ -626,7 +629,7 @@ class BrowserTests(unittest.TestCase):
             self.assertIn("New Taipei City", self.page.locator("#question-city").inner_text())
             visited.add(target["id"])
             self.click_district(target["id"])
-            self.assertIn("Genau richtig", self.page.locator("#feedback").inner_text())
+            self.assertIn('Exactly right', self.page.locator("#feedback").inner_text())
             self.page.locator("#next-button").click()
         self.assertEqual(len(visited), 29)
         self.assertIn("29 / 29", self.page.locator("#result-score").inner_text())
@@ -659,7 +662,7 @@ class BrowserTests(unittest.TestCase):
         self.assertEqual(self.page.locator("#city-scope").input_value(), "all")
         self.assertEqual(self.page.locator("#district-picker input:checked").count(), 41)
         self.assertEqual(self.page.locator("#round-size").input_value(), "all")
-        self.assertIn("41 Aufgaben", self.page.locator("#start-button").inner_text())
+        self.assertIn('41 questions', self.page.locator("#start-button").inner_text())
         self.assertFalse(self.page.locator("#show-metro").is_checked())
         self.assertFalse(self.page.locator("#show-labels-taipei").is_checked())
         self.assertFalse(self.page.locator("#show-labels-new-taipei").is_checked())
@@ -671,7 +674,7 @@ class BrowserTests(unittest.TestCase):
         self.assertFalse(self.page.locator("#show-labels-new-taipei").is_checked())
         self.assertEqual(self.progress(), progress)
         self.page.locator("#progress-open").click()
-        self.assertIn("7 beantwortete Aufgaben", self.page.locator("#progress-summary").inner_text())
+        self.assertIn('7 questions answered', self.page.locator("#progress-summary").inner_text())
         self.assertEqual(self.page.locator(".progress-city").count(), 2)
 
 

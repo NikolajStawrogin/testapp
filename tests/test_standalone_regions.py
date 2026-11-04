@@ -26,6 +26,7 @@ class StandaloneRegionTests(unittest.TestCase):
         cls.browser.close();cls.playwright.stop();cls.server.shutdown();cls.server.server_close();cls.thread.join();cls.directory.cleanup()
     def setUp(self):
         self.context=self.browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
+        self.context.add_init_script("try { localStorage.setItem('stadt-kennen.ui-language.v1', 'en'); } catch {}")
         self.page=self.context.new_page();self.errors=[];self.requests=[]
         self.page.on('pageerror',lambda e:self.errors.append(str(e)));self.page.on('request',lambda r:self.requests.append(r.url))
     def tearDown(self):
@@ -78,3 +79,22 @@ class StandaloneRegionTests(unittest.TestCase):
         self.page.locator('#session-end').tap()
         second=self.page.locator('#street-picker .street-choice').evaluate_all('nodes=>nodes.map(n=>n.dataset.streetId)')
         self.assertEqual(len(second),10);self.assertFalse(set(first)&set(second))
+
+    def test_language_switch_and_street_level_offline(self):
+        self.context.close()
+        self.context=self.browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
+        self.page=self.context.new_page();self.page.on('pageerror',lambda e:self.errors.append(str(e)));self.page.on('request',lambda r:self.requests.append(r.url))
+        self.open('duesseldorf')
+        self.assertEqual(self.page.locator('html').get_attribute('lang'),'zh-Hant')
+        self.page.locator('#ui-language-toggle').tap();self.page.locator('[data-ui-language="en"]').tap()
+        self.page.locator('[data-start="streets"]').tap();self.page.locator('#chapter-loading').wait_for(state='hidden')
+        self.page.locator('#city-scope').select_option('dd-eller')
+        self.assertIn('10 new streets',self.page.locator('#street-level-summary').inner_text())
+        self.assertEqual(self.page.locator('#street-picker .street-choice').count(),10)
+        self.page.locator('#ui-language-toggle').tap();self.assertEqual(self.page.locator('[data-ui-language="zh-Hant"]').inner_text(),'Mandarin')
+        self.page.locator('[data-ui-language="zh-Hant"]').tap()
+        self.assertIn('新增 10 條街道',self.page.locator('#street-level-summary').inner_text())
+        self.context.set_offline(False)
+        self.page.reload();self.page.wait_for_selector('body[data-ready="true"]',state='attached')
+        self.context.set_offline(True)
+        self.assertEqual(self.page.locator('html').get_attribute('lang'),'zh-Hant')

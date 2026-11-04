@@ -54,6 +54,7 @@ class PagesTests(unittest.TestCase):
         self.assertTrue((ROOT / ".nojekyll").exists())
         errors, responses, external = [], {}, []
         with self.browser.new_context(viewport={"width": 1440, "height": 1100}) as context:
+            context.add_init_script("try { localStorage.setItem('stadt-kennen.ui-language.v1', 'en'); } catch {}")
             page = context.new_page()
             page.on("pageerror", lambda error: errors.append(str(error)))
             page.on("response", lambda response: responses.update({response.url: response.status}))
@@ -61,8 +62,8 @@ class PagesTests(unittest.TestCase):
             self.assertEqual(page.goto(self.url + "?region=taipei").status, 200)
             page.wait_for_selector('body[data-ready="true"]', state="attached")
             self.assertTrue(page.locator("#home-view").is_visible())
-            assets = ["styles.css", "bootstrap.js", "region-ui.js", "street-map.js", "street-levels.js", "app.js", "data/levels-taipei.js", "data/districts.js", "data/metro.js", "data/rivers.js", "data/streets.js", "data/street-parents.js"]
-            assets = [asset + "?v=0.12" for asset in assets]
+            assets = ["i18n.js", "styles.css", "bootstrap.js", "region-ui.js", "street-map.js", "street-levels.js", "app.js", "data/levels-taipei.js", "data/districts.js", "data/metro.js", "data/rivers.js", "data/streets.js", "data/street-parents.js"]
+            assets = [asset + '?v=0.13' for asset in assets]
             for asset in assets:
                 self.assertEqual(responses.get(self.url + asset), 200, asset)
             page.locator('[data-start="streets"]').click()
@@ -85,6 +86,7 @@ class PagesTests(unittest.TestCase):
     def test_mobile_menu_works_without_accounts_or_external_services(self):
         errors = []
         with self.browser.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True) as context:
+            context.add_init_script("try { localStorage.setItem('stadt-kennen.ui-language.v1', 'en'); } catch {}")
             page = context.new_page()
             page.on("pageerror", lambda error: errors.append(str(error)))
             self.assertEqual(page.goto(self.url + "?region=taipei").status, 200)

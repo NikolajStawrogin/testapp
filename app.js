@@ -1,5 +1,6 @@
 (() => {
   "use strict";
+  const t = window.I18n.t;
 
   const REGION = window.APP_REGION || { id: "taipei", name: "Taipei & New Taipei", storagePrefix: "taipei-kennen", language: "zh-Hant" };
   const german = REGION.language === "de";
@@ -30,6 +31,7 @@
   const modes = ["explore", "cards", "quiz"];
   const languages = german ? ["de"] : ["both", "zh", "en"];
   let toastTimer;
+  window.I18n.subscribe(() => { render(); renderProgress(); });
 
   function toast(message) {
     $("toast").textContent = message;
@@ -46,7 +48,7 @@
   function save(key, value) {
     try { localStorage.setItem(key, JSON.stringify(value)); return true; }
     catch {
-      toast("Der Browser kann deinen Fortschritt gerade nicht speichern. Die Übung funktioniert trotzdem.");
+      toast(t("m2"));
       return false;
     }
   }
@@ -184,9 +186,9 @@
 
   function learningAreaLabel() {
     if (state.selected.size === 1) return byId.get([...state.selected][0]).nameZh;
-    if (state.selected.size === features.filter(feature => !german || feature.level === "neighborhood").length) return REGION.name;
+    if (state.selected.size === features.filter(feature => !german || feature.level === "neighborhood").length) return window.I18n.regionName(REGION);
     if (state.selected.size === scopeFeatures().length && state.scope !== "all") return german ? byId.get(state.scope).nameZh : cityName(cityById.get(state.scope));
-    return `${state.selected.size} ausgewählte ${areaWord(true)}`;
+    return t("m5", state.selected.size, areaWord(true));
   }
 
   function setStreetLevel(level) {
@@ -208,12 +210,12 @@
     $("street-select-all").hidden = Boolean(info);
     if (!info) return;
     const selector = $("street-level");
-    const signature = info.areaKey + "|" + info.ranked.length;
+    const signature = info.areaKey + "|" + info.ranked.length + "|" + window.I18n.language();
     if (selector.dataset.signature !== signature) {
       selector.replaceChildren();
       for (let level = 1; level <= info.total; level++) {
         const start = (level - 1) * window.StreetLevels.SIZE + 1;
-        selector.add(new Option(`Level ${level} · Straßen ${start}–${Math.min(level * window.StreetLevels.SIZE, info.ranked.length)}`, String(level)));
+        selector.add(new Option(t("m6", level, start, Math.min(level * window.StreetLevels.SIZE, info.ranked.length)), String(level)));
       }
       selector.dataset.signature = signature;
     }
@@ -222,9 +224,9 @@
     $("level-next").disabled = info.level >= info.total;
     $("level-review").checked = state.levelReview;
     $("level-review").disabled = info.level === 1;
-    $("street-level-summary").textContent = info.total ? `${learningAreaLabel()} · Level ${info.level} von ${info.total} · ${info.fresh.length} neue ${info.fresh.length === 1 ? "Straße" : "Straßen"}${state.levelReview && info.level > 1 ? ` · ${info.active.length} mit Wiederholung` : ""}` : "Wähle zuerst ein Lerngebiet mit Straßen.";
+    $("street-level-summary").textContent = info.total ? t("m7", learningAreaLabel(), info.level, info.total, info.fresh.length, info.fresh.length === 1 ? t("m8") : t("m9"), state.levelReview && info.level > 1 ? t("m10", info.active.length) : "") : t("m11");
     const known = info.fresh.filter(row => state.progress.districts[row.feature.id]?.correct > 0).length;
-    $("street-level-progress").textContent = info.total ? `${known} von ${info.fresh.length} ${info.fresh.length === 1 ? "Straße" : "Straßen"} dieses Levels schon richtig gefunden.` : "";
+    $("street-level-progress").textContent = info.total ? t("m12", known, info.fresh.length, info.fresh.length === 1 ? t("m8") : t("m9")) : "";
   }
 
   function maxMapZoom() { return state.subject === "streets" ? 96 : MAX_MAP_ZOOM; }
@@ -276,21 +278,21 @@
   }
 
   function featureContext(feature) {
-    if (german) return feature.kind === "street" ? "Düsseldorf · " + feature.districtIds.filter(id => byId.get(id).level === "neighborhood").map(id => byId.get(id).nameZh).join(" / ") : feature.kind === "river" ? "Fluss · Düsseldorf" : "Düsseldorf";
+    if (german) return feature.kind === "street" ? "Düsseldorf · " + feature.districtIds.filter(id => byId.get(id).level === "neighborhood").map(id => byId.get(id).nameZh).join(" / ") : feature.kind === "river" ? t("m15") : "Düsseldorf";
     if (feature.kind === "street") return cityName(cityById.get(feature.cityId)) + " · "
       + feature.districtIds.map(id => state.language === "en" ? byId.get(id).nameEn : byId.get(id).nameZh).join(" / ");
-    return feature.kind === "river" ? "Fluss · " + feature.cityIds.map(id => cityName(cityById.get(id))).join(" / ")
+    return feature.kind === "river" ? t("m17") + feature.cityIds.map(id => cityName(cityById.get(id))).join(" / ")
       : cityName(cityById.get(feature.cityId));
   }
 
-  function areaWord(plural = false) { return german ? state.areaLevel === "borough" ? plural ? "Stadtbezirke" : "Stadtbezirk" : plural ? "Stadtteile" : "Stadtteil" : plural ? "Bezirke" : "Bezirk"; }
+  function areaWord(plural = false) { return german ? state.areaLevel === "borough" ? plural ? t("m18") : t("m19") : plural ? t("m20") : t("m21") : plural ? t("m22") : t("m23"); }
 
   function roundLength(size) {
     return state.roundSize === "all" ? size : Math.min(state.roundSize, size);
   }
 
   function cityName(city) {
-    if (german) return city.nameZh;
+    if (german) return t(city.nameZh);
     if (state.language === "zh") return city.nameZh;
     if (state.language === "en") return city.nameEn;
     return `${city.nameZh} · ${city.nameEn}`;
@@ -314,7 +316,7 @@
   }
 
   function nameParts(feature) {
-    if (german) return { main: feature.nameZh, secondary: "", lang: "de" };
+    if (german) return { main: feature.level === "borough" ? t(feature.nameZh) : feature.nameZh, secondary: "", lang: feature.level === "borough" ? window.I18n.language() : "de" };
     if (state.language === "en") return { main: feature.nameEn || feature.nameZh, secondary: "", lang: feature.nameEn ? "en" : "zh-Hant" };
     return {
       main: feature.nameZh,
@@ -481,7 +483,7 @@
       $("zoom-reset").addEventListener("click", () => this.reset());
       $("zoom-range").addEventListener("input", event => this.zoomBy(Number(event.target.value) / 100 / this.zoom));
       if (window.matchMedia("(pointer: coarse)").matches) {
-        $("map-instruction").textContent = "Zwei Finger: Zoom · Ein Finger: Verschieben";
+        $("map-instruction").textContent = t("m31");
       }
       this.resizeObserver = new ResizeObserver(() => this.updateLabels());
       this.resizeObserver.observe(this.svg);
@@ -806,7 +808,7 @@
         if (isRiver) control.style.pointerEvents = active && !revealed && riversVisible() ? "all" : "none";
         control.setAttribute("tabindex", active && !revealed && (!isRiver || riversVisible()) ? "0" : "-1");
         control.setAttribute("aria-disabled", String(!active || revealed));
-        control.setAttribute("aria-label", inSession && !revealed ? isRiver ? "Fluss auf der Karte auswählen" : "Bezirk auf der Karte auswählen" : readableName(feature));
+        control.setAttribute("aria-label", inSession && !revealed ? isRiver ? t("m34") : t("m35") : readableName(feature));
       }
       this.updateLabels();
       this.renderStreets();
@@ -861,7 +863,7 @@
       main.textContent = feature.nameZh;
       const english = document.createElement("small");
       english.lang = "en";
-      english.textContent = feature.nameEn || "Englischer Name nicht belegt";
+      english.textContent = feature.nameEn || t("m37");
       const context = document.createElement("small");
       context.className = "street-choice-context";
       context.textContent = feature.districtIds.filter(id => !german || byId.get(id).level === state.areaLevel).map(id => byId.get(id).nameZh).join(" · ");
@@ -877,14 +879,14 @@
     }
     picker.scrollTop = scroll;
     if (focused) picker.querySelector(`input[value="${focused}"]`)?.focus({ preventScroll: true });
-    $("street-selection-count").textContent = `${selectedCount.toLocaleString("de-DE")} / ${available.length.toLocaleString("de-DE")} ausgewählt`;
-    $("street-select-all").textContent = selectedCount === available.length && available.length ? "Auswahl aufheben" : "Alle auswählen";
+    $("street-selection-count").textContent = t("m38", selectedCount.toLocaleString(window.I18n.locale()), available.length.toLocaleString(window.I18n.locale()));
+    $("street-select-all").textContent = selectedCount === available.length && available.length ? t("m40") : t("m41");
     $("street-select-all").disabled = !available.length;
     $("street-more").hidden = available.length <= state.streetLimit;
-    $("street-more").textContent = `Weitere Straßen anzeigen (${Math.min(state.streetLimit, available.length)} von ${available.length})`;
+    $("street-more").textContent = t("m42", Math.min(state.streetLimit, available.length), available.length);
     $("street-empty").hidden = available.length > 0;
     const missing = streets.filter(feature => feature.districtIds.some(id => state.selected.has(id)) && !feature.nameEn).length;
-    $("street-data-note").textContent = german ? window.DUESSELDORF_DATA.note : `Daten außerhalb des Zentrums: 2021; Innenstadt-Auszug: 2026. ${missing.toLocaleString("de-DE")} Einheiten im gewählten Gebiet ohne belegten englischen Namen. Details unter Hilfe → Datenquellen.`;
+    $("street-data-note").textContent = german ? t(window.DUESSELDORF_DATA.note) : t("m43", missing.toLocaleString(window.I18n.locale()));
   }
 
   function buildPicker() {
@@ -946,10 +948,10 @@
     const content = $("map-detail").lastElementChild;
     const strong = document.createElement("strong");
     const paragraph = document.createElement("p");
-    strong.textContent = title || (feature ? readableName(feature) : `Ein Gefühl für ${REGION.name} bekommen`);
-    paragraph.textContent = description || (feature ? feature.description : state.stage === "session"
-      ? "Die gesuchte Fläche wird nach deiner Antwort aufgelöst."
-      : "Klicke auf einen Bezirk oder einen zum Mitüben gewählten Fluss, um Namen und Lage kennenzulernen.");
+    strong.textContent = title || (feature ? readableName(feature) : t("m44", window.I18n.regionName(REGION)));
+    paragraph.textContent = description || (feature ? window.I18n.describe(feature, byId) : state.stage === "session"
+      ? t("m45")
+      : t("m46"));
     if (feature) {
       const city = document.createElement("small");
       city.className = "detail-city";
@@ -960,14 +962,14 @@
 
   function renderSetup() {
     const descriptions = {
-      explore: `Erkunde die Karte und klicke auf einen ${areaWord()}.`,
-      cards: "Präge dir Namen und Lage ein. Lass dir die richtige Fläche zeigen.",
-      quiz: `Ein Name, eine Fläche. Teste, wie gut du ${REGION.name} schon kennst.`
+      explore: t("m47", areaWord()),
+      cards: t("m48"),
+      quiz: t("m49", window.I18n.regionName(REGION))
     };
     if (state.subject === "streets") {
-      descriptions.explore = "Erkunde Straßennamen und ihre Verläufe. Zoome für kleine Straßen und Gassen hinein.";
-      descriptions.cards = "Präge dir Namen und Verlauf ein. Lass dir anschließend die Straße auf der Karte zeigen.";
-      descriptions.quiz = "Ein Straßenname, ein Verlauf. Wähle die gesuchte Straße auf der Karte.";
+      descriptions.explore = t("m50");
+      descriptions.cards = t("m51");
+      descriptions.quiz = t("m52");
     }
     for (const button of document.querySelectorAll("[data-mode]")) {
       const active = button.dataset.mode === state.mode;
@@ -979,7 +981,7 @@
     $("include-rivers").checked = state.includeRivers;
     $("river-selection").hidden = !state.includeRivers || state.subject === "streets";
     const selectedRiverCount = scopeRivers().filter(river => state.selectedRivers.has(river.id)).length;
-    $("river-selection-note").textContent = `${selectedRiverCount} von ${scopeRivers().length} Flüssen ausgewählt. Für eine reine Flussrunde die Bezirksauswahl aufheben.`;
+    $("river-selection-note").textContent = t("m53", selectedRiverCount, scopeRivers().length);
     const taskCount = selectedFeatures().length;
     const available = scopeFeatures();
     for (const heading of document.querySelectorAll(".district-group-title")) {
@@ -988,22 +990,22 @@
     }
     $("city-scope").value = state.scope;
     $("mode-description").textContent = descriptions[state.mode];
-    $("select-all").textContent = available.every(feature => state.selected.has(feature.id)) ? "Auswahl aufheben" : "Alle auswählen";
-    $("selection-note").textContent = state.selected.size === 0 ? state.subject !== "streets" && state.includeRivers && selectedRiverCount ? `Keine ${areaWord(true)} · nur Flüsse üben` : `Wähle mindestens einen ${areaWord()} oder Fluss.`
-      : state.selected.size === available.length ? `Alle ${available.length} ${areaWord(true)} ausgewählt`
-      : `${state.selected.size} / ${available.length} ${areaWord(true)} ausgewählt`;
+    $("select-all").textContent = available.every(feature => state.selected.has(feature.id)) ? t("m40") : t("m41");
+    $("selection-note").textContent = state.selected.size === 0 ? state.subject !== "streets" && state.includeRivers && selectedRiverCount ? t("m55", areaWord(true)) : t("m56", areaWord())
+      : state.selected.size === available.length ? t("m57", available.length, areaWord(true))
+      : t("m58", state.selected.size, available.length, areaWord(true));
     $("selection-note").classList.toggle("error", taskCount === 0);
     $("start-button").disabled = taskCount === 0;
     $("focus-selected").disabled = taskCount === 0;
     $("round-size-field").hidden = state.mode !== "quiz";
     $("round-size").value = String(state.roundSize);
-    $("round-size").querySelector('[value="all"]').textContent = state.subject === "streets" ? "Alle gewählten Straßen" : state.includeRivers ? `Alle gewählten ${areaWord(true)} und Flüsse` : `Alle gewählten ${areaWord(true)}`;
+    $("round-size").querySelector('[value="all"]').textContent = state.subject === "streets" ? t("m59") : state.includeRivers ? t("m60", areaWord(true)) : t("m61", areaWord(true));
     $("start-button").firstElementChild.textContent = state.mode === "quiz"
-      ? `Quiz starten · ${roundLength(taskCount)} Aufgaben`
-      : state.mode === "cards" ? "Lernkarten starten" : "Karte erkunden";
+      ? t("m62", roundLength(taskCount))
+      : state.mode === "cards" ? t("m63") : t("m64");
     $("street-selection").hidden = state.subject !== "streets";
     $("street-subject-hint").hidden = state.subject !== "streets";
-    $("street-subject-hint").textContent = state.streetPath === "levels" ? "Beginne mit Level 1: zehn längere Straßen deines Lerngebiets. Danach kommen je Level zehn neue hinzu." : "Wähle Gebiet, Straßenklassen und einzelne Straßen selbst.";
+    $("street-subject-hint").textContent = state.streetPath === "levels" ? t("m65") : t("m66");
     for (const button of document.querySelectorAll("[data-subject]")) button.setAttribute("aria-pressed", String(button.dataset.subject === state.subject));
     for (const input of document.querySelectorAll('[name="street-category"]')) input.checked = state.streetCategories.has(input.value);
     for (const input of document.querySelectorAll('[name="street-unit"]')) input.checked = state.streetUnits.has(input.value);
@@ -1019,39 +1021,39 @@
     const parts = nameParts(target);
     const isRiver = target.kind === "river";
     const isStreet = target.kind === "street";
-    $("question-city").textContent = (round.level ? `Level ${round.level.number} · ` : "") + featureContext(target);
-    $("session-kind").textContent = round.kind === "quiz" ? isStreet ? "DEIN STRASSENQUIZ" : round.ids.some(id => byId.get(id).kind === "river") ? "DEIN KARTENQUIZ" : "DEIN BEZIRKSQUIZ" : "DEINE LERNKARTEN";
-    $("session-count").textContent = `${round.kind === "quiz" ? "Aufgabe" : "Karte"} ${round.position + 1} / ${round.ids.length}`;
-    $("session-score").textContent = round.kind === "quiz" ? `${round.answers.filter(answer => answer.correct).length} richtig` : "Ohne Bewertung";
+    $("question-city").textContent = (round.level ? t("m67", round.level.number) : "") + featureContext(target);
+    $("session-kind").textContent = round.kind === "quiz" ? isStreet ? t("m68") : round.ids.some(id => byId.get(id).kind === "river") ? t("m69") : t("m70") : t("m71");
+    $("session-count").textContent = `${round.kind === "quiz" ? t("m73") : t("m74")} ${round.position + 1} / ${round.ids.length}`;
+    $("session-score").textContent = round.kind === "quiz" ? t("m75", round.answers.filter(answer => answer.correct).length) : t("m76");
     $("session-progress-bar").style.width = `${100 * (round.position + Number(round.revealed)) / round.ids.length}%`;
-    $("question-instruction").textContent = round.kind === "quiz" ? isStreet ? "Finde diese Straße auf der Karte:" : isRiver ? "Finde diesen Fluss auf der Karte:" : `Finde diesen ${areaWord()} auf der Karte:` : isStreet ? "Wo verläuft diese Straße?" : isRiver ? "Wo verläuft dieser Fluss?" : `Wo liegt dieser ${areaWord()}?`;
+    $("question-instruction").textContent = round.kind === "quiz" ? isStreet ? t("m77") : isRiver ? t("m78") : t("m79", areaWord()) : isStreet ? t("m80") : isRiver ? t("m81") : t("m82", areaWord());
     $("question-name").textContent = parts.main;
     $("question-name").lang = parts.lang;
     $("question-name").classList.toggle("english", parts.lang === "en");
     $("question-secondary").textContent = parts.secondary;
     $("question-secondary").hidden = !parts.secondary;
     $("question-hint").hidden = round.revealed;
-    $("question-hint").textContent = round.kind === "quiz" ? isStreet ? window.matchMedia("(pointer: coarse)").matches ? "Zoome hinein, tippe eine Straße an und bestätige deine hervorgehobene Auswahl." : "Zoome hinein. Die Maus hebt den Verlauf hervor; ein Klick wählt diese Straße." : isRiver ? "Klicke auf den passenden blauen Flusslauf. Du kannst vorher zoomen." : "Klicke auf die passende Fläche. Du kannst vorher zoomen." : "Versuche die Lage zu finden oder lass dir den Verlauf zeigen.";
-    $("reveal-button").textContent = round.kind === "quiz" ? "Ich weiß es noch nicht" : "Lage auf der Karte zeigen";
+    $("question-hint").textContent = round.kind === "quiz" ? isStreet ? window.matchMedia("(pointer: coarse)").matches ? t("m83") : t("m84") : isRiver ? t("m85") : t("m86") : t("m87");
+    $("reveal-button").textContent = round.kind === "quiz" ? t("m88") : t("m89");
     $("reveal-button").hidden = round.revealed;
     $("next-button").hidden = !round.revealed;
-    $("next-button").firstChild.textContent = round.position === round.ids.length - 1 ? "Runde abschließen" : "Weiter";
+    $("next-button").firstChild.textContent = round.position === round.ids.length - 1 ? t("m90") : t("m91");
     $("feedback").hidden = !round.revealed;
     if (round.revealed) {
       const answer = round.answers.at(-1);
       const heading = document.createElement("strong");
       const description = document.createElement("span");
       heading.textContent = round.kind === "cards" ? readableName(target)
-        : answer.correct ? "Genau richtig!" : answer.chosenId ? "Noch nicht ganz." : "Für die nächste Runde merken.";
-      description.textContent = round.kind === "cards" ? target.description
-        : answer.correct ? target.description
-        : `${answer.chosenId ? `Gewählt: ${readableName(byId.get(answer.chosenId))}. ` : ""}Gesucht: ${readableName(target)}. Die richtige ${isStreet ? "Straße" : isRiver ? "Flussfläche" : "Bezirksfläche"} ist grün markiert.`;
+        : answer.correct ? t("m92") : answer.chosenId ? t("m93") : t("m94");
+      description.textContent = round.kind === "cards" ? window.I18n.describe(target, byId)
+        : answer.correct ? window.I18n.describe(target, byId)
+        : t("m95", answer.chosenId ? t("m96", readableName(byId.get(answer.chosenId))) : "", readableName(target), isStreet ? t("m8") : isRiver ? t("m97") : t("m98"));
       $("feedback").replaceChildren(heading, description);
       $("feedback").classList.toggle("wrong", round.kind === "quiz" && !answer.correct);
-      renderDetail(target, round.kind === "quiz" ? `Lösung: ${readableName(target)}` : null,
-        answer.chosenId && !answer.correct ? `Deine Auswahl: ${readableName(byId.get(answer.chosenId))}` : null);
+      renderDetail(target, round.kind === "quiz" ? t("m99", readableName(target)) : null,
+        answer.chosenId && !answer.correct ? t("m100", readableName(byId.get(answer.chosenId))) : null);
     } else {
-      renderDetail(null, isStreet ? "Welche Straße ist gesucht?" : isRiver ? "Welcher Fluss ist gesucht?" : `Welcher ${areaWord()} ist gesucht?`);
+      renderDetail(null, isStreet ? t("m101") : isRiver ? t("m102") : t("m103", areaWord()));
     }
     $("mobile-question-count").textContent = $("session-count").textContent;
     $("mobile-question-city").textContent = $("question-city").textContent;
@@ -1062,9 +1064,9 @@
     $("mobile-question-feedback").textContent = round.revealed ? $("feedback").firstElementChild.textContent : "";
     $("mobile-question-feedback").classList.toggle("wrong", round.revealed && round.kind === "quiz" && !round.answers.at(-1).correct);
     $("mobile-reveal").hidden = round.revealed;
-    $("mobile-reveal").textContent = round.kind === "cards" ? "Verlauf zeigen" : "Weiß ich noch nicht";
+    $("mobile-reveal").textContent = round.kind === "cards" ? t("m104") : t("m105");
     $("mobile-next").hidden = !round.revealed;
-    $("mobile-next").textContent = round.position === round.ids.length - 1 ? "Runde abschließen" : "Weiter";
+    $("mobile-next").textContent = round.position === round.ids.length - 1 ? t("m90") : t("m91");
   }
 
   function renderResults() {
@@ -1073,12 +1075,12 @@
     const errors = round.answers.filter(answer => !answer.correct);
     const scoreText = document.createTextNode(round.kind === "cards" ? String(round.ids.length) : String(correct));
     const total = document.createElement("small");
-    total.textContent = round.kind === "cards" ? " Karten" : ` / ${round.ids.length}`;
+    total.textContent = round.kind === "cards" ? round.ids.length === 1 ? t("oneCard") : t("m106") : ` / ${round.ids.length}`;
     $("result-score").replaceChildren(scoreText, total);
-    $("results-title").textContent = round.kind === "cards" ? "Ein Stück vertrauter."
-      : correct === round.ids.length ? `${REGION.name} wird vertrauter!` : "Jede Runde bringt dich weiter.";
-    $("result-summary").textContent = round.kind === "cards" ? "Du hast dir alle gewählten Orte angesehen. Im Quiz kannst du dein Wissen testen."
-      : `${correct} von ${round.ids.length} richtig.${errors.length ? ` ${errors.length} ${errors.length === 1 ? "Aufgabe wartet" : "Aufgaben warten"} noch auf eine Wiederholung.` : " Alle Orte dieser Runde gefunden."}`;
+    $("results-title").textContent = round.kind === "cards" ? t("m108")
+      : correct === round.ids.length ? t("m109", window.I18n.regionName(REGION)) : t("m110");
+    $("result-summary").textContent = round.kind === "cards" ? t("m111")
+      : t("m112", correct, round.ids.length, errors.length ? t("m113", errors.length, errors.length === 1 ? t("m114") : t("m115")) : t("m116"));
     $("result-list").replaceChildren();
     for (const answer of round.answers) {
       const row = document.createElement("div");
@@ -1090,22 +1092,22 @@
       city.textContent = featureContext(byId.get(answer.id));
       name.append(city);
       const status = document.createElement("span");
-      status.textContent = round.kind === "cards" ? "Angesehen" : answer.correct ? "Richtig" : "Wiederholen";
+      status.textContent = round.kind === "cards" ? t("m118") : answer.correct ? t("m119") : t("m120");
       row.append(name, status);
       $("result-list").append(row);
     }
     $("retry-errors").hidden = round.kind !== "quiz" || !errors.length;
     const info = state.subject === "streets" ? streetLevelInfo() : null;
     $("next-street-level").hidden = !round.level || !info || round.level.areaKey !== info.areaKey || round.level.number !== info.level || info.level >= info.total;
-    if (round.level) $("result-summary").textContent += ` ${round.level.areaLabel} · Level ${round.level.number}.`;
+    if (round.level) $("result-summary").textContent += t("m121", round.level.areaLabel, round.level.number);
   }
 
   function render() {
     $("home-view").hidden = state.view !== "home";
     $("practice-view").hidden = state.view !== "practice";
     document.body.dataset.subject = state.subject;
-    $("home-street-count").textContent = `10 Straßen pro Level · ${Object.keys(window.STREET_LEVEL_DATA.streets).length.toLocaleString("de-DE")} ganze Straßen`;
-    $("home-data-note").textContent = german && !window.DUESSELDORF_DATA.complete ? "Düsseldorf im Aufbau: Stadtteile, Stadtbezirke und Straßen sind verfügbar. Flüsse und Stadtbahn sind noch nicht verfügbar." : german ? "Lokale Karte mit sechs Flüssen und U-Bahn, S-Bahn, Straßenbahn sowie SkyTrain. Bahnlinien verbinden Haltestellen schematisch. Datenstand unter Hilfe → Datenquellen." : "Lokale Karte mit Metro und Flüssen. Datenstand und Namensherkunft sind unter Hilfe → Datenquellen dokumentiert.";
+    $("home-street-count").textContent = t("m122", Object.keys(window.STREET_LEVEL_DATA.streets).length.toLocaleString(window.I18n.locale()));
+    $("home-data-note").textContent = german && !window.DUESSELDORF_DATA.complete ? t("m123") : german ? t("m124") : t("m125");
     for (const button of document.querySelectorAll("[data-nav]")) {
       if ((state.view === "home" && button.dataset.nav === "home") || (state.view === "practice" && button.dataset.nav === state.mode)) button.setAttribute("aria-current", "page");
       else button.removeAttribute("aria-current");
@@ -1129,7 +1131,7 @@
     $("show-river-labels").disabled = !riversVisible();
     $("show-street-labels").checked = state.streetLabels;
     $("show-street-labels").disabled = state.subject === "streets" && state.streetPath === "levels" && state.stage === "session" && state.round.kind === "quiz" && !state.round.revealed;
-    $("show-street-labels").title = $("show-street-labels").disabled ? "Im Levelquiz bleiben Straßennamen bis zur Auflösung verborgen." : "";
+    $("show-street-labels").title = $("show-street-labels").disabled ? t("m126") : "";
     $("street-credit").hidden = state.subject !== "streets";
     $("river-credit").hidden = !riversVisible();
     $("metro-legend").hidden = !state.metro;
@@ -1152,16 +1154,16 @@
       $("metro-legend-items").append(chip);
     }
     $("city-scope").disabled = state.stage === "session";
-    $("city-scope").title = state.stage === "session" ? "Beende die Runde, um das Gebiet zu wechseln." : "Lerngebiet auswählen";
-    $("map-state").textContent = state.stage === "setup" ? "Entdecken" : state.stage === "results" ? "Rundenauswertung" : state.round.kind === "quiz" ? "Quiz" : "Lernkarten";
-    $("map-title").textContent = state.scope === "all" ? REGION.name : german ? byId.get(state.scope).nameZh : cityById.get(state.scope).nameEn;
+    $("city-scope").title = state.stage === "session" ? t("m127") : t("m128");
+    $("map-state").textContent = state.stage === "setup" ? t("m129") : state.stage === "results" ? t("m130") : state.round.kind === "quiz" ? t("m131") : t("m132");
+    $("map-title").textContent = state.scope === "all" ? window.I18n.regionName(REGION) : german ? byId.get(state.scope).nameZh : cityById.get(state.scope).nameEn;
     $("map-city-zh").textContent = german ? "" : state.scope === "all" ? "臺北市 · 新北市" : cityById.get(state.scope).nameZh;
-    $("map-scope-note").textContent = german ? `${scopeFeatures().length} ${scopeFeatures().length === 1 ? "Stadtteil" : "Stadtteile"}` : state.scope === "all" ? "12 + 29 Bezirke · beide Städte" : `${scopeFeatures().length} Bezirke`;
+    $("map-scope-note").textContent = german ? `${scopeFeatures().length} ${scopeFeatures().length === 1 ? t("m21") : t("m20")}` : state.scope === "all" ? t("m134") : t("m135", scopeFeatures().length);
     $("area-level").value = state.areaLevel;
     $("area-level").disabled = state.stage === "session";
     renderSetup();
     if (state.stage === "session") renderSession();
-    else if (state.stage === "results") { renderResults(); renderDetail(null, "Deine nächste Runde wartet."); }
+    else if (state.stage === "results") { renderResults(); renderDetail(null, t("m136")); }
     else renderDetail(byId.get(state.inspected));
     $("street-confirmation").hidden = !state.pendingStreet;
     $("street-alternative").hidden = state.streetAlternatives.length < 2;
@@ -1263,8 +1265,8 @@
     const rows = Object.values(state.progress.districts);
     const attempts = rows.reduce((sum, row) => sum + row.attempts, 0);
     const correct = rows.reduce((sum, row) => sum + row.correct, 0);
-    $("progress-summary").textContent = attempts ? `${attempts} beantwortete Aufgaben · ${correct} richtig · ${state.progress.rounds} abgeschlossene Quizrunden`
-      : "Deine ersten Quizantworten werden hier gespeichert. Lernkarten werden nicht bewertet.";
+    $("progress-summary").textContent = attempts ? t("m138", attempts, correct, state.progress.rounds)
+      : t("m139");
     $("progress-list").replaceChildren();
     let previousCity = null;
     for (const feature of learningFeatures) {
@@ -1274,7 +1276,7 @@
       if (group !== previousCity) {
         const heading = document.createElement("h3");
         heading.className = "progress-city";
-        heading.textContent = group === "rivers" ? "Flüsse" : group === "streets" ? "Geübte Straßen" : cityName(cityById.get(group));
+        heading.textContent = group === "rivers" ? t("m140") : group === "streets" ? t("m141") : cityName(cityById.get(group));
         $("progress-list").append(heading);
         previousCity = group;
       }
@@ -1285,7 +1287,7 @@
       const main = document.createElement("span");
       main.textContent = readableName(feature);
       const summary = document.createElement("small");
-      summary.textContent = stats ? `${stats.correct} von ${stats.attempts} Antworten richtig` : "Noch nicht geübt";
+      summary.textContent = stats ? t("m142", stats.correct, stats.attempts) : t("m143");
       names.append(main, summary);
       const percentage = document.createElement("span");
       percentage.className = "percentage";
@@ -1437,18 +1439,20 @@
     const file = event.target.files[0];
     if (!file) return;
     try {
-      if (file.size > 5 * 1024 * 1024) throw new Error("Die Sicherung ist zu groß.");
-      const payload = JSON.parse(await file.text());
-      if (payload?.app !== "taipei-kennen" || payload.formatVersion !== 1 || !payload.progress || !payload.progress.districts || typeof payload.progress.districts !== "object" || Array.isArray(payload.progress.districts)) throw new Error("Keine gültige Taipei-kennen-Sicherung.");
-      if ((payload.region || "taipei") !== REGION.id) throw new Error("Diese Sicherung gehört zu einer anderen Stadt. Bitte wechsle zuerst die Stadt.");
-      if (payload.streetLearning && payload.streetLearning.version !== 1) throw new Error("Die Level-Version dieser Sicherung wird nicht unterstützt.");
+      if (file.size > 5 * 1024 * 1024) throw new Error(t("m148"));
+      let payload;
+      try { payload = JSON.parse(await file.text()); }
+      catch { throw new Error(t("m149")); }
+      if (payload?.app !== "taipei-kennen" || payload.formatVersion !== 1 || !payload.progress || !payload.progress.districts || typeof payload.progress.districts !== "object" || Array.isArray(payload.progress.districts)) throw new Error(t("m149"));
+      if ((payload.region || "taipei") !== REGION.id) throw new Error(t("m150"));
+      if (payload.streetLearning && payload.streetLearning.version !== 1) throw new Error(t("m151"));
       importedStreetLearning = payload.streetLearning ? cleanStreetLevels(payload.streetLearning.levels) : null;
       importedProgress = cleanProgress(payload.progress);
       const attempts = Object.values(importedProgress.districts).reduce((total, row) => total + row.attempts, 0);
-      $("import-summary").textContent = `${attempts} gespeicherte Antworten und ${importedProgress.rounds} Quizrunden übernehmen?`;
+      $("import-summary").textContent = t("m152", attempts, importedProgress.rounds);
       $("import-confirmation").hidden = false;
       $("confirm-import").focus();
-    } catch (error) { toast(error.message || "Die Sicherung konnte nicht gelesen werden."); }
+    } catch (error) { toast(error.message || t("m153")); }
     event.target.value = "";
   });
   $("confirm-import").addEventListener("click", () => {
@@ -1461,7 +1465,7 @@
     if (state.stage !== "setup") endRound();
     else render();
     renderProgress();
-    toast("Dein Lernstand wurde übernommen.");
+    toast(t("m154"));
   });
   $("cancel-import").addEventListener("click", () => { importedProgress = null; $("import-confirmation").hidden = true; });
   for (const button of document.querySelectorAll("[data-mode]")) button.addEventListener("click", () => {
@@ -1547,14 +1551,14 @@
   $("delete-cancel").addEventListener("click", () => { $("delete-confirmation").hidden = true; $("delete-progress").focus(); });
   $("delete-confirm").addEventListener("click", () => {
     try { localStorage.removeItem(PROGRESS_KEY); }
-    catch { toast("Der Browserspeicher konnte nicht gelöscht werden."); return; }
+    catch { toast(t("m155")); return; }
     state.progress = cleanProgress(null);
     state.streetLevels = {}; saveSettings();
     $("delete-confirmation").hidden = true;
     if (state.stage !== "setup") endRound();
     else render();
     renderProgress();
-    toast("Dein Lernfortschritt wurde gelöscht.");
+    toast(t("m156"));
   });
   map.reset();
   render();

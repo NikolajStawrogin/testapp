@@ -41,7 +41,7 @@ def main():
 
     html, style_count = re.subn(r'<link rel="stylesheet" href="([^"]+)">', inline_styles, html)
     html, script_count = re.subn(r'<script src="([^"]+)" defer></script>', collect_script, html)
-    if style_count != 1 or script_count != 1:
+    if style_count != 1 or script_count != 2:
         raise ValueError("Unerwartete Ressourcenliste; Export muss überprüft werden")
     paths = ["data/districts.js", "data/metro.js", "data/rivers.js", "data/streets.js", "data/street-parents.js", "data/duesseldorf.js", "data/levels-taipei.js", "data/levels-duesseldorf.js", "street-levels.js", "region-ui.js", "street-map.js", "app.js"]
     embedded = json.dumps({path:local_resource(path) for path in paths}, ensure_ascii=False, separators=(",", ":"))

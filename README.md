@@ -49,6 +49,10 @@ python server.py --port 8766
 
 Die App funktioniert nach dem Bereitstellen der Dateien ohne Internetverbindung. Die optionalen Quellenlinks benötigen beim Öffnen Internetzugriff.
 
+## 國語 / English · 0.13
+
+Die App startet beim ersten Besuch in traditionellem Chinesisch. Über das Globus-Symbol oben rechts lässt sich die gesamte Oberfläche sofort auf Englisch umstellen. Die Sprachbezeichnung lautet 國語 beziehungsweise Mandarin; die Auswahl bleibt beim nächsten Besuch und Stadtwechsel erhalten. Laufende Quizrunden und Lernstände bleiben bestehen. Die Kartennamen sind separat einstellbar, Düsseldorfer Straßen behalten ihre Originalnamen. Details: [SPRACHEN.md](SPRACHEN.md).
+
 ## Straßen schrittweise lernen · 0.12
 
 „Straßen“ startet jetzt mit Leveln: jeweils zehn neue ganze Straßen, grob nach Länge im gewählten Gebiet sortiert. Das gilt für jeden Stadtteil/Bezirk und die ganze Stadt in Düsseldorf sowie Taipei/New Taipei. Die Level-Position wird je Gebiet gespeichert. Frühere Level lassen sich zusätzlich mitüben; die bisherige Suche und Einzelwahl bleiben unter „Freie Auswahl“ erreichbar. Beispiele: Eller 13 Level, ganz Düsseldorf 290 Level. Details, Berechnungsgrenzen und Offline-Aufbereitung: [STREET_LEVELS.md](STREET_LEVELS.md).

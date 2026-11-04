@@ -1,6 +1,7 @@
 /* Region selection and local, on-demand data loading. No external runtime services. */
 (() => {
   "use strict";
+  const t = window.I18n.t;
   const params = new URLSearchParams(location.search);
   const id = params.get("region");
   const $ = id => document.getElementById(id);
@@ -15,14 +16,15 @@
   $("main-menu").hidden = !region;
   document.querySelector(".header-right").hidden = !region;
   if (!region) {
-    document.title = "Stadt kennen · Wähle deine Stadt";
+    document.title = t("m190");
     document.querySelector(".brand-mark").textContent = "⌖";
     document.querySelector(".brand-mark").lang = "de";
-    $("page-heading").textContent = "Welche Stadt möchtest du kennenlernen?";
-    document.querySelector(".intro-copy").textContent = "Wähle deine Stadt. Danach entscheidest du dich für Straßen, Gebiete oder Flüsse.";
-    document.querySelector(".intro .eyebrow").textContent = "DEIN ORTSSINN. DEINE STADT.";
-    document.querySelector(".brand>span:last-child").textContent = "Stadt kennen.";
-    document.querySelector(".brand").setAttribute("aria-label", "Stadt kennen, Stadtauswahl");
+    $("page-heading").textContent = t("m191");
+    document.querySelector(".intro-copy").textContent = t("m192");
+    document.querySelector(".intro .eyebrow").textContent = t("m193");
+    document.querySelector(".brand>span:last-child").textContent = t("m194");
+    document.querySelector(".brand").setAttribute("aria-label", t("m195"));
+    window.I18n.capture();
     return;
   }
   window.APP_REGION = region;
@@ -35,9 +37,9 @@
       document.body.append(script);
       resolve();
     } else {
-      script.src = path + "?v=0.12";
+      script.src = path + "?v=0.13";
       script.onload = resolve;
-      script.onerror = () => reject(new Error("Die Datei „" + path + "“ konnte nicht geladen werden."));
+      script.onerror = () => reject(new Error(t("fileError", path)));
       document.head.append(script);
     }
   });
@@ -50,6 +52,7 @@
         TAIPEI_STREETS: data.streets, TAIPEI_STREET_PARENTS: { features: [], replacedIds: [], aliases: {} } });
     }
     await load("region-ui.js");
+    window.I18n.capture();
     await load("street-levels.js");
     await load("street-map.js");
     await load("app.js");
@@ -58,6 +61,7 @@
   }).catch(error => {
     loading.hidden = true;
     $("region-error").hidden = false;
-    $("region-error-message").textContent = error.message + " Bitte lade die Seite neu oder wähle eine andere Stadt.";
+    $("region-error-message").textContent = error.message + t("m198");
+    window.I18n.capture();
   });
 })();
