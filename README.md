@@ -49,10 +49,14 @@ python server.py --port 8766
 
 Die App funktioniert nach dem Bereitstellen der Dateien ohne Internetverbindung. Die optionalen Quellenlinks benötigen beim Öffnen Internetzugriff.
 
+## Straßen schrittweise lernen · 0.12
+
+„Straßen“ startet jetzt mit Leveln: jeweils zehn neue ganze Straßen, grob nach Länge im gewählten Gebiet sortiert. Das gilt für jeden Stadtteil/Bezirk und die ganze Stadt in Düsseldorf sowie Taipei/New Taipei. Die Level-Position wird je Gebiet gespeichert. Frühere Level lassen sich zusätzlich mitüben; die bisherige Suche und Einzelwahl bleiben unter „Freie Auswahl“ erreichbar. Beispiele: Eller 13 Level, ganz Düsseldorf 290 Level. Details, Berechnungsgrenzen und Offline-Aufbereitung: [STREET_LEVELS.md](STREET_LEVELS.md).
+
 ## Was bereits funktioniert
 
 - Startseite mit Einstiegen für Bezirke, Straßen und Flüsse. Hauptmenü mit Start, Entdecken, Lernen, Quiz, Fortschritt, Einstellungen und Hilfe; auf schmalen Bildschirmen als aufklappbares Menü.
-- Straßen in allen 41 Bezirken auswählen, erkunden, als Lernkarten ansehen und im Kartenquiz finden. Straßensuche, Einzelwahl, drei Straßenklassen sowie getrennte Filter für ganze Straßen, Sections, Lanes und Alleys. Ganze Straßen wie 忠孝東路 sind zusätzlich zu ihren sieben einzelnen Sections lernbar. Standardmäßig sind Haupt-/Verbindungsstraßen und Straßen/Sections gewählt; kleine Gassen können schrittweise zugeschaltet werden.
+- Straßen in allen 41 Bezirken auswählen, erkunden, als Lernkarten ansehen und im Kartenquiz finden. Straßensuche, Einzelwahl, drei Straßenklassen sowie getrennte Filter für ganze Straßen, Sections, Lanes und Alleys. Ganze Straßen wie 忠孝東路 sind zusätzlich zu ihren sieben einzelnen Sections lernbar. Im Level-Modus werden ganze Straßen verwendet. Unter „Freie Auswahl“ sind Haupt-/Verbindungsstraßen und Straßen/Sections vorbelegt; kleine Gassen können zugeschaltet werden.
 - Maus-Hover hebt die gesamte gewählte Straßeneinheit hervor, ein Klick wählt sie. Auf Touch-Geräten wird die angetippte Straße zuerst hervorgehoben und anschließend bestätigt. An Kreuzungen ist zwischen nahen Straßen wechselbar. Verschieben und Zoomen geben keine Quizantwort ab. Der Zielname bleibt vor der Auflösung verborgen.
 - Straßenfilter und Einzelauswahl werden gespeichert. Fehlende englische Namen sind ausdrücklich gekennzeichnet und standardmäßig aus dem Quiz ausgeschlossen; reine Englisch-Aufgaben enthalten keine erfundenen Ersatznamen. Die Namensherkunft ist dokumentiert und keine pauschale Zusage heutiger amtlicher Verifikation.
 - Lernstand als JSON sichern und nach ausdrücklicher Bestätigung wieder einlesen. Ungültige Dateien werden abgewiesen; ein Import beendet gegebenenfalls die laufende Runde. Fortschritt, Fehlerwiederholung und Lernkarten funktionieren auch für Straßen.

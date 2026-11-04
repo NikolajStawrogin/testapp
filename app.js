@@ -55,6 +55,11 @@
     return Number.isSafeInteger(value) && value >= 0 ? value : 0;
   }
 
+  function cleanStreetLevels(raw) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+    return Object.fromEntries(Object.entries(raw).filter(([key,level]) => key.startsWith("whole-v1|") && key.length < 5000 && Number.isSafeInteger(level) && level > 0 && level <= 10000).slice(-300));
+  }
+
   function cleanProgress(raw) {
     const result = { rounds: count(raw?.rounds), districts: {} };
     for (const feature of learningFeatures) {
@@ -93,6 +98,9 @@
     onlyBilingual: savedSettings?.onlyBilingual !== false,
     streetLabels: savedSettings?.streetLabels !== false,
     streetSearch: typeof savedSettings?.streetSearch === "string" ? savedSettings.streetSearch.slice(0, 120) : "",
+    streetPath: savedSettings?.streetPath === "free" ? "free" : "levels",
+    streetLevels: cleanStreetLevels(savedSettings?.streetLevels),
+    levelReview: savedSettings?.levelReview === true,
     streetLimit: 40,
     hoveredStreet: null,
     pendingStreet: null,
@@ -119,32 +127,104 @@
   };
   let streetRevision = 0;
   let streetCandidateCache = null;
+  let streetViewCache = null;
+  let curriculumCache = null;
   let streetSelectionCache = null;
 
   function searchText(value) {
     return value.normalize("NFKC").toLowerCase().replaceAll("臺", "台").replace(/[\s.,’']/g, "");
   }
 
-  function streetCandidates() {
-    const key = [state.scope, [...state.selected].sort().join(), [...state.streetCategories].sort().join(), [...state.streetUnits].sort().join(), !german && (state.onlyBilingual || state.language === "en"), state.streetSearch].join("|");
+  function streetBaseCandidates() {
+    const guided = state.streetPath === "levels";
+    const englishRequired = !german && (state.language === "en" || (!guided && state.onlyBilingual));
+    const key = [state.scope, [...state.selected].sort().join(), guided, [...state.streetCategories].sort().join(), [...state.streetUnits].sort().join(), englishRequired].join("|");
     if (streetCandidateCache?.key !== key) {
-      const query = searchText(state.streetSearch.trim());
       streetCandidateCache = { key, features: streets.filter(feature => (state.scope === "all" || (german ? feature.districtIds.includes(state.scope) : feature.cityId === state.scope || feature.cityIds?.includes(state.scope)))
-        && feature.districtIds.some(id => state.selected.has(id)) && state.streetCategories.has(feature.category)
-        && state.streetUnits.has(feature.unit) && (german || !(state.onlyBilingual || state.language === "en") || feature.nameEn)
-        && (!query || searchText(`${feature.nameZh} ${feature.nameEn}`).includes(query))) };
+        && feature.districtIds.some(id => state.selected.has(id))
+        && (guided ? feature.unit === "street" : state.streetCategories.has(feature.category) && state.streetUnits.has(feature.unit))
+        && (!englishRequired || feature.nameEn)) };
     }
     return streetCandidateCache;
+  }
+
+  function streetLevelInfo() {
+    if (state.streetPath !== "levels") return null;
+    const base = streetBaseCandidates();
+    const ids = [...state.selected];
+    const areaKey = window.StreetLevels.areaKey(ids);
+    if (curriculumCache?.key !== base.key) {
+      const districts = features.filter(feature => !german || feature.level === "neighborhood");
+      const groups = german ? [] : cities.map(city => ({ id: city.id, ids: districts.filter(feature => feature.cityId === city.id).map(feature => feature.id) }));
+      curriculumCache = { key: base.key, ranked: window.StreetLevels.rank(base.features, window.STREET_LEVEL_DATA, ids, districts.map(feature => feature.id), groups) };
+    }
+    return { ...window.StreetLevels.slice(curriculumCache.ranked, state.streetLevels[areaKey] || 1, state.levelReview), areaKey, ranked: curriculumCache.ranked };
+  }
+
+  function streetCandidates() {
+    const base = streetBaseCandidates();
+    const level = streetLevelInfo();
+    const key = base.key + "|" + (level ? `${level.level}|${state.levelReview}` : state.streetSearch);
+    if (streetViewCache?.key !== key) {
+      const query = searchText(state.streetSearch.trim());
+      streetViewCache = { key, features: level ? level.active.map(row => row.feature) : base.features.filter(feature => !query || searchText(`${feature.nameZh} ${feature.nameEn}`).includes(query)) };
+    }
+    return streetViewCache;
   }
 
   function streetPool() {
     const candidates = streetCandidates();
     const key = candidates.key + "|" + streetRevision;
     if (streetSelectionCache?.key !== key) {
-      const features = candidates.features.filter(feature => !state.excludedStreets.has(feature.id));
+      const features = candidates.features.filter(feature => state.streetPath === "levels" || !state.excludedStreets.has(feature.id));
       streetSelectionCache = { key, features, ids: new Set(features.map(feature => feature.id)) };
     }
     return streetSelectionCache;
+  }
+
+  function learningAreaLabel() {
+    if (state.selected.size === 1) return byId.get([...state.selected][0]).nameZh;
+    if (state.selected.size === features.filter(feature => !german || feature.level === "neighborhood").length) return REGION.name;
+    if (state.selected.size === scopeFeatures().length && state.scope !== "all") return german ? byId.get(state.scope).nameZh : cityName(cityById.get(state.scope));
+    return `${state.selected.size} ausgewählte ${areaWord(true)}`;
+  }
+
+  function setStreetLevel(level) {
+    const info = streetLevelInfo();
+    if (!info?.total) return;
+    state.streetLevels[info.areaKey] = Math.max(1, Math.min(info.total, level));
+    state.streetLimit = 40; state.inspected = null;
+    clearStreetPreview(); saveSettings(); render();
+  }
+
+  function renderStreetLevels() {
+    const info = streetLevelInfo();
+    $("street-learning-path").value = state.streetPath;
+    $("street-level-controls").hidden = !info;
+    $("street-category-filter").hidden = Boolean(info);
+    $("street-unit-filter").hidden = Boolean(info) || german;
+    $("street-bilingual-field").hidden = Boolean(info) || german;
+    $("street-search-field").hidden = Boolean(info);
+    $("street-select-all").hidden = Boolean(info);
+    if (!info) return;
+    const selector = $("street-level");
+    const signature = info.areaKey + "|" + info.ranked.length;
+    if (selector.dataset.signature !== signature) {
+      selector.replaceChildren();
+      for (let level = 1; level <= info.total; level++) {
+        const start = (level - 1) * window.StreetLevels.SIZE + 1;
+        selector.add(new Option(`Level ${level} · Straßen ${start}–${Math.min(level * window.StreetLevels.SIZE, info.ranked.length)}`, String(level)));
+      }
+      selector.dataset.signature = signature;
+    }
+    selector.value = String(info.level); selector.disabled = !info.total;
+    $("level-previous").disabled = info.level <= 1 || !info.total;
+    $("level-next").disabled = info.level >= info.total;
+    $("level-review").checked = state.levelReview;
+    $("level-review").disabled = info.level === 1;
+    $("street-level-summary").textContent = info.total ? `${learningAreaLabel()} · Level ${info.level} von ${info.total} · ${info.fresh.length} neue ${info.fresh.length === 1 ? "Straße" : "Straßen"}${state.levelReview && info.level > 1 ? ` · ${info.active.length} mit Wiederholung` : ""}` : "Wähle zuerst ein Lerngebiet mit Straßen.";
+    const known = info.fresh.filter(row => state.progress.districts[row.feature.id]?.correct > 0).length;
+    $("street-level-progress").textContent = info.total ? `${known} von ${info.fresh.length} ${info.fresh.length === 1 ? "Straße" : "Straßen"} dieses Levels schon richtig gefunden.` : "";
   }
 
   function maxMapZoom() { return state.subject === "streets" ? 96 : MAX_MAP_ZOOM; }
@@ -152,6 +232,7 @@
   function saveSettings() {
     save(SETTINGS_KEY, {
       areaLevel: state.areaLevel, view: state.view, subject: state.subject, streetCategories: [...state.streetCategories], streetUnits: [...state.streetUnits],
+      streetPath: state.streetPath, streetLevels: state.streetLevels, levelReview: state.levelReview,
       excludedStreets: [...state.excludedStreets], onlyBilingual: state.onlyBilingual,
       streetLabels: state.streetLabels, streetSearch: state.streetSearch,
       mode: state.mode, language: state.language, labelsByCity: state.labelsByCity, metro: state.metro, metroKinds: state.metroKinds,
@@ -488,6 +569,7 @@
 
     renderStreets() {
       const visible = state.subject === "streets" && state.view === "practice";
+      $("map-content").classList.toggle("has-street-level", visible && state.streetPath === "levels");
       $("street-map-hint").hidden = !visible;
       if (!visible && !this.streets) return;
       if (visible) this.ensureStreetLayer();
@@ -500,7 +582,7 @@
       if (state.stage === "session") for (const id of state.round.ids) if (byId.get(id).kind === "street") pool.add(id);
       if (target?.kind === "street") for (const id of pool) if (byId.get(id).unit !== target.unit) pool.delete(id);
       this.streets.render({ visible, pool, zoom: this.zoom, matrix, viewport: this.svg.getBoundingClientRect(),
-        language: state.language, names: state.streetLabels, hiddenId: revealed ? null : target?.id,
+        language: state.language, focusPool: state.streetPath === "levels", names: state.streetLabels && !(state.streetPath === "levels" && state.stage === "session" && state.round.kind === "quiz" && !revealed), hiddenId: revealed ? null : target?.id,
         hiddenPrefix: revealed ? null : target?.nameZh,
         inSession: state.stage === "session", revealed,
         correctId: revealed && target?.kind === "street" ? target.id : null,
@@ -749,6 +831,8 @@
 
   function renderStreetPicker() {
     if (state.subject !== "streets") return;
+    renderStreetLevels();
+    const level = streetLevelInfo();
     const available = streetCandidates().features;
     const selectedCount = streetPool().features.length;
     const picker = $("street-picker");
@@ -757,11 +841,13 @@
     picker.replaceChildren();
     for (const feature of available.slice(0, state.streetLimit)) {
       const label = document.createElement("label");
-      label.className = "street-choice";
+      label.className = "street-choice" + (level ? " is-level" : "");
+      label.dataset.streetId = feature.id;
       const input = document.createElement("input");
       input.type = "checkbox";
       input.value = feature.id;
-      input.checked = !state.excludedStreets.has(feature.id);
+      input.checked = Boolean(level) || !state.excludedStreets.has(feature.id);
+      input.hidden = Boolean(level); input.disabled = Boolean(level);
       input.setAttribute("aria-label", readableName(feature));
       input.addEventListener("change", () => {
         input.checked ? state.excludedStreets.delete(feature.id) : state.excludedStreets.add(feature.id);
@@ -780,7 +866,13 @@
       context.className = "street-choice-context";
       context.textContent = feature.districtIds.filter(id => !german || byId.get(id).level === state.areaLevel).map(id => byId.get(id).nameZh).join(" · ");
       names.append(main, english, context);
-      label.append(input, names);
+      label.append(input);
+      if (level) {
+        const rank = document.createElement("span"); rank.className = "street-rank";
+        rank.textContent = String(level.ranked.findIndex(row => row.feature.id === feature.id) + 1);
+        label.append(rank);
+      }
+      label.append(names);
       picker.append(label);
     }
     picker.scrollTop = scroll;
@@ -911,6 +1003,7 @@
       : state.mode === "cards" ? "Lernkarten starten" : "Karte erkunden";
     $("street-selection").hidden = state.subject !== "streets";
     $("street-subject-hint").hidden = state.subject !== "streets";
+    $("street-subject-hint").textContent = state.streetPath === "levels" ? "Beginne mit Level 1: zehn längere Straßen deines Lerngebiets. Danach kommen je Level zehn neue hinzu." : "Wähle Gebiet, Straßenklassen und einzelne Straßen selbst.";
     for (const button of document.querySelectorAll("[data-subject]")) button.setAttribute("aria-pressed", String(button.dataset.subject === state.subject));
     for (const input of document.querySelectorAll('[name="street-category"]')) input.checked = state.streetCategories.has(input.value);
     for (const input of document.querySelectorAll('[name="street-unit"]')) input.checked = state.streetUnits.has(input.value);
@@ -926,7 +1019,7 @@
     const parts = nameParts(target);
     const isRiver = target.kind === "river";
     const isStreet = target.kind === "street";
-    $("question-city").textContent = featureContext(target);
+    $("question-city").textContent = (round.level ? `Level ${round.level.number} · ` : "") + featureContext(target);
     $("session-kind").textContent = round.kind === "quiz" ? isStreet ? "DEIN STRASSENQUIZ" : round.ids.some(id => byId.get(id).kind === "river") ? "DEIN KARTENQUIZ" : "DEIN BEZIRKSQUIZ" : "DEINE LERNKARTEN";
     $("session-count").textContent = `${round.kind === "quiz" ? "Aufgabe" : "Karte"} ${round.position + 1} / ${round.ids.length}`;
     $("session-score").textContent = round.kind === "quiz" ? `${round.answers.filter(answer => answer.correct).length} richtig` : "Ohne Bewertung";
@@ -1002,13 +1095,16 @@
       $("result-list").append(row);
     }
     $("retry-errors").hidden = round.kind !== "quiz" || !errors.length;
+    const info = state.subject === "streets" ? streetLevelInfo() : null;
+    $("next-street-level").hidden = !round.level || !info || round.level.areaKey !== info.areaKey || round.level.number !== info.level || info.level >= info.total;
+    if (round.level) $("result-summary").textContent += ` ${round.level.areaLabel} · Level ${round.level.number}.`;
   }
 
   function render() {
     $("home-view").hidden = state.view !== "home";
     $("practice-view").hidden = state.view !== "practice";
     document.body.dataset.subject = state.subject;
-    $("home-street-count").textContent = `${streets.length.toLocaleString("de-DE")} Straßeneinheiten · ${german ? "50 Stadtteile" : "41 Bezirke"}`;
+    $("home-street-count").textContent = `10 Straßen pro Level · ${Object.keys(window.STREET_LEVEL_DATA.streets).length.toLocaleString("de-DE")} ganze Straßen`;
     $("home-data-note").textContent = german && !window.DUESSELDORF_DATA.complete ? "Düsseldorf im Aufbau: Stadtteile, Stadtbezirke und Straßen sind verfügbar. Flüsse und Stadtbahn sind noch nicht verfügbar." : german ? "Lokale Karte mit sechs Flüssen und U-Bahn, S-Bahn, Straßenbahn sowie SkyTrain. Bahnlinien verbinden Haltestellen schematisch. Datenstand unter Hilfe → Datenquellen." : "Lokale Karte mit Metro und Flüssen. Datenstand und Namensherkunft sind unter Hilfe → Datenquellen dokumentiert.";
     for (const button of document.querySelectorAll("[data-nav]")) {
       if ((state.view === "home" && button.dataset.nav === "home") || (state.view === "practice" && button.dataset.nav === state.mode)) button.setAttribute("aria-current", "page");
@@ -1032,6 +1128,8 @@
     $("show-river-labels").checked = state.riverLabels;
     $("show-river-labels").disabled = !riversVisible();
     $("show-street-labels").checked = state.streetLabels;
+    $("show-street-labels").disabled = state.subject === "streets" && state.streetPath === "levels" && state.stage === "session" && state.round.kind === "quiz" && !state.round.revealed;
+    $("show-street-labels").title = $("show-street-labels").disabled ? "Im Levelquiz bleiben Straßennamen bis zur Auflösung verborgen." : "";
     $("street-credit").hidden = state.subject !== "streets";
     $("river-credit").hidden = !riversVisible();
     $("metro-legend").hidden = !state.metro;
@@ -1073,7 +1171,9 @@
   function beginRound(kind, ids) {
     const selected = shuffled(ids || selectedFeatures().map(feature => feature.id));
     if (!selected.length) return;
+    const level = state.subject === "streets" ? streetLevelInfo() : null;
     state.round = {
+      level: level ? { areaKey: level.areaKey, number: level.level, areaLabel: learningAreaLabel() } : null,
       kind,
       ids: kind === "quiz" ? selected.slice(0, roundLength(selected.length)) : selected,
       position: 0, answers: [], revealed: false, completed: false
@@ -1085,6 +1185,7 @@
     render();
     $("question-name").setAttribute("tabindex", "-1");
     focusQuestion();
+    if (level) $("practice-view").scrollIntoView({ behavior: "instant", block: "start" });
   }
 
   function focusQuestion() {
@@ -1139,6 +1240,7 @@
       }
       round.completed = true;
       render();
+      if (round.level) $("results-panel").scrollIntoView({ behavior: "instant", block: "start" });
     } else {
       clearStreetPreview();
       round.position += 1;
@@ -1245,6 +1347,18 @@
     map.reset();
   }
 
+  $("street-learning-path").addEventListener("change", event => {
+    state.streetPath = event.target.value; state.streetLimit = 40; state.inspected = null;
+    clearStreetPreview(); saveSettings(); render(); map.reset();
+  });
+  $("street-level").addEventListener("change", event => setStreetLevel(Number(event.target.value)));
+  $("level-previous").addEventListener("click", () => setStreetLevel(streetLevelInfo().level - 1));
+  $("level-next").addEventListener("click", () => setStreetLevel(streetLevelInfo().level + 1));
+  $("level-review").addEventListener("change", event => { state.levelReview = event.target.checked; clearStreetPreview(); saveSettings(); render(); });
+  $("next-street-level").addEventListener("click", () => {
+    const kind = state.round.kind; const next = streetLevelInfo().level + 1;
+    endRound(); setStreetLevel(next); beginRound(kind);
+  });
   $("area-level").addEventListener("change", event => {
     state.areaLevel = event.target.value;
     state.selected = new Set(scopeFeatures().map(feature => feature.id));
@@ -1309,7 +1423,7 @@
     render();
   });
   $("export-progress").addEventListener("click", () => {
-    const payload = { app: "taipei-kennen", region: REGION.id, formatVersion: 1, exportedAt: new Date().toISOString(), progress: state.progress };
+    const payload = { app: "taipei-kennen", region: REGION.id, formatVersion: 1, exportedAt: new Date().toISOString(), progress: state.progress, streetLearning: { version: 1, levels: state.streetLevels } };
     const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }));
     const link = document.createElement("a");
     link.href = url;
@@ -1318,6 +1432,7 @@
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
   let importedProgress = null;
+  let importedStreetLearning = null;
   $("import-progress").addEventListener("change", async event => {
     const file = event.target.files[0];
     if (!file) return;
@@ -1326,6 +1441,8 @@
       const payload = JSON.parse(await file.text());
       if (payload?.app !== "taipei-kennen" || payload.formatVersion !== 1 || !payload.progress || !payload.progress.districts || typeof payload.progress.districts !== "object" || Array.isArray(payload.progress.districts)) throw new Error("Keine gültige Taipei-kennen-Sicherung.");
       if ((payload.region || "taipei") !== REGION.id) throw new Error("Diese Sicherung gehört zu einer anderen Stadt. Bitte wechsle zuerst die Stadt.");
+      if (payload.streetLearning && payload.streetLearning.version !== 1) throw new Error("Die Level-Version dieser Sicherung wird nicht unterstützt.");
+      importedStreetLearning = payload.streetLearning ? cleanStreetLevels(payload.streetLearning.levels) : null;
       importedProgress = cleanProgress(payload.progress);
       const attempts = Object.values(importedProgress.districts).reduce((total, row) => total + row.attempts, 0);
       $("import-summary").textContent = `${attempts} gespeicherte Antworten und ${importedProgress.rounds} Quizrunden übernehmen?`;
@@ -1337,9 +1454,12 @@
   $("confirm-import").addEventListener("click", () => {
     if (!importedProgress || !save(PROGRESS_KEY, importedProgress)) return;
     state.progress = importedProgress;
+    if (importedStreetLearning) { state.streetLevels = importedStreetLearning; saveSettings(); }
+    importedStreetLearning = null;
     importedProgress = null;
     $("import-confirmation").hidden = true;
     if (state.stage !== "setup") endRound();
+    else render();
     renderProgress();
     toast("Dein Lernstand wurde übernommen.");
   });
@@ -1429,7 +1549,10 @@
     try { localStorage.removeItem(PROGRESS_KEY); }
     catch { toast("Der Browserspeicher konnte nicht gelöscht werden."); return; }
     state.progress = cleanProgress(null);
+    state.streetLevels = {}; saveSettings();
     $("delete-confirmation").hidden = true;
+    if (state.stage !== "setup") endRound();
+    else render();
     renderProgress();
     toast("Dein Lernfortschritt wurde gelöscht.");
   });

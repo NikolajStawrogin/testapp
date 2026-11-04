@@ -58,6 +58,7 @@
     input.type = "checkbox"; input.hidden = true;
     labelSettings.append(input);
   }
+  $("street-search").placeholder = "Straßenname eingeben";
   const units = document.querySelector('[name="street-unit"]').closest("fieldset");
   units.hidden = true;
   const bilingual = $("only-bilingual");
@@ -90,7 +91,9 @@
   for (const node of [...help.children].slice(1)) node.remove();
   const text = document.createElement("p");
   text.textContent = "Wähle zuerst ein Thema. Wähle oben einen Stadtteil wie Eller oder Wersten oder wähle in der Liste mehrere Stadtteile für eine gemeinsame Runde. Geübt werden die Stadtteilnamen. Auch das Straßenquiz lässt sich so auf deine Stadtteile eingrenzen. Straßen werden als ganze benannte Verläufe gespielt. Bahnarten lassen sich in den Einstellungen einzeln einblenden. Ihre Linien sind schematische Verbindungen zwischen VRR-Haltestellen. Rhein und weitere enthaltene Flüsse lassen sich einzeln mitüben; für reine Flussrunden hebe die Gebietsauswahl auf. Karte ziehen und mit Rad oder zwei Fingern zoomen. Eine Finger-Auswahl wird vor der Quizantwort bestätigt; an Kreuzungen hilft Andere Straße. Lernkarten werden nicht bewertet. Unter Fortschritt kannst du den Lernstand sichern und wieder einlesen; Sicherungen gelten jeweils für die ausgewählte Stadt. Über Stadt wechseln kehrst du zur Stadtauswahl zurück.";
-  help.append(text);
+  const levelsHelp = document.createElement("p");
+  levelsHelp.textContent = "Straßen starten mit Leveln: jeweils zehn neue ganze Straßen, grob nach Länge innerhalb deines Lerngebiets sortiert. Die Level-Position bleibt für jeden Stadtteil und ganz Düsseldorf getrennt gespeichert. Frühere Level mitüben ergänzt die bisherigen Straßen. Nach einer Runde kannst du direkt das nächste Level starten; alle Level sind auch einzeln wählbar. Suche und Einzelwahl findest du unter Freie Auswahl. Level-Positionen sind in der Lernstand-Sicherung enthalten.";
+  help.append(levelsHelp, text);
   // Preserve the shared sources-button listener installed by app.js.
   const button = document.createElement("button");button.id="help-sources";button.className="button button-secondary";button.textContent="Datenquellen";help.append(button);
 })();

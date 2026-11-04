@@ -146,3 +146,7 @@ Der Nutzer hat beide Düsseldorfer Gebietsebenen sowie den vollen bisherigen Umf
 ## Düsseldorfer Quiz-Auswahl nach Stadtteilnamen · 0.11
 
 Nach aktualisiertem Nutzerwunsch wird Düsseldorf über die 50 Stadtteilnamen wie Eller oder Wersten ausgewählt, ohne nummerierte Stadtbezirke als Quiz-Optionen. Die Auswahl über der Karte und die alphabetische Mehrfachauswahl verwenden dieselben Stadtteile; Straßen- und Flussauswahl folgen dieser Eingrenzung. Alte Bezirks-Auswahlen werden auf ihre Stadtteile übertragen, vorhandene Ergebnisse bleiben erhalten. Taipei behält die bisherige Stadtauswahl.
+
+## Straßen in Zehner-Leveln · 0.12
+
+Für jeden Stadtteil/Bezirk, jede Stadt und ausgewählte Gebietskombinationen beginnt Straßenlernen mit zehn langen ganzen Straßen. Jedes weitere Level enthält zehn neue Straßen; der letzte Rest darf kleiner sein. Maßgeblich ist die ungefähre Länge im gewählten Gebiet, nicht die Summe paralleler Fahrbahnen oder eine erfundene Straßenklasse. Die Einteilung darf durch freie Suche und Einzelauswahl nicht wandern. Alle Straßen des jeweiligen Bestands müssen über die Level erreichbar sein. Frühere Level sind erneut wählbar und optional zusätzlich mitübbar. Level-Positionen werden je Gebiet und Region gespeichert, gesichert und wiederhergestellt. Der Lernstand zeigt bereits richtig beantwortete Straßen; der Rundenabschluss bietet einen direkten Übergang zum nächsten Level. Bestehende freie Auswahl, Kartenquiz, Touch-Bedienung und lokale Offline-Nutzung bleiben erhalten. Umsetzungsdetails und Grenzen: STREET_LEVELS.md.

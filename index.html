@@ -6,8 +6,8 @@
   <meta name="color-scheme" content="light">
   <meta name="description" content="Lerne Straßen, Bezirke und Flüsse in Taipei und New Taipei. Ohne Konto, mit Kartenquiz und lokal gespeichertem Lernfortschritt.">
   <title>Taipei kennen · Straßen, Bezirke und Flüsse lernen</title>
-  <link rel="stylesheet" href="styles.css?v=0.11">
-  <script src="bootstrap.js?v=0.11" defer></script>
+  <link rel="stylesheet" href="styles.css?v=0.12">
+  <script src="bootstrap.js?v=0.12" defer></script>
 </head>
 <body>
   <svg class="icon-library" aria-hidden="true"><defs>
@@ -48,14 +48,14 @@
         <h1 id="page-heading">Taipei wird vertrauter.</h1>
         <p class="intro-copy">Straßen, Bezirke und Flüsse in Taipei und New Taipei kennenlernen.</p>
       </div>
-      <span class="version-badge">Lernapp · 0.11</span>
+      <span class="version-badge">Lernapp · 0.12</span>
     </section>
 
     <section id="home-view" hidden class="home-view" aria-label="Startseite">
       <div class="home-welcome"><p class="eyebrow">DEIN ORTSSINN WÄCHST MIT JEDER RUNDE</p><h2>Was möchtest du heute kennenlernen?</h2><p>Beginne mit einem Bezirk oder erkunde die Straßen deiner Umgebung. Du bestimmst Gebiet, Umfang und Tempo.</p></div>
       <div class="home-cards">
         <button class="home-card" data-start="districts"><span class="home-card-icon" aria-hidden="true">區</span><strong>Bezirke kennenlernen</strong><span>41 Bezirke · beide Städte im Überblick</span><small>Entdecken, lernen und auf der Karte finden →</small></button>
-        <button class="home-card" data-start="streets"><span class="home-card-icon" aria-hidden="true">路</span><strong>Straßen kennenlernen</strong><span id="home-street-count">Straßen, Sections, Lanes und Alleys</span><small>Wähle einen Bezirk und baue deinen Ortssinn auf →</small></button>
+        <button class="home-card" data-start="streets"><span class="home-card-icon" aria-hidden="true">路</span><strong>Straßen kennenlernen</strong><span id="home-street-count">Straßen, Sections, Lanes und Alleys</span><small>Beginne mit 10 Straßen und steigere dich Level für Level →</small></button>
         <button class="home-card" data-start="rivers"><span class="home-card-icon" aria-hidden="true">川</span><strong>Flüsse kennenlernen</strong><span>Tamsui, Keelung, Xindian und Dahan</span><small>Die natürlichen Linien der Stadt verstehen →</small></button>
       </div>
       <div class="home-bottom"><div><h3>Eine kleine Runde reicht.</h3><p>Standardmäßig zehn Aufgaben. Dein Fortschritt bleibt in diesem Browser — ohne Anmeldung und ohne Tracker.</p></div><button class="button button-primary" data-nav="continue">Mit letzter Auswahl fortfahren →</button></div>
@@ -85,10 +85,20 @@
           <div id="district-picker" class="district-sections" aria-label="Bezirke auswählen"></div>
           <div class="selection-tools"><p id="selection-note" class="selection-note">Alle 41 Bezirke ausgewählt</p><button id="focus-selected" class="text-button">Auswahl zeigen</button></div>
           <section id="street-selection" hidden aria-label="Straßen auswählen">
-            <fieldset class="street-filter"><legend>Straßenklasse</legend><label><input type="checkbox" name="street-category" value="major" checked> Hauptstraßen</label><label><input type="checkbox" name="street-category" value="secondary" checked> Verbindungsstraßen</label><label><input type="checkbox" name="street-category" value="local"> Nebenstraßen</label></fieldset>
-            <fieldset class="street-filter"><legend>Namenseinheiten</legend><label><input type="checkbox" name="street-unit" value="street" checked> Ganze Straßen</label><label><input type="checkbox" name="street-unit" value="section" checked> Sections · 段</label><label><input type="checkbox" name="street-unit" value="lane" checked> Lanes · 巷</label><label><input type="checkbox" name="street-unit" value="alley" checked> Alleys · 弄</label></fieldset>
-            <label class="checkbox-row"><input type="checkbox" id="only-bilingual" checked><span>Nur Straßen mit belegtem englischem Namen</span></label>
-            <label class="field street-search-field">Straße suchen<input id="street-search" type="search" placeholder="中文 oder English" autocomplete="off"></label>
+            <div class="street-learning-path">
+              <label class="field">Straßen lernen<select id="street-learning-path"><option value="levels">Level · jeweils 10 neue Straßen</option><option value="free">Freie Auswahl</option></select></label>
+              <div id="street-level-controls">
+                <div class="level-navigation"><button id="level-previous" class="button button-quiet" aria-label="Vorheriges Straßen-Level">←</button><label class="field">Dein Level<select id="street-level" aria-label="Straßen-Level"></select></label><button id="level-next" class="button button-quiet" aria-label="Nächstes Straßen-Level">→</button></div>
+                <p id="street-level-summary" class="level-summary" aria-live="polite"></p>
+                <p id="street-level-progress" class="selection-note"></p>
+                <label class="checkbox-row"><input type="checkbox" id="level-review"><span>Frühere Level mitüben</span></label>
+                <p class="selection-note">Ganze Straßen, grob nach Länge im gewählten Gebiet sortiert. Jedes Level ergänzt bis zu 10 neue Straßen.</p>
+              </div>
+            </div>
+            <fieldset id="street-category-filter" class="street-filter"><legend>Straßenklasse</legend><label><input type="checkbox" name="street-category" value="major" checked> Hauptstraßen</label><label><input type="checkbox" name="street-category" value="secondary" checked> Verbindungsstraßen</label><label><input type="checkbox" name="street-category" value="local"> Nebenstraßen</label></fieldset>
+            <fieldset id="street-unit-filter" class="street-filter"><legend>Namenseinheiten</legend><label><input type="checkbox" name="street-unit" value="street" checked> Ganze Straßen</label><label><input type="checkbox" name="street-unit" value="section" checked> Sections · 段</label><label><input type="checkbox" name="street-unit" value="lane" checked> Lanes · 巷</label><label><input type="checkbox" name="street-unit" value="alley" checked> Alleys · 弄</label></fieldset>
+            <label id="street-bilingual-field" class="checkbox-row"><input type="checkbox" id="only-bilingual" checked><span>Nur Straßen mit belegtem englischem Namen</span></label>
+            <label id="street-search-field" class="field street-search-field">Straße suchen<input id="street-search" type="search" placeholder="中文 oder English" autocomplete="off"></label>
             <div class="section-heading"><p class="section-label" id="street-selection-count"></p><button id="street-select-all" class="text-button">Auswahl aufheben</button></div>
             <div id="street-picker" class="street-picker" aria-label="Einzelne Straßen auswählen"></div>
             <button id="street-more" class="text-button" hidden>Weitere Straßen anzeigen</button>
@@ -123,6 +133,7 @@
           <div class="result-score" id="result-score"></div>
           <h2 id="results-title">Das war eine gute Übung.</h2>
           <p id="result-summary" class="muted"></p>
+          <button id="next-street-level" class="button button-primary wide" hidden>Nächstes Level starten →</button>
           <div id="result-list" class="result-list"></div>
           <button id="retry-errors" class="button button-primary wide">Fehler wiederholen</button>
           <button id="back-to-setup" class="button button-secondary wide">Zur Auswahl</button>
@@ -203,10 +214,10 @@
     <div class="progress-tools"><button id="export-progress" class="button button-secondary">Lernstand exportieren</button><label class="button button-secondary" for="import-progress">Lernstand importieren</label><input id="import-progress" type="file" accept="application/json,.json" hidden></div>
     <div id="import-confirmation" class="import-confirmation" hidden><p id="import-summary"></p><p>Die Sicherung ersetzt den aktuellen Lernstand in diesem Browser. Eine laufende Runde wird dabei beendet.</p><div class="button-row"><button id="confirm-import" class="button button-primary">Sicherung übernehmen</button><button id="cancel-import" class="button button-secondary">Abbrechen</button></div></div>
     <div id="progress-list" class="progress-list"></div>
-    <div class="delete-area"><button id="delete-progress" class="text-button danger">Lernfortschritt löschen</button><div id="delete-confirmation" hidden><p>Alle gespeicherten Antworten und Runden auf diesem Rechner löschen?</p><div class="button-row"><button id="delete-confirm" class="button button-danger">Ja, löschen</button><button id="delete-cancel" class="button button-secondary">Behalten</button></div></div></div>
+    <div class="delete-area"><button id="delete-progress" class="text-button danger">Lernfortschritt löschen</button><div id="delete-confirmation" hidden><p>Alle gespeicherten Antworten, Runden und Straßen-Level-Positionen auf diesem Rechner löschen?</p><div class="button-row"><button id="delete-confirm" class="button button-danger">Ja, löschen</button><button id="delete-cancel" class="button button-secondary">Behalten</button></div></div></div>
   </dialog>
   <dialog id="settings-dialog" class="dialog settings-dialog"><div class="dialog-heading"><h2>Einstellungen</h2><button class="icon-button dialog-close" aria-label="Einstellungen schließen">×</button></div><p class="muted">Sprache und Orientierungshilfen gelten auch in Lernkarten und Quiz. Der gesuchte Name bleibt bis zur Auflösung verborgen.</p><div id="settings-dialog-content"></div><p class="muted">Deine Einstellungen werden in diesem Browser gespeichert. Deinen Lernstand kannst du unter „Fortschritt“ sichern oder löschen.</p></dialog>
-  <dialog id="help-dialog" class="dialog help-dialog"><div class="dialog-heading"><h2>So lernst du Taipei kennen</h2><button class="icon-button dialog-close" aria-label="Hilfe schließen">×</button></div><h3>1. Wähle dein Lernziel</h3><p>Bezirke und Flüsse geben dir einen Überblick. Im Straßenmodus wählst du Stadt, Bezirke, Straßengröße und Namenseinheiten. Sections (段), Lanes (巷) und Alleys (弄) sind eigene Aufgaben.</p><h3>2. Entdecken, Lernen oder Quiz</h3><p>Beim Entdecken zeigen Kartenklicks Namen und Lage. Lernkarten zeigen dir auf Wunsch die Lösung, ohne Wertung. Im Quiz klickst du auf den gesuchten Verlauf; danach siehst du Lösung und Auswertung. Fehler kannst du anschließend wiederholen.</p><h3>3. Karte bedienen</h3><p>Mausrad oder Plus/Minus zoomen, Ziehen verschiebt. Auf dem Handy: zwei Finger zum Zoomen, ein Finger zum Verschieben. Bei Straßenfragen hebt die Maus den gesamten Verlauf hervor. Auf dem Handy tippst du eine Straße an und bestätigst anschließend die hervorgehobene Auswahl. An Kreuzungen kannst du „Andere Straße“ wählen.</p><h3>4. Orientierung selbst bestimmen</h3><p>Unter Einstellungen schaltest du Bezirksnamen je Stadt, Flussnamen, Straßennamen sowie Metro- und Flussebene unabhängig ein und aus. Der gesuchte Name bleibt verborgen.</p><h3>5. Deinen Lernstand behalten</h3><p>Fortschritt wird lokal gespeichert. Sichere ihn bei Bedarf über „Lernstand exportieren“. Der Import übernimmt eine zuvor exportierte Sicherung in diesen Browser. Browserdaten löschen oder zu einer anderen Adresse wechseln kann deinen bisherigen Stand unzugänglich machen.</p><h3>Datenstand und Straßenbilder</h3><p>Die Straßengeometrien basieren außerhalb des Zentrums auf einem älteren OSM-Bestand. Die aktuelle amtliche Vollständigkeit ist nicht bestätigt. Fehlende englische Namen werden nicht erfunden. Straßenbilder bleiben eine spätere Erweiterung.</p><button id="help-sources" class="button button-secondary">Datenquellen ansehen</button></dialog>
+  <dialog id="help-dialog" class="dialog help-dialog"><div class="dialog-heading"><h2>So lernst du Taipei kennen</h2><button class="icon-button dialog-close" aria-label="Hilfe schließen">×</button></div><h3>1. Wähle dein Lernziel</h3><p>Bezirke und Flüsse geben dir einen Überblick. Straßen lernst du standardmäßig in Leveln: jeweils zehn neue ganze Straßen, grob nach Länge im gewählten Gebiet sortiert. Deine Level-Position wird je Gebiet gespeichert. „Frühere Level mitüben“ ergänzt die bisherigen Straßen; nach einer Runde kannst du direkt zum nächsten Level wechseln. Unter „Freie Auswahl“ findest du Suche, Straßengrößen und Namenseinheiten. Sections (段), Lanes (巷) und Alleys (弄) sind dort eigene Aufgaben.</p><h3>2. Entdecken, Lernen oder Quiz</h3><p>Beim Entdecken zeigen Kartenklicks Namen und Lage. Lernkarten zeigen dir auf Wunsch die Lösung, ohne Wertung. Im Quiz klickst du auf den gesuchten Verlauf; danach siehst du Lösung und Auswertung. Fehler kannst du anschließend wiederholen.</p><h3>3. Karte bedienen</h3><p>Mausrad oder Plus/Minus zoomen, Ziehen verschiebt. Auf dem Handy: zwei Finger zum Zoomen, ein Finger zum Verschieben. Bei Straßenfragen hebt die Maus den gesamten Verlauf hervor. Auf dem Handy tippst du eine Straße an und bestätigst anschließend die hervorgehobene Auswahl. An Kreuzungen kannst du „Andere Straße“ wählen.</p><h3>4. Orientierung selbst bestimmen</h3><p>Unter Einstellungen schaltest du Bezirksnamen je Stadt, Flussnamen, Straßennamen sowie Metro- und Flussebene unabhängig ein und aus. Der gesuchte Name bleibt verborgen.</p><h3>5. Deinen Lernstand behalten</h3><p>Fortschritt wird lokal gespeichert. Sichere ihn bei Bedarf über „Lernstand exportieren“. Der Import übernimmt eine zuvor exportierte Sicherung in diesen Browser. Browserdaten löschen oder zu einer anderen Adresse wechseln kann deinen bisherigen Stand unzugänglich machen.</p><h3>Datenstand und Straßenbilder</h3><p>Die Straßengeometrien basieren außerhalb des Zentrums auf einem älteren OSM-Bestand. Die aktuelle amtliche Vollständigkeit ist nicht bestätigt. Fehlende englische Namen werden nicht erfunden. Straßenbilder bleiben eine spätere Erweiterung.</p><button id="help-sources" class="button button-secondary">Datenquellen ansehen</button></dialog>
   <dialog id="sources-dialog" class="dialog sources-dialog">
     <div class="dialog-heading"><h2>Quellen & Datenstand</h2><button class="icon-button dialog-close" aria-label="Quellen schließen"><svg class="icon"><use href="#i-close"/></svg></button></div>
     <p>Die Lernkarte enthält alle 41 Bezirke von Taipei City (12) und New Taipei City (29), vier große Flüsse und 22.240 wählbare Straßeneinheiten. Straßenbilder sind als spätere Erweiterung vorgesehen.</p>

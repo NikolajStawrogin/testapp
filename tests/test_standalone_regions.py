@@ -52,6 +52,7 @@ class StandaloneRegionTests(unittest.TestCase):
     def test_taipei_mobile_street_quiz_offline(self):
         self.open('taipei')
         self.page.locator('[data-start="streets"]').tap();self.page.locator('#chapter-loading').wait_for(state='hidden')
+        self.page.locator('#street-learning-path').select_option('free')
         self.page.locator('#city-scope').select_option('taipei')
         self.page.locator('[name="street-unit"][value="section"]').uncheck()
         self.page.locator('#street-search').fill('忠孝東路')
@@ -61,3 +62,19 @@ class StandaloneRegionTests(unittest.TestCase):
         self.assertTrue(self.page.locator('.street-solution').get_attribute('d'))
         self.page.locator('#mobile-next').tap()
         self.assertTrue(self.page.locator('#results-panel').is_visible())
+
+    def test_guided_street_levels_and_advance_offline(self):
+        self.open('duesseldorf')
+        self.page.locator('[data-start="streets"]').tap();self.page.locator('#chapter-loading').wait_for(state='hidden')
+        self.page.locator('#city-scope').select_option('dd-eller')
+        self.assertEqual(self.page.locator('#street-picker .street-choice').count(),10)
+        first=self.page.locator('#street-picker .street-choice').evaluate_all('nodes=>nodes.map(n=>n.dataset.streetId)')
+        self.page.locator('[data-mode="cards"]').tap();self.page.locator('#start-button').tap()
+        for _ in range(10):
+            self.page.locator('#mobile-reveal').tap();self.page.locator('#mobile-next').tap()
+        self.assertTrue(self.page.locator('#next-street-level').is_visible())
+        self.page.locator('#next-street-level').tap()
+        self.assertIn('Level 2',self.page.locator('#question-city').inner_text())
+        self.page.locator('#session-end').tap()
+        second=self.page.locator('#street-picker .street-choice').evaluate_all('nodes=>nodes.map(n=>n.dataset.streetId)')
+        self.assertEqual(len(second),10);self.assertFalse(set(first)&set(second))

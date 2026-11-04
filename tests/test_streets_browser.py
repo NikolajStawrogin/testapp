@@ -23,6 +23,7 @@ class StreetBrowserTests(unittest.TestCase):
 
     def street_mode(self, scope="taipei"):
         self.page.locator('[data-subject="streets"]').click()
+        self.page.locator("#street-learning-path").select_option("free")
         self.page.locator("#city-scope").select_option(scope)
 
     def search(self, text):

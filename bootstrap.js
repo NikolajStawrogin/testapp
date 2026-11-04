@@ -5,8 +5,8 @@
   const id = params.get("region");
   const $ = id => document.getElementById(id);
   const regions = {
-    taipei: { id: "taipei", name: "Taipei & New Taipei", storagePrefix: "taipei-kennen", language: "zh-Hant", files: ["data/districts.js", "data/metro.js", "data/rivers.js", "data/streets.js", "data/street-parents.js"] },
-    duesseldorf: { id: "duesseldorf", name: "Düsseldorf", storagePrefix: "duesseldorf-kennen", language: "de", files: ["data/duesseldorf.js"] }
+    taipei: { id: "taipei", name: "Taipei & New Taipei", storagePrefix: "taipei-kennen", language: "zh-Hant", files: ["data/districts.js", "data/metro.js", "data/rivers.js", "data/streets.js", "data/street-parents.js", "data/levels-taipei.js"] },
+    duesseldorf: { id: "duesseldorf", name: "Düsseldorf", storagePrefix: "duesseldorf-kennen", language: "de", files: ["data/duesseldorf.js", "data/levels-duesseldorf.js"] }
   };
   const region = regions[id];
   document.body.dataset.region = region?.id || "selection";
@@ -35,7 +35,7 @@
       document.body.append(script);
       resolve();
     } else {
-      script.src = path + "?v=0.11";
+      script.src = path + "?v=0.12";
       script.onload = resolve;
       script.onerror = () => reject(new Error("Die Datei „" + path + "“ konnte nicht geladen werden."));
       document.head.append(script);
@@ -50,6 +50,7 @@
         TAIPEI_STREETS: data.streets, TAIPEI_STREET_PARENTS: { features: [], replacedIds: [], aliases: {} } });
     }
     await load("region-ui.js");
+    await load("street-levels.js");
     await load("street-map.js");
     await load("app.js");
     loading.hidden = true;

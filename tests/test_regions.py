@@ -87,7 +87,7 @@ class RegionBrowserTests(unittest.TestCase):
     def test_street_quiz_and_taipei_progress_are_separate(self):
         self.open('duesseldorf')
         self.page.evaluate("localStorage.setItem('taipei-kennen.progress.v1',JSON.stringify({rounds:4,districts:{daan:{attempts:3,correct:2}}}))")
-        self.chapter('streets');self.page.locator('#street-search').fill('Königsallee')
+        self.chapter('streets');self.page.locator('#street-learning-path').select_option('free');self.page.locator('#street-search').fill('Königsallee')
         self.page.wait_for_function("document.querySelectorAll('#street-picker input').length===1")
         self.page.locator('[data-mode="quiz"]').click();self.page.locator('#start-button').click()
         self.assertEqual(self.page.locator('#question-name').inner_text(),'Königsallee')

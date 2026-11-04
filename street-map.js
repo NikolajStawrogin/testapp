@@ -86,7 +86,7 @@
       const cornerB = new DOMPoint(options.viewport.right, options.viewport.bottom).matrixTransform(inverse);
       const view = [cornerA.x, cornerA.y, cornerB.x, cornerB.y];
       const detail = options.zoom >= 5;
-      const visible = this.itemIndex.query(view).filter(item => detail || item.feature.category !== "local" || item.feature.id === options.correctId);
+      const visible = this.itemIndex.query(view).filter(item => detail || item.feature.category !== "local" || (options.focusPool && options.pool.has(item.feature.id)) || item.feature.id === options.correctId);
       visible.sort((a, b) => Number(options.pool.has(b.feature.id)) - Number(options.pool.has(a.feature.id))
         || ({ major: 0, secondary: 1, local: 2, unclassified: 3 }[a.feature.category] - { major: 0, secondary: 1, local: 2, unclassified: 3 }[b.feature.category]));
       this.visible = visible.slice(0, 1600);
@@ -117,7 +117,7 @@
       }
       this.renderLabels(view);
       this.setHighlight(options.highlightId);
-      document.getElementById("street-map-hint").textContent = !detail ? "Hineinzoomen zeigt kleine Straßen und Gassen."
+      document.getElementById("street-map-hint").textContent = options.focusPool ? `${options.pool.size} Straßen dieses Levels sind hervorgehoben. Zoome hinein und präge dir ihre Lage ein.` : !detail ? "Hineinzoomen zeigt kleine Straßen und Gassen."
         : visible.length > 1600 ? "Zoome weiter hinein, um alle Straßen dieses Ausschnitts zu sehen." : "Straße berühren oder mit der Maus hervorheben.";
     }
 
@@ -127,7 +127,7 @@
       const shown = new Set();
       if (options.names && options.zoom >= 3) {
         const normalize = value => value.normalize("NFKC").replaceAll("臺", "台").replace(/\s/g, "");
-        const candidates = this.visible.filter(item => item.feature.id !== options.hiddenId
+        const candidates = this.visible.filter(item => (!options.focusPool || options.pool.has(item.feature.id)) && item.feature.id !== options.hiddenId
           && (!options.hiddenPrefix || !normalize(item.feature.nameZh).includes(normalize(options.hiddenPrefix)))
           && overlaps([item.anchor[0], item.anchor[1], item.anchor[0], item.anchor[1]], view));
         for (const item of candidates) {

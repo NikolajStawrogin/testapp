@@ -1,6 +1,22 @@
 # Prüfung der Straßen- und Menüerweiterung
 
-## Aktueller Stand 0.11 · Düsseldorfer Stadtteil-Auswahl
+## Aktueller Stand 0.12 · Straßen-Level mit je zehn neuen Straßen
+
+Stand: 4. November 2026. Die Level gelten für alle 50 Düsseldorfer Stadtteile, ganz Düsseldorf, alle 41 Bezirke in Taipei/New Taipei, die beiden ganzen Städte und eigene Gebietskombinationen. Zehn neue ganze Straßen je Level, optional frühere Level mitüben, frei wählbare Level, direkte Fortsetzung nach der Runde und gespeicherte Positionen pro Gebiet. Bestehende Quizantworten bleiben erhalten. Level-Positionen sind in Sicherung und bestätigtem Löschen enthalten. Freie Suche und Einzelauswahl bleiben als eigener Lernweg erhalten.
+
+Die Längenmetadaten sind offline berechnet und nach erneutem Aufbau byteidentisch; ihre Eingabe-Hashes sind geprüft. Sie decken alle 2.891 Düsseldorfer beziehungsweise 3.958 ganzen Taipei/New-Taipei-Straßen ab. Die geografische Sortierung verwendet die Länge innerhalb der Gebietsauswahl. Doppelte Fahrbahnen werden nicht einfach addiert. Synthetische Kontrollgeometrien ergaben 1.000 Meter für eine gerade 1-km-Linie, 1.019 Meter für zwei parallele, am Ende verbundene 1-km-Fahrbahnen und 628 Meter für einen Ring mit 100 Metern Radius. Die Schätzungen sind keine amtlichen Längen; Grenzen stehen in STREET_LEVELS.md.
+
+36 unterschiedliche Prüfungen bestanden: 20 Level-/Straßen-/Fortschrittsprüfungen in 255,460 s sowie 16 Regions-/Pages-/Offline-Prüfungen in 49,879 s. Der ergänzte Nachlauf zur Sichtbarkeit kleiner Level-Straßen bestand in 10,192 s. Enthalten sind neue Level-Funktionen, bestehende Straßenquiz-Funktionen, Fortschrittslöschen, regionale Trennung, Pages-Unterpfad und die isolierte Offline-Einzeldatei. Der neue Browserlauf deckt insbesondere Eller/​Wersten/​Ganz Düsseldorf mit getrennten Positionen, korrekte Zehnergruppen bis zum letzten Rest ohne doppelte Einträge, Wiederholung, zehn korrekt beantwortete Quizfragen, Fortsetzung, Neuladen, Sicherung/Import sowie mobile Sichtbarkeit ab. Das Levelquiz verbirgt alle Straßennamen bis zur Auflösung. Eine zusätzliche Prüfung stellt sicher, dass auch kleine Lernstraßen beim Herauszoomen sichtbar bleiben. Die Offline-Einzeldatei spielt zehn Düsseldorfer Lernkarten und startet danach Level 2 ohne weitere Abrufe.
+
+Bei der mobilen Sicherungsprüfung wurde eine veraltete Level-Anzeige nach Import gefunden und behoben; der Nachlauf besteht. Desktop- und Handy-Ansichten wurden mit Chromium visuell kontrolliert. JavaScript-Syntax und `git diff --check` bestanden. Dies sind gezielte Prüfungen für die Erweiterung, kein erneut behaupteter Volltest aller älteren Testmodule und kein Test auf einem echten Telefon.
+
+Das aktualisierte ZIP enthält 74 Dateien einschließlich der isoliert nutzbaren Browser-Einzeldatei. CRC-Prüfung und bytegenauer Vergleich aller archivierten Inhalte mit ihren Quelldateien bestanden. Das Paket und die zusätzliche HTML-Datei liegen außerhalb des Repositorys; generierte Doppelkopien werden nicht eingecheckt.
+
+Die folgenden Abschnitte dokumentieren frühere Versionen.
+
+---
+
+## Stand 0.11 · Düsseldorfer Stadtteil-Auswahl
 
 Gebietsauswahl und Quiz verwenden die 50 alphabetisch sortierten Stadtteilnamen wie Eller oder Wersten. Nummerierte Stadtbezirke und die bisherige Ebenenauswahl erscheinen nicht mehr als Quiz-Auswahl. Die Liste erlaubt mehrere Stadtteile für eine Runde; Straßen und Flüsse werden nach den ausgewählten Stadtteilen gefiltert. Bisherige ausgewählte Stadtbezirke werden in ihre zugehörigen Stadtteile übertragen, historische Antworten bleiben erhalten. Die Daten enthalten weiterhin die alten Stadtbezirksgeometrien und Kennungen, damit vorhandene Lernstände lesbar bleiben.
 
